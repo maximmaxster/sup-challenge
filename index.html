@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SUP Challenge — לוח השוואה</title>
+  <meta name="description" content="השוואת אימוני SUP בין שני חותרים — מהירות, מרחק, דופק ו-DPS">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" defer></script>
+  <script src="js/app.js" defer></script>
+</head>
+<body>
+
+<!-- ===== LOADING SCREEN ===== -->
+<div id="loading" class="loading-overlay">
+  <div class="loading-logo">🏄</div>
+  <div class="loading-bar"><div class="loading-bar-fill"></div></div>
+  <div class="loading-text">טוען נתוני אימון...</div>
+</div>
+
+<!-- ===== HEADER ===== -->
+<header>
+  <div class="header-inner">
+    <a href="#" class="logo">
+      <div class="logo-icon">🌊</div>
+      <span class="logo-text">SUP Challenge</span>
+    </a>
+
+    <nav>
+      <a href="#athletes" class="active">ראשי</a>
+      <a href="#workouts">אימונים</a>
+      <a href="#gallery">גלריה</a>
+    </nav>
+
+    <div class="header-meta">
+      <div class="dot"></div>
+      <span id="last-updated">טוען...</span>
+    </div>
+  </div>
+</header>
+
+<!-- ===== MAIN ===== -->
+<main>
+
+  <!-- ========== SECTION 1: ATHLETE CARDS ========== -->
+  <section id="athletes" class="section-tab">
+    <div class="section-title">חותרים</div>
+
+    <div class="athletes-grid">
+
+      <!-- Athlete 1 -->
+      <div class="glass-card athlete-card" id="card-a1">
+        <div class="athlete-header">
+          <div class="athlete-avatar" id="athlete1-avatar">
+            <div class="avatar-placeholder">🏄</div>
+            <div class="avatar-glow"></div>
+          </div>
+          <div class="athlete-info">
+            <div class="athlete-name" id="athlete1-name">טוען...</div>
+            <div class="athlete-subtitle">SUP Paddler</div>
+          </div>
+        </div>
+        <div class="athlete-stats-grid">
+          <div class="stat-box">
+            <div class="stat-value" id="a1-distance">—</div>
+            <div class="stat-label">מרחק שבועי</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-value" id="a1-sessions">—</div>
+            <div class="stat-label">אימונים</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-value" id="a1-maxspeed">—</div>
+            <div class="stat-label">שיא מהירות</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- VS Badge -->
+      <div class="vs-badge">
+        <div class="vs-circle">VS</div>
+      </div>
+
+      <!-- Athlete 2 -->
+      <div class="glass-card athlete-card" id="card-a2">
+        <div class="athlete-header">
+          <div class="athlete-avatar" id="athlete2-avatar">
+            <div class="avatar-placeholder">🏄</div>
+            <div class="avatar-glow"></div>
+          </div>
+          <div class="athlete-info">
+            <div class="athlete-name" id="athlete2-name">טוען...</div>
+            <div class="athlete-subtitle">SUP Paddler</div>
+          </div>
+        </div>
+        <div class="athlete-stats-grid">
+          <div class="stat-box">
+            <div class="stat-value" id="a2-distance">—</div>
+            <div class="stat-label">מרחק שבועי</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-value" id="a2-sessions">—</div>
+            <div class="stat-label">אימונים</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-value" id="a2-maxspeed">—</div>
+            <div class="stat-label">שיא מהירות</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ========== SECTION 2: LAST WORKOUT COMPARISON ========== -->
+  <section id="comparison" class="section-tab">
+    <div class="section-title">לוח תוצאות האימון האחרון</div>
+    <div class="last-workout-date" id="last-workout-date"></div>
+
+    <div class="glass-card" style="overflow:hidden">
+      <table class="comparison-table">
+        <thead>
+          <tr>
+            <th id="athlete1-name-table" style="width:38%">חותר 1</th>
+            <th style="width:24%">קטגוריה</th>
+            <th id="athlete2-name-table" style="width:38%;text-align:left">חותר 2</th>
+          </tr>
+        </thead>
+        <tbody id="comparison-tbody">
+          <tr><td colspan="3" class="empty-state"><div class="empty-icon">⏳</div><p>טוען...</p></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ========== SECTION 3: CHARTS ========== -->
+  <section id="charts" class="section-tab">
+    <div class="section-title">גרפים</div>
+
+    <div class="charts-grid">
+
+      <!-- Speed chart -->
+      <div class="glass-card chart-card">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">⚡ מהירות ממוצעת (קמ"ש)</div>
+            <div class="chart-legend" style="margin-top:0.4rem">
+              <span><span class="legend-dot" style="background:#00D4FF"></span><span id="legend-speed-1">חותר 1</span></span>
+              <span><span class="legend-dot" style="background:#FF6B35"></span><span id="legend-speed-2">חותר 2</span></span>
+            </div>
+          </div>
+          <div class="toggle-group" data-chart="speed">
+            <button class="toggle-btn" data-range="week">שבוע</button>
+            <button class="toggle-btn active" data-range="month">חודש</button>
+            <button class="toggle-btn" data-range="all">הכל</button>
+          </div>
+        </div>
+        <div class="chart-canvas-wrapper">
+          <canvas id="speedChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Distance chart -->
+      <div class="glass-card chart-card">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">📏 מרחק מצטבר (ק"מ)</div>
+            <div class="chart-legend" style="margin-top:0.4rem">
+              <span><span class="legend-dot" style="background:#00D4FF"></span><span id="legend-dist-1">חותר 1</span></span>
+              <span><span class="legend-dot" style="background:#FF6B35"></span><span id="legend-dist-2">חותר 2</span></span>
+            </div>
+          </div>
+          <div class="toggle-group" data-chart="distance">
+            <button class="toggle-btn" data-range="week">שבוע</button>
+            <button class="toggle-btn active" data-range="month">חודש</button>
+            <button class="toggle-btn" data-range="all">הכל</button>
+          </div>
+        </div>
+        <div class="chart-canvas-wrapper">
+          <canvas id="distanceChart"></canvas>
+        </div>
+      </div>
+
+      <!-- HR chart -->
+      <div class="glass-card chart-card">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">❤️ דופק ממוצע (BPM)</div>
+            <div class="chart-legend" style="margin-top:0.4rem">
+              <span><span class="legend-dot" style="background:#00D4FF"></span><span id="legend-hr-1">חותר 1</span></span>
+              <span><span class="legend-dot" style="background:#FF6B35"></span><span id="legend-hr-2">חותר 2</span></span>
+            </div>
+          </div>
+          <div class="toggle-group" data-chart="hr">
+            <button class="toggle-btn" data-range="week">שבוע</button>
+            <button class="toggle-btn active" data-range="month">חודש</button>
+            <button class="toggle-btn" data-range="all">הכל</button>
+          </div>
+        </div>
+        <div class="chart-canvas-wrapper">
+          <canvas id="hrChart"></canvas>
+        </div>
+      </div>
+
+      <!-- DPS chart -->
+      <div class="glass-card chart-card">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">🚣 DPS התקדמות (מ')</div>
+            <div class="chart-legend" style="margin-top:0.4rem">
+              <span><span class="legend-dot" style="background:#00D4FF"></span><span id="legend-dps-1">חותר 1</span></span>
+              <span><span class="legend-dot" style="background:#FF6B35"></span><span id="legend-dps-2">חותר 2</span></span>
+            </div>
+          </div>
+          <div class="toggle-group" data-chart="dps">
+            <button class="toggle-btn" data-range="week">שבוע</button>
+            <button class="toggle-btn active" data-range="month">חודש</button>
+            <button class="toggle-btn" data-range="all">הכל</button>
+          </div>
+        </div>
+        <div class="chart-canvas-wrapper">
+          <canvas id="dpsChart"></canvas>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ========== SECTION 4: WORKOUTS TABLE ========== -->
+  <section id="workouts" class="section-tab">
+    <div class="section-title">כל האימונים</div>
+
+    <div class="filters-bar">
+      <select id="filter-athlete" class="filter-select filter-athlete">
+        <option value="all">כל החותרים</option>
+      </select>
+      <select id="filter-type" class="filter-select">
+        <option value="all">כל הסוגים</option>
+        <option value="אירובי">אירובי</option>
+        <option value="אירובי ארוך">אירובי ארוך</option>
+        <option value="טמפו">טמפו</option>
+        <option value="ספרינטים">ספרינטים</option>
+      </select>
+      <select id="filter-location" class="filter-select">
+        <option value="all">כל המקומות</option>
+        <option value="ים">🌊 ים</option>
+        <option value="נחל">🏞️ נחל</option>
+      </select>
+    </div>
+
+    <div class="workouts-table-wrapper">
+      <table class="workouts-table">
+        <thead>
+          <tr>
+            <th>תאריך</th>
+            <th>חותר</th>
+            <th>סוג אימון</th>
+            <th>מיקום</th>
+            <th>מרחק (ק"מ)</th>
+            <th>זמן</th>
+            <th>מהירות (קמ"ש)</th>
+            <th>דופק ממוצע</th>
+            <th>SPM</th>
+            <th>DPS (מ')</th>
+            <th>זמן Z3</th>
+            <th>זמן Z4</th>
+            <th>זמן Z5</th>
+          </tr>
+        </thead>
+        <tbody id="workouts-tbody">
+          <tr><td colspan="13" class="empty-state"><div class="empty-icon">⏳</div><p>טוען אימונים...</p></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ========== SECTION 5: GALLERY ========== -->
+  <section id="gallery" class="section-tab">
+    <div class="section-title">גלריה</div>
+    <div id="gallery-grid" class="gallery-grid">
+      <!-- populated by JS -->
+    </div>
+  </section>
+
+</main>
+
+<!-- ===== LIGHTBOX ===== -->
+<div id="lightbox" class="lightbox">
+  <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+  <div class="lightbox-inner">
+    <img id="lightbox-img" src="" alt="" class="lightbox-img">
+    <div id="lightbox-caption" class="lightbox-caption"></div>
+  </div>
+</div>
+
+<!-- ===== FOOTER ===== -->
+<footer>
+  <p>SUP Challenge &copy; 2026 — <span>נבנה עם ❤️ ו-Garmin Connect</span></p>
+</footer>
+
+</body>
+</html>

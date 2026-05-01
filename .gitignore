@@ -1,0 +1,40 @@
+# Secrets — never commit
+.env
+*.env.local
+garmin_config.json
+
+# Garmin OAuth tokens (sensitive!)
+.garth_tokens*/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# Logs & temp files
+*.log
+*.txt
+run_output.txt
+netlify_login_*.txt
+activity_log.txt
+sup_tracker_log.txt
+
+# Generated reports (large HTML files)
+sup_report_*.html
+latest.html
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Task scheduler scripts (local only)
+create_task.ps1
+setup_task_scheduler.bat
+run_sup_tracker.bat
