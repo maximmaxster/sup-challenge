@@ -202,6 +202,8 @@ def fetch_athlete(cfg: dict) -> dict:
     activities = api.get_activities(0, MAX_ACTIVITIES)
     sup_list = [a for a in activities if is_sup(a)]
     print(f"  פעילויות כלל: {len(activities)}, SUP: {len(sup_list)}")
+    # Sort by date to process in order
+    sup_list.sort(key=lambda a: a.get("startTimeLocal", ""), reverse=True)
 
     workouts = []
     for act in sup_list:

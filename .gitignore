@@ -16,7 +16,7 @@ env/
 
 # Logs & temp files
 *.log
-*.txt
+activity_log.txt
 run_output.txt
 netlify_login_*.txt
 activity_log.txt
@@ -38,3 +38,6 @@ Thumbs.db
 create_task.ps1
 setup_task_scheduler.bat
 run_sup_tracker.bat
+
+# Local Netlify folder
+.netlify
