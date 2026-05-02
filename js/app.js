@@ -135,6 +135,7 @@ function renderAll() {
   renderAthleteCards();
   renderComparisonTable();
   renderCharts();
+  populateYearFilter();
   renderWorkoutsTable();
   renderGallery();
 }
@@ -380,30 +381,26 @@ function renderDpsChart(range) {
 }
 
 // ===== WORKOUTS TABLE =====
-function renderWorkoutsTable(filterAthlete = 'all', filterType = 'all', filterLoc = 'all') {
-  // Merge athlete workouts with date-based pairing (same dates = they trained together)
-  const allDates = [...new Set([
-    ...athlete1Data.workouts.map(w => w.date),
-    ...athlete2Data.workouts.map(w => w.date),
-  ])].sort((a, b) => parseDMY(b) - parseDMY(a));
+function renderWorkoutsTable(filterAthlete = 'all', filterType = 'all', filterLoc = 'all', filterYear = 'all') {
+  // Only use dates where Maxim (athlete1) trained — Maxim determines comparison dates
+  const maximDates = [...new Set(
+    athlete1Data.workouts.filter(w => w.distance > 0).map(w => w.date)
+  )].sort((a, b) => parseDMY(b) - parseDMY(a));
 
   const rows = [];
-  allDates.forEach(date => {
-    const w1matches = athlete1Data.workouts.filter(w => w.date === date);
-    const w2matches = athlete2Data.workouts.filter(w => w.date === date);
-
-    const maxLen = Math.max(w1matches.length, w2matches.length);
-    for (let i = 0; i < maxLen; i++) {
-      if (w1matches[i]) rows.push({ ...w1matches[i], athlete: 1, athleteName: athlete1Data.name });
-      if (w2matches[i]) rows.push({ ...w2matches[i], athlete: 2, athleteName: athlete2Data.name });
-    }
+  maximDates.forEach(date => {
+    const w1 = athlete1Data.workouts.find(w => w.date === date);
+    const w2 = athlete2Data.workouts.find(w => w.date === date && w.distance > 0);
+    if (w1) rows.push({ ...w1, athlete: 1, athleteName: athlete1Data.name });
+    if (w2) rows.push({ ...w2, athlete: 2, athleteName: athlete2Data.name });
   });
 
   const filtered = rows.filter(w => {
     if (filterAthlete !== 'all' && String(w.athlete) !== filterAthlete) return false;
     if (filterType !== 'all' && w.type !== filterType) return false;
     if (filterLoc !== 'all' && w.location !== filterLoc) return false;
-    if (w.distance === 0 && filterAthlete === 'all') return false; // hide zero rows unless specific athlete selected
+    if (filterYear !== 'all' && !w.date.endsWith('.' + filterYear)) return false;
+    if (w.distance === 0) return false;
     return true;
   });
 
@@ -508,10 +505,26 @@ function setupFilters() {
   const selAthlete = document.getElementById('filter-athlete');
   const selType    = document.getElementById('filter-type');
   const selLoc     = document.getElementById('filter-location');
-  const update = () => renderWorkoutsTable(selAthlete.value, selType.value, selLoc.value);
+  const selYear    = document.getElementById('filter-year');
+  const update = () => renderWorkoutsTable(selAthlete.value, selType.value, selLoc.value, selYear.value);
   selAthlete.addEventListener('change', update);
   selType.addEventListener('change', update);
   selLoc.addEventListener('change', update);
+  if (selYear) selYear.addEventListener('change', update);
+}
+
+function populateYearFilter() {
+  const years = new Set(
+    athlete1Data.workouts.filter(w => w.distance > 0).map(w => w.date.split('.')[2])
+  );
+  const sel = document.getElementById('filter-year');
+  if (!sel) return;
+  [...years].sort((a, b) => b - a).forEach(y => {
+    const opt = document.createElement('option');
+    opt.value = y;
+    opt.textContent = y;
+    sel.appendChild(opt);
+  });
 }
 
 // ===== NAV =====

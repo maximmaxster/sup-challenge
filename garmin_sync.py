@@ -136,7 +136,7 @@ def detect_type(z4_str: str, z5_str: str, avg_hr: int, dist_km: float, dur_sec: 
         return "ספרינטים"
     if z4_sec > 1200:  # >20 min in Z4 = tempo
         return "טמפו"
-    if dist_km >= 12:
+    if dist_km > 11:
         return "אירובי ארוך"
     return "אירובי"
 
