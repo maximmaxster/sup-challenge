@@ -175,14 +175,13 @@ function tryLoadAvatar(id, src, fallback) {
 
 // ===== LAST WORKOUT COMPARISON =====
 function renderComparisonTable() {
-  // Find the most recent shared workout date
-  const dates1 = new Set(athlete1Data.workouts.filter(w => w.distance > 0).map(w => w.date));
-  const dates2 = new Set(athlete2Data.workouts.filter(w => w.distance > 0).map(w => w.date));
-  const sharedDates = [...dates1].filter(d => dates2.has(d)).sort((a, b) => parseDMY(b) - parseDMY(a));
-  const lastDate = sharedDates[0] || [...dates1].sort((a, b) => parseDMY(b) - parseDMY(a))[0];
+  // Rule: take Maxim's most recent workout, show Victor's workout from the SAME day
+  const lastDate = athlete1Data.workouts
+    .filter(w => w.distance > 0)
+    .sort((a, b) => parseDMY(b.date) - parseDMY(a.date))[0]?.date || '';
 
   const lw1 = athlete1Data.workouts.find(w => w.date === lastDate) || {};
-  const lw2 = athlete2Data.workouts.find(w => w.date === lastDate) || {};
+  const lw2 = athlete2Data.workouts.find(w => w.date === lastDate && w.distance > 0) || {};
 
   // Show date subtitle
   const dateEl = document.getElementById('last-workout-date');
