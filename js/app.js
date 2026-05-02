@@ -5,7 +5,7 @@
 let athlete1Data = null;
 let athlete2Data = null;
 let charts = {};
-let currentRange = { speed: 'month', distance: 'month', hr: 'month', dps: 'month' };
+let currentRange = { speed: 'week', distance: 'week', hr: 'week', dps: 'week' };
 
 const COLORS = {
   cyan: '#00D4FF',
@@ -279,10 +279,10 @@ function renderComparisonTable() {
 
 // ===== CHARTS =====
 function renderCharts() {
-  renderSpeedChart('month');
-  renderDistanceChart('month');
-  renderHrChart('month');
-  renderDpsChart('month');
+  renderSpeedChart('week');
+  renderDistanceChart('week');
+  renderHrChart('week');
+  renderDpsChart('week');
 }
 
 function getCalendarStart(range) {
