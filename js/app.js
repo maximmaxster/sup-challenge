@@ -90,6 +90,23 @@ function getWorkoutsInRange(workouts, days) {
   return workouts.filter(w => parseDMY(w.date) >= cutoff);
 }
 
+// Filter by CURRENT calendar month (auto-updates every month)
+function getWorkoutsCurrentMonth(workouts) {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth(); // 0-based
+  return workouts.filter(w => {
+    if (!w.distance || w.distance === 0) return false;
+    const d = parseDMY(w.date);
+    return d.getFullYear() === year && d.getMonth() === month;
+  });
+}
+
+function getMonthName() {
+  const months = ['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'];
+  return months[new Date().getMonth()];
+}
+
 function avg(arr, key) {
   const valid = arr.filter(w => w[key] && w[key] > 0);
   if (!valid.length) return 0;
@@ -124,8 +141,13 @@ function renderAll() {
 
 // ===== ATHLETE CARDS =====
 function renderAthleteCards() {
-  const w1 = getWorkoutsInRange(athlete1Data.workouts, 7);
-  const w2 = getWorkoutsInRange(athlete2Data.workouts, 7);
+  const w1 = getWorkoutsCurrentMonth(athlete1Data.workouts);
+  const w2 = getWorkoutsCurrentMonth(athlete2Data.workouts);
+
+  // Update stat label to current month name
+  document.querySelectorAll('.stat-label-distance').forEach(el => {
+    el.textContent = `מרחק ${getMonthName()}`;
+  });
 
   setAthleteWeekStats('a1', w1, sum(w1, 'distance'));
   setAthleteWeekStats('a2', w2, sum(w2, 'distance'));
@@ -511,10 +533,24 @@ function setupNav() {
   sections.forEach(s => observer.observe(s));
 }
 
+// ===== TRAINING PLAN TABS =====
+function setupTrainingTabs() {
+  document.querySelectorAll('.training-tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.training-tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.training-panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      const panel = document.getElementById('tab-' + btn.dataset.tab);
+      if (panel) panel.classList.add('active');
+    });
+  });
+}
+
 // ===== INIT =====
 document.addEventListener('DOMContentLoaded', () => {
   setupToggleButtons();
   setupFilters();
+  setupTrainingTabs();
   setupNav();
   loadData();
 
