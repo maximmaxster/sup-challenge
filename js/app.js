@@ -590,12 +590,12 @@ function populateYearFilter() {
 // ===========================
 
 const PROG_PERIODS = {
-  q1:   { start: new Date(2026,0,1),  end: new Date(2026,2,31),  label: 'Q1 — ינואר-מרץ 2026',          baseRef: 'base' },
-  q2:   { start: new Date(2026,3,1),  end: new Date(2026,5,30),  label: 'Q2 — אפריל-יוני 2026',          baseRef: 'base' },
-  h1:   { isH1: true,                                             label: 'H1 — שיאי Q1+Q2',              baseRef: 'base' },
-  q3:   { start: new Date(2026,6,1),  end: new Date(2026,8,30),  label: 'Q3 — יולי-ספטמבר 2026',        baseRef: 'h1'   },
-  q4:   { start: new Date(2026,9,1),  end: new Date(2026,11,31), label: 'Q4 — אוקטובר-דצמבר 2026',      baseRef: 'h1'   },
-  year: { isYear: true,                                           label: 'שנה — ממוצע Q4 vs דצמבר 2025', baseRef: 'base' },
+  q1:   { start: new Date(2026,0,1),  end: new Date(2026,2,31),  label: 'Q1 — ינואר-מרץ 2026',        baseRef: 'base', showVsDec: false },
+  q2:   { start: new Date(2026,3,1),  end: new Date(2026,5,30),  label: 'Q2 — אפריל-יוני 2026',        baseRef: 'q1',   showVsDec: true  },
+  q3:   { start: new Date(2026,6,1),  end: new Date(2026,8,30),  label: 'Q3 — יולי-ספטמבר 2026',      baseRef: 'q2',   showVsDec: true  },
+  q4:   { start: new Date(2026,9,1),  end: new Date(2026,11,31), label: 'Q4 — אוקטובר-דצמבר 2026',    baseRef: 'q3',   showVsDec: true  },
+  h1:   { isH1: true,                                             label: 'חצי שנתי — ממוצע Q1+Q2',     baseRef: 'base', showVsDec: false },
+  year: { isYear: true,                                           label: 'שנתי — ממוצע שנה מלאה',       baseRef: 'base', showVsDec: false },
 };
 const PROG_BASE = { start: new Date(2025,11,1), end: new Date(2025,11,31) };
 
@@ -650,26 +650,15 @@ function progCalcStats(workouts, start, end, types) {
            distance: ws.reduce((s,w)=>s+w.distance,0)/ws.length, eff: hr>0 ? +(spd/hr*100).toFixed(3) : 0 };
 }
 
-function progCalcH1(q1, q2) {
-  if (!q1 && !q2) return null;
-  if (!q1) return q2;
-  if (!q2) return q1;
-  const best=(a,b,lb=false)=>{ if(!a||a===0)return b; if(!b||b===0)return a; return lb?Math.min(a,b):Math.max(a,b); };
-  return { count: q1.count+q2.count, speed: best(q1.speed,q2.speed), hr: best(q1.hr,q2.hr,true),
-           dps: best(q1.dps,q2.dps), spm: best(q1.spm,q2.spm), distance: best(q1.distance,q2.distance),
-           eff: best(q1.eff,q2.eff), isH1: true };
-}
-
 function progGetStats(workouts, periodKey) {
   const p = PROG_PERIODS[periodKey];
   return PROG_TYPES.reduce((acc, t) => {
     if (p.isH1) {
-      acc[t.key] = progCalcH1(
-        progCalcStats(workouts, PROG_PERIODS.q1.start, PROG_PERIODS.q1.end, t.types),
-        progCalcStats(workouts, PROG_PERIODS.q2.start, PROG_PERIODS.q2.end, t.types)
-      );
+      // חצי שנתי = ממוצע כל Q1+Q2 (ינואר-יוני)
+      acc[t.key] = progCalcStats(workouts, PROG_PERIODS.q1.start, PROG_PERIODS.q2.end, t.types);
     } else if (p.isYear) {
-      acc[t.key] = progCalcStats(workouts, PROG_PERIODS.q4.start, PROG_PERIODS.q4.end, t.types);
+      // שנתי = ממוצע כל השנה (ינואר-דצמבר 2026)
+      acc[t.key] = progCalcStats(workouts, new Date(2026,0,1), new Date(2026,11,31), t.types);
     } else {
       acc[t.key] = progCalcStats(workouts, p.start, p.end, t.types);
     }
@@ -678,15 +667,17 @@ function progGetStats(workouts, periodKey) {
 }
 
 function progGetBase(workouts, baseRef) {
-  if (baseRef === 'h1') {
-    return PROG_TYPES.reduce((acc, t) => {
-      acc[t.key] = progCalcH1(
-        progCalcStats(workouts, PROG_PERIODS.q1.start, PROG_PERIODS.q1.end, t.types),
-        progCalcStats(workouts, PROG_PERIODS.q2.start, PROG_PERIODS.q2.end, t.types)
-      );
-      return acc;
-    }, {});
-  }
+  // baseRef = 'base' (Dec 2025) | 'q1' | 'q2' | 'q3' (previous quarter)
+  const range = baseRef === 'base'
+    ? { start: PROG_BASE.start, end: PROG_BASE.end }
+    : { start: PROG_PERIODS[baseRef].start, end: PROG_PERIODS[baseRef].end };
+  return PROG_TYPES.reduce((acc, t) => {
+    acc[t.key] = progCalcStats(workouts, range.start, range.end, t.types);
+    return acc;
+  }, {});
+}
+
+function progGetDecBase(workouts) {
   return PROG_TYPES.reduce((acc, t) => {
     acc[t.key] = progCalcStats(workouts, PROG_BASE.start, PROG_BASE.end, t.types);
     return acc;
@@ -711,10 +702,18 @@ function progDelta(bv, cv, lb) {
   return { pct, good, bad, stable: !good && !bad };
 }
 
-function renderProgCard(typeConf, base, curr, periodKey) {
-  const b = base[typeConf.key];
-  const c = curr[typeConf.key];
-  const p = PROG_PERIODS[periodKey];
+function progDeltaHtml(delta) {
+  if (!delta) return '<span class="pm-delta">—</span>';
+  const cls   = delta.good ? 'good' : delta.bad ? 'bad' : 'neutral';
+  const arrow = delta.pct > 0 ? '↑' : '↓';
+  const sign  = delta.pct > 0 ? '+' : '';
+  return `<span class="pm-delta ${cls}">${arrow} ${sign}${delta.pct.toFixed(1)}%</span>`;
+}
+
+function renderProgCard(typeConf, base, curr, decBase, showVsDec, periodKey) {
+  const b  = base[typeConf.key];
+  const c  = curr[typeConf.key];
+  const db = decBase[typeConf.key];   // Dec 2025 always
 
   if (!b && !c) return `
     <div class="prog-card glass-card">
@@ -723,35 +722,42 @@ function renderProgCard(typeConf, base, curr, periodKey) {
     </div>`;
 
   const future = !c ? `<div class="prog-future">⏳ נתונים יגיעו בתקופה זו</div>` : '';
-  const h1badge = p.isH1 ? ' <span class="prog-h1-note">(שיאים)</span>' : '';
 
   const rows = typeConf.metrics.map(m => {
-    const bv = b?.[m.key], cv = c?.[m.key];
-    const d = b && c ? progDelta(bv, cv, m.lb) : null;
-    const cls = d ? (d.good?'good':d.bad?'bad':'neutral') : '';
-    const arrow = d ? (d.pct > 0 ? '↑' : '↓') : '';
-    const sign  = d?.pct > 0 ? '+' : '';
+    const bv = b?.[m.key], cv = c?.[m.key], dv = db?.[m.key];
+    const dRolling = (b && c) ? progDelta(bv, cv, m.lb) : null;
+    const dVsDec   = (showVsDec && db && c) ? progDelta(dv, cv, m.lb) : null;
+    const vsDecCol = showVsDec
+      ? progDeltaHtml(dVsDec)
+      : '';
     return `
-      <div class="pm-row">
+      <div class="pm-row ${showVsDec ? 'pm-row-6' : ''}">
         <span class="pm-lbl">${m.label}</span>
         <span class="pm-bv">${progFmtVal(bv, m.key)}<small>${m.unit}</small></span>
         <span class="pm-sep">→</span>
         <span class="pm-cv">${progFmtVal(cv, m.key)}<small>${m.unit}</small></span>
-        <span class="pm-delta ${cls}">${d ? arrow+' '+sign+d.pct.toFixed(1)+'%' : '—'}</span>
+        ${progDeltaHtml(dRolling)}
+        ${vsDecCol}
       </div>`;
   }).join('');
 
   const baseN = b?.count ?? 0;
   const currN = c?.count ?? 0;
+  // Base label: Q1/Q2/Q3 or Dec 2025
+  const baseLabel = PROG_PERIODS[periodKey]?.baseRef === 'base' ? "דצמ'25" :
+                    PROG_PERIODS[periodKey]?.baseRef === 'q1'   ? 'Q1' :
+                    PROG_PERIODS[periodKey]?.baseRef === 'q2'   ? 'Q2' : 'Q3';
+
+  const vsDecHeader = showVsDec ? `<span>vs דצמ'25</span>` : '';
 
   return `
     <div class="prog-card glass-card">
       <div class="prog-card-hdr">
         <div><span class="prog-icon">${typeConf.icon}</span><span class="prog-type-lbl">${typeConf.label}</span></div>
-        <div class="prog-counts">${baseN} בסיס · ${currN}${h1badge} תקופה</div>
+        <div class="prog-counts">${baseN} ${baseLabel} · ${currN} תקופה</div>
       </div>
-      <div class="pm-head-row">
-        <span></span><span>בסיס</span><span></span><span>תקופה</span><span>שינוי</span>
+      <div class="pm-head-row ${showVsDec ? 'pm-head-6' : ''}">
+        <span></span><span>${baseLabel}</span><span></span><span>תקופה</span><span>שינוי</span>${vsDecHeader}
       </div>
       ${rows}
       ${future}
@@ -761,18 +767,22 @@ function renderProgCard(typeConf, base, curr, periodKey) {
 function renderProgress() {
   const ath = progAthlete === 1 ? athlete1Data : athlete2Data;
   const p   = PROG_PERIODS[progPeriod];
-  const base = progGetBase(ath.workouts, p.baseRef);
-  const curr = progGetStats(ath.workouts, progPeriod);
+  const base    = progGetBase(ath.workouts, p.baseRef);
+  const curr    = progGetStats(ath.workouts, progPeriod);
+  const decBase = progGetDecBase(ath.workouts);   // always Dec 2025, for extra column
 
   // Info bar
-  const baseName = p.baseRef === 'h1' ? 'חציון ראשון (שיאי Q1+Q2)' : 'דצמבר 2025';
+  const baseLabel = p.baseRef === 'base' ? 'דצמבר 2025'
+    : p.baseRef === 'q1' ? 'ממוצע Q1' : p.baseRef === 'q2' ? 'ממוצע Q2' : 'ממוצע Q3';
   const infoEl = document.getElementById('prog-period-info');
   if (infoEl) infoEl.innerHTML =
-    `<span class="ppi-period">${p.label}</span><span class="ppi-sep">·</span><span class="ppi-base">השוואה מול ${baseName}</span>`;
+    `<span class="ppi-period">${p.label}</span><span class="ppi-sep">·</span><span class="ppi-base">השוואה מול ${baseLabel}${p.showVsDec ? ' + עמודת vs דצמ\'25' : ''}</span>`;
 
   // Cards
   const cardsEl = document.getElementById('prog-cards');
-  if (cardsEl) cardsEl.innerHTML = PROG_TYPES.map(t => renderProgCard(t, base, curr, progPeriod)).join('');
+  if (cardsEl) cardsEl.innerHTML = PROG_TYPES.map(t =>
+    renderProgCard(t, base, curr, decBase, p.showVsDec, progPeriod)
+  ).join('');
 
   // Efficiency chart
   renderEfficiencyChart();

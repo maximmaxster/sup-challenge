@@ -1263,6 +1263,11 @@ footer span {
   border-bottom: 1px solid rgba(255,255,255,0.06);
 }
 .pm-head-row span:first-child { text-align: right; }
+.pm-head-row.pm-head-6 { grid-template-columns: 1.4fr 0.9fr 0.3fr 0.9fr 0.9fr 1fr; }
+.pm-head-6 span:last-child {
+  color: #FFB300;
+  font-weight: 700;
+}
 
 .pm-row {
   display: grid;
@@ -1272,7 +1277,13 @@ footer span {
   border-bottom: 1px solid rgba(255,255,255,0.04);
   gap: 0.2rem;
 }
+.pm-row.pm-row-6 { grid-template-columns: 1.4fr 0.9fr 0.3fr 0.9fr 0.9fr 1fr; }
 .pm-row:last-child { border-bottom: none; }
+/* vs Dec column special styling */
+.pm-row-6 .pm-delta:last-child {
+  font-size: 0.72rem;
+  border: 1px solid rgba(255,179,0,0.2);
+}
 
 .pm-lbl { font-size: 0.78rem; font-weight: 600; color: var(--text-secondary); }
 .pm-bv, .pm-cv {
