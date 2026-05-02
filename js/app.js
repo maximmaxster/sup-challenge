@@ -168,6 +168,7 @@ function renderAll() {
   renderCharts();
   populateYearFilter();
   renderWorkoutsTable();
+  renderProgress();
   renderGallery();
 }
 
@@ -584,6 +585,264 @@ function populateYearFilter() {
   });
 }
 
+// ===========================
+// PROGRESS SECTION
+// ===========================
+
+const PROG_PERIODS = {
+  q1:   { start: new Date(2026,0,1),  end: new Date(2026,2,31),  label: 'Q1 — ינואר-מרץ 2026',          baseRef: 'base' },
+  q2:   { start: new Date(2026,3,1),  end: new Date(2026,5,30),  label: 'Q2 — אפריל-יוני 2026',          baseRef: 'base' },
+  h1:   { isH1: true,                                             label: 'H1 — שיאי Q1+Q2',              baseRef: 'base' },
+  q3:   { start: new Date(2026,6,1),  end: new Date(2026,8,30),  label: 'Q3 — יולי-ספטמבר 2026',        baseRef: 'h1'   },
+  q4:   { start: new Date(2026,9,1),  end: new Date(2026,11,31), label: 'Q4 — אוקטובר-דצמבר 2026',      baseRef: 'h1'   },
+  year: { isYear: true,                                           label: 'שנה — ממוצע Q4 vs דצמבר 2025', baseRef: 'base' },
+};
+const PROG_BASE = { start: new Date(2025,11,1), end: new Date(2025,11,31) };
+
+const PROG_TYPES = [
+  {
+    key: 'sprints', types: ['ספרינטים'], label: 'ספרינטים', icon: '⚡',
+    metrics: [
+      { key: 'speed', label: 'מהירות', unit: 'קמ"ש', lb: false },
+      { key: 'spm',   label: 'SPM',    unit: '',      lb: false },
+      { key: 'hr',    label: 'דופק',   unit: 'BPM',   lb: true  },
+      { key: 'eff',   label: 'יעילות', unit: '',      lb: false },
+    ]
+  },
+  {
+    key: 'tempo', types: ['טמפו'], label: 'טמפו / אינטרוואלים', icon: '🌊',
+    metrics: [
+      { key: 'dps',      label: 'DPS',     unit: "מ'",   lb: false },
+      { key: 'speed',    label: 'מהירות',  unit: 'קמ"ש', lb: false },
+      { key: 'hr',       label: 'דופק',    unit: 'BPM',  lb: true  },
+      { key: 'distance', label: 'מרחק',    unit: "ק\"מ", lb: false },
+      { key: 'eff',      label: 'יעילות',  unit: '',     lb: false },
+    ]
+  },
+  {
+    key: 'aerobic', types: ['אירובי','אירובי ארוך'], label: 'אירובי', icon: '🏄',
+    metrics: [
+      { key: 'distance', label: 'מרחק',    unit: "ק\"מ", lb: false },
+      { key: 'hr',       label: 'דופק',    unit: 'BPM',  lb: true  },
+      { key: 'dps',      label: 'DPS',     unit: "מ'",   lb: false },
+      { key: 'speed',    label: 'מהירות',  unit: 'קמ"ש', lb: false },
+      { key: 'eff',      label: 'יעילות',  unit: '',     lb: false },
+    ]
+  },
+];
+
+let progAthlete = 1;
+let progPeriod  = 'q1';
+
+function progCalcStats(workouts, start, end, types) {
+  const ws = workouts.filter(w => {
+    if (!w.distance || w.distance === 0) return false;
+    if (!types.includes(w.type)) return false;
+    const d = parseDMY(w.date);
+    if (start && d < start) return false;
+    if (end   && d > end)   return false;
+    return true;
+  });
+  if (!ws.length) return null;
+  const vm = key => { const v = ws.map(w=>w[key]||0).filter(x=>x>0); return v.length ? v.reduce((a,b)=>a+b,0)/v.length : 0; };
+  const spd = vm('avg_speed'), hr = vm('avg_hr');
+  return { count: ws.length, speed: spd, hr, dps: vm('dps'), spm: vm('spm'),
+           distance: ws.reduce((s,w)=>s+w.distance,0)/ws.length, eff: hr>0 ? +(spd/hr*100).toFixed(3) : 0 };
+}
+
+function progCalcH1(q1, q2) {
+  if (!q1 && !q2) return null;
+  if (!q1) return q2;
+  if (!q2) return q1;
+  const best=(a,b,lb=false)=>{ if(!a||a===0)return b; if(!b||b===0)return a; return lb?Math.min(a,b):Math.max(a,b); };
+  return { count: q1.count+q2.count, speed: best(q1.speed,q2.speed), hr: best(q1.hr,q2.hr,true),
+           dps: best(q1.dps,q2.dps), spm: best(q1.spm,q2.spm), distance: best(q1.distance,q2.distance),
+           eff: best(q1.eff,q2.eff), isH1: true };
+}
+
+function progGetStats(workouts, periodKey) {
+  const p = PROG_PERIODS[periodKey];
+  return PROG_TYPES.reduce((acc, t) => {
+    if (p.isH1) {
+      acc[t.key] = progCalcH1(
+        progCalcStats(workouts, PROG_PERIODS.q1.start, PROG_PERIODS.q1.end, t.types),
+        progCalcStats(workouts, PROG_PERIODS.q2.start, PROG_PERIODS.q2.end, t.types)
+      );
+    } else if (p.isYear) {
+      acc[t.key] = progCalcStats(workouts, PROG_PERIODS.q4.start, PROG_PERIODS.q4.end, t.types);
+    } else {
+      acc[t.key] = progCalcStats(workouts, p.start, p.end, t.types);
+    }
+    return acc;
+  }, {});
+}
+
+function progGetBase(workouts, baseRef) {
+  if (baseRef === 'h1') {
+    return PROG_TYPES.reduce((acc, t) => {
+      acc[t.key] = progCalcH1(
+        progCalcStats(workouts, PROG_PERIODS.q1.start, PROG_PERIODS.q1.end, t.types),
+        progCalcStats(workouts, PROG_PERIODS.q2.start, PROG_PERIODS.q2.end, t.types)
+      );
+      return acc;
+    }, {});
+  }
+  return PROG_TYPES.reduce((acc, t) => {
+    acc[t.key] = progCalcStats(workouts, PROG_BASE.start, PROG_BASE.end, t.types);
+    return acc;
+  }, {});
+}
+
+function progFmtVal(val, key) {
+  if (!val || val === 0) return '—';
+  if (key === 'eff')      return (+val).toFixed(2);
+  if (key === 'speed')    return (+val).toFixed(1);
+  if (key === 'hr' || key === 'spm') return Math.round(val);
+  if (key === 'dps')      return (+val).toFixed(2);
+  if (key === 'distance') return (+val).toFixed(1);
+  return val;
+}
+
+function progDelta(bv, cv, lb) {
+  if (!bv || !cv || bv === 0 || cv === 0) return null;
+  const pct = ((cv - bv) / bv) * 100;
+  const good = lb ? pct < -3 : pct > 3;
+  const bad  = lb ? pct > 3  : pct < -3;
+  return { pct, good, bad, stable: !good && !bad };
+}
+
+function renderProgCard(typeConf, base, curr, periodKey) {
+  const b = base[typeConf.key];
+  const c = curr[typeConf.key];
+  const p = PROG_PERIODS[periodKey];
+
+  if (!b && !c) return `
+    <div class="prog-card glass-card">
+      <div class="prog-card-hdr"><span class="prog-icon">${typeConf.icon}</span><span class="prog-type-lbl">${typeConf.label}</span></div>
+      <div class="prog-empty">אין נתונים לסוג אימון זה בתקופות אלה</div>
+    </div>`;
+
+  const future = !c ? `<div class="prog-future">⏳ נתונים יגיעו בתקופה זו</div>` : '';
+  const h1badge = p.isH1 ? ' <span class="prog-h1-note">(שיאים)</span>' : '';
+
+  const rows = typeConf.metrics.map(m => {
+    const bv = b?.[m.key], cv = c?.[m.key];
+    const d = b && c ? progDelta(bv, cv, m.lb) : null;
+    const cls = d ? (d.good?'good':d.bad?'bad':'neutral') : '';
+    const arrow = d ? (d.pct > 0 ? '↑' : '↓') : '';
+    const sign  = d?.pct > 0 ? '+' : '';
+    return `
+      <div class="pm-row">
+        <span class="pm-lbl">${m.label}</span>
+        <span class="pm-bv">${progFmtVal(bv, m.key)}<small>${m.unit}</small></span>
+        <span class="pm-sep">→</span>
+        <span class="pm-cv">${progFmtVal(cv, m.key)}<small>${m.unit}</small></span>
+        <span class="pm-delta ${cls}">${d ? arrow+' '+sign+d.pct.toFixed(1)+'%' : '—'}</span>
+      </div>`;
+  }).join('');
+
+  const baseN = b?.count ?? 0;
+  const currN = c?.count ?? 0;
+
+  return `
+    <div class="prog-card glass-card">
+      <div class="prog-card-hdr">
+        <div><span class="prog-icon">${typeConf.icon}</span><span class="prog-type-lbl">${typeConf.label}</span></div>
+        <div class="prog-counts">${baseN} בסיס · ${currN}${h1badge} תקופה</div>
+      </div>
+      <div class="pm-head-row">
+        <span></span><span>בסיס</span><span></span><span>תקופה</span><span>שינוי</span>
+      </div>
+      ${rows}
+      ${future}
+    </div>`;
+}
+
+function renderProgress() {
+  const ath = progAthlete === 1 ? athlete1Data : athlete2Data;
+  const p   = PROG_PERIODS[progPeriod];
+  const base = progGetBase(ath.workouts, p.baseRef);
+  const curr = progGetStats(ath.workouts, progPeriod);
+
+  // Info bar
+  const baseName = p.baseRef === 'h1' ? 'חציון ראשון (שיאי Q1+Q2)' : 'דצמבר 2025';
+  const infoEl = document.getElementById('prog-period-info');
+  if (infoEl) infoEl.innerHTML =
+    `<span class="ppi-period">${p.label}</span><span class="ppi-sep">·</span><span class="ppi-base">השוואה מול ${baseName}</span>`;
+
+  // Cards
+  const cardsEl = document.getElementById('prog-cards');
+  if (cardsEl) cardsEl.innerHTML = PROG_TYPES.map(t => renderProgCard(t, base, curr, progPeriod)).join('');
+
+  // Efficiency chart
+  renderEfficiencyChart();
+}
+
+function renderEfficiencyChart() {
+  const MONTHS = [
+    { lbl:"דצמ'25", s:new Date(2025,11,1), e:new Date(2025,11,31) },
+    { lbl:"ינו'26", s:new Date(2026,0,1),  e:new Date(2026,0,31)  },
+    { lbl:"פבר'26", s:new Date(2026,1,1),  e:new Date(2026,1,28)  },
+    { lbl:"מרץ'26", s:new Date(2026,2,1),  e:new Date(2026,2,31)  },
+    { lbl:"אפר'26", s:new Date(2026,3,1),  e:new Date(2026,3,30)  },
+    { lbl:"מאי'26", s:new Date(2026,4,1),  e:new Date(2026,4,31)  },
+  ];
+  const eff = (data) => MONTHS.map(m => {
+    const ws = data.workouts.filter(w => {
+      if (!w.distance||!w.avg_speed||!w.avg_hr||w.avg_hr===0) return false;
+      const d = parseDMY(w.date); return d>=m.s && d<=m.e;
+    });
+    if (!ws.length) return null;
+    const spd = ws.reduce((s,w)=>s+w.avg_speed,0)/ws.length;
+    const hr  = ws.reduce((s,w)=>s+w.avg_hr,0)/ws.length;
+    return hr>0 ? +(spd/hr*100).toFixed(2) : null;
+  });
+
+  if (charts['efficiencyChart']) charts['efficiencyChart'].destroy();
+  const ctx = document.getElementById('efficiencyChart')?.getContext('2d');
+  if (!ctx) return;
+  charts['efficiencyChart'] = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: MONTHS.map(m=>m.lbl),
+      datasets: [
+        { label: athlete1Data.name, data: eff(athlete1Data), borderColor: COLORS.cyan,   backgroundColor:'rgba(0,212,255,0.08)', pointBackgroundColor:COLORS.cyan,   pointRadius:6, tension:0.4, spanGaps:true },
+        { label: athlete2Data.name, data: eff(athlete2Data), borderColor: COLORS.orange, backgroundColor:'rgba(255,107,53,0.08)',  pointBackgroundColor:COLORS.orange, pointRadius:6, tension:0.4, spanGaps:true },
+      ]
+    },
+    options: { ...chartDefaults,
+      plugins: { ...chartDefaults.plugins,
+        legend: { display:false },
+        tooltip: { ...chartDefaults.plugins.tooltip,
+          callbacks: { label: ctx=>`${ctx.dataset.label}: ${ctx.parsed.y?.toFixed(2)}` }
+        }
+      }
+    }
+  });
+  const l1 = document.getElementById('eff-legend-1'), l2 = document.getElementById('eff-legend-2');
+  if (l1) l1.textContent = athlete1Data.name;
+  if (l2) l2.textContent = athlete2Data.name;
+}
+
+function setupProgress() {
+  document.querySelectorAll('.prog-athlete-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.prog-athlete-btn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      progAthlete = parseInt(btn.dataset.athlete);
+      renderProgress();
+    });
+  });
+  document.querySelectorAll('.prog-period-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.prog-period-btn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      progPeriod = btn.dataset.period;
+      renderProgress();
+    });
+  });
+}
+
 // ===== NAV =====
 function setupNav() {
   document.querySelectorAll('nav a[href^="#"]').forEach(link => {
@@ -612,6 +871,7 @@ function setupNav() {
 document.addEventListener('DOMContentLoaded', () => {
   setupToggleButtons();
   setupFilters();
+  setupProgress();
   setupNav();
   loadData();
 

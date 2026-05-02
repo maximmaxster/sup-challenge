@@ -1152,6 +1152,163 @@ footer span {
   border-right: 3px solid var(--accent-cyan);
 }
 
+/* ===========================
+   PROGRESS SECTION
+   =========================== */
+
+.prog-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.prog-athlete-selector,
+.prog-period-selector {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.prog-athlete-btn,
+.prog-period-btn {
+  padding: 0.45rem 1rem;
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.04);
+  color: var(--text-secondary);
+  font-family: 'Heebo', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+}
+.prog-athlete-btn.active {
+  background: linear-gradient(135deg, rgba(0,212,255,0.2), rgba(0,212,255,0.08));
+  border-color: var(--accent-cyan);
+  color: var(--accent-cyan);
+}
+.prog-period-btn.active {
+  background: linear-gradient(135deg, rgba(0,230,118,0.18), rgba(0,230,118,0.06));
+  border-color: var(--accent-green);
+  color: var(--accent-green);
+}
+.prog-period-btn.h1-btn { border-color: rgba(255,179,0,0.4); }
+.prog-period-btn.h1-btn.active { background:rgba(255,179,0,0.15); border-color:#FFB300; color:#FFB300; }
+.prog-period-btn.future-btn { opacity: 0.55; }
+.prog-period-btn.future-btn.active { opacity: 1; }
+.prog-athlete-btn:hover, .prog-period-btn:hover { opacity: 1; filter: brightness(1.15); }
+
+.prog-period-info {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 1.25rem;
+  padding: 0.5rem 1rem;
+  background: rgba(0,212,255,0.05);
+  border: 1px solid rgba(0,212,255,0.12);
+  border-radius: 10px;
+  flex-wrap: wrap;
+}
+.ppi-period { font-weight: 700; font-size: 0.88rem; color: var(--text-primary); }
+.ppi-sep    { color: var(--text-muted); }
+.ppi-base   { font-size: 0.8rem; color: var(--text-secondary); }
+
+/* Cards grid */
+.prog-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+@media (max-width: 1024px) { .prog-cards-grid { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 640px)  { .prog-cards-grid { grid-template-columns: 1fr; } }
+
+.prog-card {
+  padding: 1.25rem 1.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.prog-card-hdr {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.4rem;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.prog-icon { font-size: 1.15rem; margin-left: 0.4rem; }
+.prog-type-lbl { font-size: 0.95rem; font-weight: 800; color: var(--text-primary); }
+.prog-counts {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  background: rgba(255,255,255,0.05);
+  padding: 0.2rem 0.55rem;
+  border-radius: 8px;
+  white-space: nowrap;
+}
+.prog-h1-note { color: #FFB300; font-size: 0.65rem; }
+
+/* Metric rows */
+.pm-head-row {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr 0.3fr 1fr 1fr;
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  text-align: center;
+  padding: 0 0 0.25rem;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.pm-head-row span:first-child { text-align: right; }
+
+.pm-row {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr 0.3fr 1fr 1fr;
+  align-items: center;
+  padding: 0.3rem 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  gap: 0.2rem;
+}
+.pm-row:last-child { border-bottom: none; }
+
+.pm-lbl { font-size: 0.78rem; font-weight: 600; color: var(--text-secondary); }
+.pm-bv, .pm-cv {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  text-align: center;
+}
+.pm-bv small, .pm-cv small { font-size: 0.6rem; color: var(--text-muted); margin-right: 2px; }
+.pm-sep { text-align: center; color: var(--text-muted); font-size: 0.7rem; }
+
+.pm-delta {
+  text-align: center;
+  font-size: 0.78rem;
+  font-weight: 800;
+  border-radius: 6px;
+  padding: 0.15rem 0.3rem;
+}
+.pm-delta.good    { color: var(--accent-green); background: rgba(0,230,118,0.1); }
+.pm-delta.bad     { color: var(--accent-red);   background: rgba(255,23,68,0.1); }
+.pm-delta.neutral { color: #FFB300;              background: rgba(255,179,0,0.1); }
+
+.prog-empty, .prog-future {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  padding: 1rem 0;
+}
+.prog-future { color: #FFB300; }
+
+/* Efficiency chart card */
+.prog-eff-card { padding: 1.5rem; margin-bottom: 1rem; }
+.prog-eff-header { margin-bottom: 0.5rem; }
+.prog-eff-title { font-size: 1rem; font-weight: 700; color: var(--text-primary); }
+.prog-eff-sub   { font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.2rem; }
+
 /* Workout list — 1 column, full width */
 .workout-list {
   display: flex;
