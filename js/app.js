@@ -285,10 +285,33 @@ function renderCharts() {
   renderDpsChart('month');
 }
 
+function getCalendarStart(range) {
+  const now = new Date();
+  if (range === 'week') {
+    // Start of current calendar week (Sunday)
+    const day = now.getDay();
+    const start = new Date(now);
+    start.setDate(now.getDate() - day);
+    start.setHours(0, 0, 0, 0);
+    return start;
+  }
+  if (range === 'month') {
+    return new Date(now.getFullYear(), now.getMonth(), 1);
+  }
+  if (range === 'year') {
+    return new Date(now.getFullYear(), 0, 1);
+  }
+  return null;
+}
+
 function getFilteredSorted(athleteData, range) {
-  const days = range === 'week' ? 7 : range === 'month' ? 30 : null;
-  return getWorkoutsInRange(athleteData.workouts, days)
-    .filter(w => w.distance > 0)
+  const cutoff = getCalendarStart(range);
+  return athleteData.workouts
+    .filter(w => {
+      if (!w.distance || w.distance === 0) return false;
+      if (!cutoff) return true;
+      return parseDMY(w.date) >= cutoff;
+    })
     .sort((a, b) => parseDMY(a.date) - parseDMY(b.date));
 }
 
@@ -320,9 +343,9 @@ function createOrUpdate(id, config) {
   charts[id] = new Chart(ctx, config);
 }
 
-// All dates union for two workout sets
+// Only Maxim's dates — Maxim determines which dates appear in charts
 function allDatesUnion(w1, w2) {
-  return [...new Set([...w1, ...w2].map(w => w.date))]
+  return [...new Set(w1.map(w => w.date))]
     .sort((a, b) => parseDMY(a) - parseDMY(b));
 }
 
