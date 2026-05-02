@@ -211,7 +211,7 @@ section {
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   gap: 1.5rem;
-  align-items: center;
+  align-items: stretch; /* שני הכרטיסים תמיד אותו גובה */
 }
 
 .vs-badge {
@@ -238,6 +238,8 @@ section {
 .athlete-card {
   padding: 2rem;
   animation: fadeInUp 0.6s ease forwards;
+  display: flex;
+  flex-direction: column;
 }
 
 .athlete-card:nth-child(3) {

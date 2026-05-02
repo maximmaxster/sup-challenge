@@ -635,5 +635,16 @@
   ],
   "dob": "17.07.1981",
   "sup_start": "12.2025",
-  "competitions": []
+  "competitions": [
+    {
+      "name": "SUP CITY 11 CHALLENGE 220 KM",
+      "date": "09/2024",
+      "details": "HOLLAND"
+    },
+    {
+      "name": "ICF SUP WORLD CHAMPIONSHIP",
+      "date": "10/2025",
+      "details": "ABU DHABI"
+    }
+  ]
 }
