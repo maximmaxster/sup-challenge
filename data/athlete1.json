@@ -4593,5 +4593,24 @@
       "z4": "35:51",
       "z5": "2:38"
     }
+  ],
+  "dob": "16.06.1982",
+  "sup_start": "05.2021",
+  "competitions": [
+    {
+      "name": "MAX HOLLAND",
+      "date": "09/2024",
+      "details": ""
+    },
+    {
+      "name": "SUP CITY",
+      "date": "",
+      "details": "11 ק\"מ, 220 משתתפים"
+    },
+    {
+      "name": "ICF SUP WORLD CHAMPIONSHIP",
+      "date": "10/2025",
+      "details": "ABU DHABI"
+    }
   ]
 }

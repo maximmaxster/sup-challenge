@@ -16,6 +16,37 @@ const COLORS = {
   grid: 'rgba(136,153,187,0.1)',
 };
 
+// ===== AGE HELPER =====
+function calcAge(dobStr) {
+  // dobStr: "DD.MM.YYYY"
+  if (!dobStr) return '—';
+  const [d, m, y] = dobStr.split('.').map(Number);
+  const dob = new Date(y, m - 1, d);
+  const now = new Date();
+  let age = now.getFullYear() - dob.getFullYear();
+  if (now.getMonth() < dob.getMonth() || (now.getMonth() === dob.getMonth() && now.getDate() < dob.getDate())) age--;
+  return age;
+}
+
+function renderAthleteBio(prefix, data) {
+  const el = id => document.getElementById(`${prefix}-${id}`);
+  if (el('dob')) el('dob').textContent = data.dob || '—';
+  if (el('age')) el('age').textContent = data.dob ? calcAge(data.dob) : '—';
+  if (el('sup-start')) el('sup-start').textContent = data.sup_start || '—';
+
+  const compEl = document.getElementById(`${prefix}-competitions`);
+  if (!compEl) return;
+  const comps = data.competitions || [];
+  if (!comps.length) { compEl.innerHTML = ''; return; }
+  compEl.innerHTML = `<div class="comp-list-title">🏆 תחרויות</div>` +
+    comps.map(c => `
+      <div class="comp-entry">
+        <span class="comp-name">${c.name}</span>
+        ${c.date ? `<span class="comp-date">${c.date}</span>` : ''}
+        ${c.details ? `<span class="comp-details">${c.details}</span>` : ''}
+      </div>`).join('');
+}
+
 // ===== DATE HELPERS (DD.MM.YYYY format) =====
 function parseDMY(str) {
   // Accepts DD.MM.YYYY or YYYY-MM-DD
@@ -155,6 +186,9 @@ function renderAthleteCards() {
 
   setAthleteWeekStats('a1', w1, sum(w1, 'distance'));
   setAthleteWeekStats('a2', w2, sum(w2, 'distance'));
+
+  renderAthleteBio('a1', athlete1Data);
+  renderAthleteBio('a2', athlete2Data);
 
   tryLoadAvatar('athlete1-avatar', athlete1Data.profile_image, '🏄');
   tryLoadAvatar('athlete2-avatar', athlete2Data.profile_image, '🏄');
