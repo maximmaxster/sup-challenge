@@ -1306,6 +1306,23 @@ footer span {
 .pm-delta.bad     { color: var(--accent-red);   background: rgba(255,23,68,0.1); }
 .pm-delta.neutral { color: #FFB300;              background: rgba(255,179,0,0.1); }
 
+.prog-few-warn {
+  font-size: 0.72rem;
+  color: #FFB300;
+  background: rgba(255,179,0,0.08);
+  border: 1px solid rgba(255,179,0,0.2);
+  border-radius: 6px;
+  padding: 0.25rem 0.6rem;
+  margin-bottom: 0.3rem;
+}
+.prog-h1-info {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  margin-top: 0.4rem;
+  padding-top: 0.4rem;
+  border-top: 1px solid rgba(255,255,255,0.05);
+  font-style: italic;
+}
 .prog-empty, .prog-future {
   text-align: center;
   color: var(--text-muted);

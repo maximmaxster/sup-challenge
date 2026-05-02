@@ -743,24 +743,36 @@ function renderProgCard(typeConf, base, curr, decBase, showVsDec, periodKey) {
 
   const baseN = b?.count ?? 0;
   const currN = c?.count ?? 0;
-  // Base label: Q1/Q2/Q3 or Dec 2025
-  const baseLabel = PROG_PERIODS[periodKey]?.baseRef === 'base' ? "דצמ'25" :
-                    PROG_PERIODS[periodKey]?.baseRef === 'q1'   ? 'Q1' :
-                    PROG_PERIODS[periodKey]?.baseRef === 'q2'   ? 'Q2' : 'Q3';
+  // Period label for header column (e.g. Q1, Q2, etc.)
+  const baseRef = PROG_PERIODS[periodKey]?.baseRef;
+  const baseLabel = baseRef === 'base' ? "דצמ'25" : baseRef.toUpperCase(); // Q1/Q2/Q3
+  const currLabel = PROG_PERIODS[periodKey]?.isH1   ? 'H1'
+                  : PROG_PERIODS[periodKey]?.isYear  ? 'שנה'
+                  : periodKey.toUpperCase(); // Q1/Q2/Q3/Q4
+
+  // Warning if very few workouts
+  const fewWarning = (baseN <= 1 || currN <= 1)
+    ? `<div class="prog-few-warn">⚠️ ממוצע מ-${Math.min(baseN,currN)} אימון — פחות אמין</div>` : '';
 
   const vsDecHeader = showVsDec ? `<span>vs דצמ'25</span>` : '';
+
+  // H1 note
+  const h1Note = PROG_PERIODS[periodKey]?.isH1
+    ? `<div class="prog-h1-info">📊 ממוצע Q1+Q2 — יתעדכן עם סיום יוני 2026</div>` : '';
 
   return `
     <div class="prog-card glass-card">
       <div class="prog-card-hdr">
         <div><span class="prog-icon">${typeConf.icon}</span><span class="prog-type-lbl">${typeConf.label}</span></div>
-        <div class="prog-counts">${baseN} ${baseLabel} · ${currN} תקופה</div>
+        <div class="prog-counts">${baseN} אימון ${baseLabel} · ${currN} אימון ${currLabel}</div>
       </div>
+      ${fewWarning}
       <div class="pm-head-row ${showVsDec ? 'pm-head-6' : ''}">
-        <span></span><span>${baseLabel}</span><span></span><span>תקופה</span><span>שינוי</span>${vsDecHeader}
+        <span></span><span>${baseLabel}</span><span></span><span>${currLabel}</span><span>שינוי</span>${vsDecHeader}
       </div>
       ${rows}
       ${future}
+      ${h1Note}
     </div>`;
 }
 
