@@ -144,10 +144,13 @@ function renderAthleteCards() {
   const w1 = getWorkoutsCurrentMonth(athlete1Data.workouts);
   const w2 = getWorkoutsCurrentMonth(athlete2Data.workouts);
 
-  // Update stat label to current month name
-  document.querySelectorAll('.stat-label-distance').forEach(el => {
-    el.textContent = `מרחק ${getMonthName()}`;
-  });
+  // Update period label (month + year) above stats
+  const now = new Date();
+  const periodLabel = `${getMonthName()} ${now.getFullYear()}`;
+  const p1 = document.getElementById('a1-period');
+  const p2 = document.getElementById('a2-period');
+  if (p1) p1.textContent = periodLabel;
+  if (p2) p2.textContent = periodLabel;
 
   setAthleteWeekStats('a1', w1, sum(w1, 'distance'));
   setAthleteWeekStats('a2', w2, sum(w2, 'distance'));
@@ -183,9 +186,12 @@ function renderComparisonTable() {
   const lw1 = athlete1Data.workouts.find(w => w.date === lastDate) || {};
   const lw2 = athlete2Data.workouts.find(w => w.date === lastDate && w.distance > 0) || {};
 
-  // Show date subtitle
+  // Show type badge + date
+  const typeEl = document.getElementById('last-workout-type');
   const dateEl = document.getElementById('last-workout-date');
-  if (dateEl && lastDate) dateEl.textContent = `אימון: ${lastDate}`;
+  const workoutType = lw1.type || '';
+  if (typeEl) typeEl.textContent = workoutType;
+  if (dateEl) dateEl.textContent = lastDate || '';
 
   const metrics = [
     { label: 'מרחק', format: v => v ? v.toFixed(2) + ' ק"מ' : '—', fn: w => w.distance || 0 },
