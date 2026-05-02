@@ -59,9 +59,12 @@ def wait_for_internet(max_wait_min=30, check_interval_sec=60):
     return False
 
 # ── קבצי הגדרות ──────────────────────────────────────────────────────────────
-EXCEL_FILE  = "ניתוח_אימוני_SUP_v5.xlsx"
-CONFIG_FILE = "garmin_config.json"
-LOCATIONS_FILE = "sup_locations.json"
+_BASE = os.path.dirname(os.path.abspath(__file__))          # tracker/
+_PROJ = os.path.dirname(_BASE)                              # sup-challenge/
+
+EXCEL_FILE     = os.path.join(_PROJ, "ניתוח_אימוני_SUP_v5.xlsx")
+CONFIG_FILE    = os.path.join(_PROJ, "garmin_config.json")
+LOCATIONS_FILE = os.path.join(_BASE, "sup_locations.json")
 
 MONTHS_HEB = {
     1:"ינואר", 2:"פברואר", 3:"מרץ",    4:"אפריל",
@@ -82,7 +85,7 @@ def connect_garmin():
     1. אם קיים טוקן שמור — נשתמש בו (ללא login חדש)
     2. אחרת — login עם email+password ושמירת טוקן
     """
-    token_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".garth_tokens")
+    token_dir = os.path.join(_PROJ, ".garth_tokens_1")
 
     # נסה טוקן שמור קודם
     if os.path.exists(token_dir):
@@ -267,8 +270,8 @@ def detect_training_type(distance_km, duration_sec, z4_str, z5_str, hr_values):
     z4_sec = hms_to_sec(z4_str)
     z5_sec = hms_to_sec(z5_str)
 
-    # 1. אירובי ארוך
-    if distance_km > 11 and duration_min > 90:
+    # 1. אירובי ארוך — מרחק > 11 ק"מ (ללא תנאי זמן)
+    if distance_km > 11:
         return "אירובי ארוך", 0.95
 
     # 2. ספרינטים — Z5 ברור, או גרף דופק עם מחזורים

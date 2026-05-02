@@ -533,24 +533,10 @@ function setupNav() {
   sections.forEach(s => observer.observe(s));
 }
 
-// ===== TRAINING PLAN TABS =====
-function setupTrainingTabs() {
-  document.querySelectorAll('.training-tab-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.training-tab-btn').forEach(b => b.classList.remove('active'));
-      document.querySelectorAll('.training-panel').forEach(p => p.classList.remove('active'));
-      btn.classList.add('active');
-      const panel = document.getElementById('tab-' + btn.dataset.tab);
-      if (panel) panel.classList.add('active');
-    });
-  });
-}
-
 // ===== INIT =====
 document.addEventListener('DOMContentLoaded', () => {
   setupToggleButtons();
   setupFilters();
-  setupTrainingTabs();
   setupNav();
   loadData();
 
