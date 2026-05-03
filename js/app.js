@@ -289,10 +289,9 @@ function renderCharts() {
 function getCalendarStart(range) {
   const now = new Date();
   if (range === 'week') {
-    // Start of current calendar week (Sunday)
-    const day = now.getDay();
+    // Rolling 7 days back from today
     const start = new Date(now);
-    start.setDate(now.getDate() - day);
+    start.setDate(now.getDate() - 6);
     start.setHours(0, 0, 0, 0);
     return start;
   }
