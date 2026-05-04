@@ -540,18 +540,25 @@ function closeLightbox() {
 }
 
 // ===== TOGGLE BUTTONS =====
+function setAllChartsRange(range) {
+  // Update active button in all toggle groups
+  document.querySelectorAll('.toggle-group').forEach(group => {
+    group.querySelectorAll('.toggle-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.range === range);
+    });
+  });
+  // Re-render all 4 charts
+  renderSpeedChart(range);
+  renderDistanceChart(range);
+  renderHrChart(range);
+  renderDpsChart(range);
+}
+
 function setupToggleButtons() {
   document.querySelectorAll('.toggle-group').forEach(group => {
     group.querySelectorAll('.toggle-btn').forEach(btn => {
       btn.addEventListener('click', () => {
-        group.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        const chartId = group.dataset.chart;
-        const range = btn.dataset.range;
-        if (chartId === 'speed') renderSpeedChart(range);
-        else if (chartId === 'distance') renderDistanceChart(range);
-        else if (chartId === 'hr') renderHrChart(range);
-        else if (chartId === 'dps') renderDpsChart(range);
+        setAllChartsRange(btn.dataset.range);
       });
     });
   });
