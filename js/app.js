@@ -538,6 +538,9 @@ function raceCard(r) {
       <div class="race-stat"><div class="race-stat-val">${r.avg_hr || '—'}</div><div class="race-stat-lbl">BPM</div></div>
       <div class="race-stat"><div class="race-stat-val">${r.spm || '—'}</div><div class="race-stat-lbl">SPM</div></div>
       <div class="race-stat"><div class="race-stat-val">${r.dps || '—'}</div><div class="race-stat-lbl">DPS מ'</div></div>
+      ${r.z3 ? `<div class="race-stat"><div class="race-stat-val" style="color:#00E676">${r.z3}</div><div class="race-stat-lbl">Z3</div></div>` : ''}
+      ${r.z4 ? `<div class="race-stat"><div class="race-stat-val" style="color:#FF8C00">${r.z4}</div><div class="race-stat-lbl">Z4</div></div>` : ''}
+      ${r.z5 ? `<div class="race-stat"><div class="race-stat-val" style="color:#FF1744">${r.z5}</div><div class="race-stat-lbl">Z5</div></div>` : ''}
     </div>` : `<div class="race-card-pending">⏳ ${r.notes || 'נתונים בהמתנה'}</div>`;
 
   return `
