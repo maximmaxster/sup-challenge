@@ -170,6 +170,7 @@ function renderAll() {
   renderWorkoutsTable();
   renderProgress();
   renderGallery();
+  renderRaces(1);
 }
 
 // ===== ATHLETE CARDS =====
@@ -497,6 +498,62 @@ function renderWorkoutsTable(filterAthlete = 'all', filterType = 'all', filterLo
       <td>${isZero ? '—' : (w.z4 || '—')}</td>
       <td>${isZero ? '—' : (w.z5 || '—')}</td>`;
     tbody.appendChild(tr);
+  });
+}
+
+// ===== RACES =====
+let currentRacesAthlete = 1;
+
+function renderRaces(athleteNum) {
+  currentRacesAthlete = athleteNum;
+  const data = athleteNum === 1 ? athlete1Data : athlete2Data;
+  const races = data.races || [];
+
+  // Update buttons
+  document.querySelectorAll('.races-athlete-btn').forEach(btn => {
+    btn.classList.toggle('active', +btn.dataset.athlete === athleteNum);
+  });
+
+  // Update name in buttons
+  document.getElementById('races-btn-1').textContent = athlete1Data.name;
+  document.getElementById('races-btn-2').textContent = athlete2Data.name;
+
+  const worldEl = document.getElementById('races-world');
+  const localEl = document.getElementById('races-local');
+
+  const worldRaces = races.filter(r => r.category === 'world');
+  const localRaces = races.filter(r => r.category === 'local');
+
+  worldEl.innerHTML = worldRaces.length ? worldRaces.map(raceCard).join('') : '<div class="race-card-pending">אין נתונים</div>';
+  localEl.innerHTML = localRaces.length ? localRaces.map(raceCard).join('') : '<div class="race-card-pending">אין נתונים</div>';
+}
+
+function raceCard(r) {
+  const hasDat = r.distance_km !== null;
+  const statsHtml = hasDat ? `
+    <div class="race-stats">
+      <div class="race-stat"><div class="race-stat-val">${r.distance_km}</div><div class="race-stat-lbl">ק"מ</div></div>
+      <div class="race-stat"><div class="race-stat-val">${r.duration || '—'}</div><div class="race-stat-lbl">זמן</div></div>
+      <div class="race-stat"><div class="race-stat-val">${r.avg_speed || '—'}</div><div class="race-stat-lbl">קמ"ש</div></div>
+      <div class="race-stat"><div class="race-stat-val">${r.avg_hr || '—'}</div><div class="race-stat-lbl">BPM</div></div>
+      <div class="race-stat"><div class="race-stat-val">${r.spm || '—'}</div><div class="race-stat-lbl">SPM</div></div>
+      <div class="race-stat"><div class="race-stat-val">${r.dps || '—'}</div><div class="race-stat-lbl">DPS מ'</div></div>
+    </div>` : `<div class="race-card-pending">⏳ ${r.notes || 'נתונים בהמתנה'}</div>`;
+
+  return `
+    <div class="race-card">
+      <div class="race-card-header">
+        <div class="race-card-name">${r.name}</div>
+        <div class="race-card-date">${r.date}</div>
+      </div>
+      <div class="race-card-location">📍 ${r.location}${r.place ? ' &nbsp;|&nbsp; 🏅 מקום ' + r.place : ''}</div>
+      ${statsHtml}
+    </div>`;
+}
+
+function setupRacesButtons() {
+  document.querySelectorAll('.races-athlete-btn').forEach(btn => {
+    btn.addEventListener('click', () => renderRaces(+btn.dataset.athlete));
   });
 }
 
@@ -900,6 +957,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setupToggleButtons();
   setupFilters();
   setupProgress();
+  setupRacesButtons();
   setupNav();
   loadData();
 

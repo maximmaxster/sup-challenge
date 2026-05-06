@@ -33,6 +33,7 @@
       <a href="#athletes" class="active">ראשי</a>
       <a href="#workouts">אימונים</a>
       <a href="#progress">התקדמות</a>
+      <a href="#races">תחרויות</a>
       <a href="#gallery">גלריה</a>
     </nav>
 
@@ -340,7 +341,26 @@
     </div>
   </section>
 
-  <!-- ========== SECTION 6: GALLERY ========== -->
+  <!-- ========== SECTION 6: RACES ========== -->
+  <section id="races" class="section-tab">
+    <div class="section-title">🏆 תחרויות</div>
+
+    <!-- Athlete selector -->
+    <div class="races-athlete-selector">
+      <button class="races-athlete-btn active" data-athlete="1" id="races-btn-1">מקסים</button>
+      <button class="races-athlete-btn" data-athlete="2" id="races-btn-2">ויקטור</button>
+    </div>
+
+    <!-- World Championships -->
+    <div class="races-category-title">🌍 אליפויות העולם</div>
+    <div id="races-world" class="races-grid"></div>
+
+    <!-- Local Races -->
+    <div class="races-category-title">🇮🇱 תחרויות בארץ</div>
+    <div id="races-local" class="races-grid"></div>
+  </section>
+
+  <!-- ========== SECTION 7: GALLERY ========== -->
   <section id="gallery" class="section-tab">
     <div class="section-title">גלריה</div>
     <div id="gallery-grid" class="gallery-grid">
