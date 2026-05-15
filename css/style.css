@@ -129,15 +129,15 @@ header {
 }
 
 .logo-img {
-  height: 68px;
+  height: 56px;
   width: auto;
   object-fit: contain;
-  filter: drop-shadow(0 0 12px rgba(0, 200, 240, 0.25));
+  filter: drop-shadow(0 0 10px rgba(0, 200, 240, 0.2));
   transition: var(--transition);
 }
 .logo-img:hover {
-  filter: drop-shadow(0 0 20px rgba(0, 200, 240, 0.5));
-  transform: scale(1.03);
+  filter: drop-shadow(0 0 18px rgba(0, 200, 240, 0.45));
+  transform: scale(1.04);
 }
 
 .logo-icon {
