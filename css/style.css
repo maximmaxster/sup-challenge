@@ -88,6 +88,13 @@ header {
   text-decoration: none;
 }
 
+.logo-img {
+  height: 48px;
+  width: 48px;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
 .logo-icon {
   width: 44px;
   height: 44px;
