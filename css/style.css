@@ -155,14 +155,23 @@ header {
 
 .logo-text {
   font-family: var(--font-display);
-  font-size: 1.5rem;
-  font-weight: 700;
-  background: linear-gradient(135deg, #FFFFFF 0%, var(--accent-cyan) 100%);
+  font-size: 1.55rem;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  background: linear-gradient(135deg, #FFFFFF 0%, var(--accent-cyan) 60%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
+  line-height: 1;
+}
+
+.logo-text-challenge {
+  background: linear-gradient(135deg, var(--accent-orange) 0%, #FF8C42 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 0 8px rgba(232, 75, 26, 0.5));
 }
 
 nav {
