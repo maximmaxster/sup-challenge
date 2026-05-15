@@ -955,6 +955,38 @@ function setupNav() {
   sections.forEach(s => observer.observe(s));
 }
 
+// ===== COUNTDOWN =====
+function startCountdown() {
+  // תאריך האירוע — חיפה-עכו 06.06.2026 08:00 שעון ישראל
+  const TARGET = new Date('2026-06-06T08:00:00+03:00');
+
+  const elDays  = document.getElementById('cd-days');
+  const elHours = document.getElementById('cd-hours');
+  const elMins  = document.getElementById('cd-mins');
+  const elSecs  = document.getElementById('cd-secs');
+  const banner  = document.querySelector('.countdown-boxes');
+
+  function tick() {
+    const diff = TARGET - Date.now();
+    if (diff <= 0) {
+      if (banner) banner.innerHTML = '<div class="countdown-done">🏁 האירוע מתחיל עכשיו!</div>';
+      return;
+    }
+    const pad = n => String(n).padStart(2, '0');
+    const d = Math.floor(diff / 86400000);
+    const h = Math.floor((diff % 86400000) / 3600000);
+    const m = Math.floor((diff % 3600000) / 60000);
+    const s = Math.floor((diff % 60000) / 1000);
+    if (elDays)  elDays.textContent  = d;
+    if (elHours) elHours.textContent = pad(h);
+    if (elMins)  elMins.textContent  = pad(m);
+    if (elSecs)  elSecs.textContent  = pad(s);
+  }
+
+  tick();
+  setInterval(tick, 1000);
+}
+
 // ===== INIT =====
 document.addEventListener('DOMContentLoaded', () => {
   setupToggleButtons();
@@ -962,6 +994,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setupProgress();
   setupRacesButtons();
   setupNav();
+  startCountdown();
   loadData();
 
   document.getElementById('lightbox').addEventListener('click', e => {

@@ -798,6 +798,81 @@ section {
 
 .location-icon { margin-left: 0.3rem; }
 
+/* ===== COUNTDOWN ===== */
+.countdown-banner {
+  background: linear-gradient(135deg, #0d1e3a 0%, #1a2e50 50%, #0d1e3a 100%);
+  border: 1px solid rgba(0, 212, 255, 0.25);
+  border-radius: 20px;
+  padding: 1.8rem 2rem;
+  margin: 0 0 2rem 0;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 0 40px rgba(0, 212, 255, 0.08);
+}
+.countdown-banner::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 0%, rgba(0,212,255,0.07) 0%, transparent 65%);
+  pointer-events: none;
+}
+.countdown-event-name {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #00D4FF;
+  letter-spacing: 0.03em;
+  margin-bottom: 0.3rem;
+}
+.countdown-date-label {
+  font-size: 0.85rem;
+  color: rgba(255,255,255,0.45);
+  margin-bottom: 1.4rem;
+  letter-spacing: 0.05em;
+}
+.countdown-boxes {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: nowrap;
+}
+.countdown-box {
+  background: rgba(0, 212, 255, 0.07);
+  border: 1px solid rgba(0, 212, 255, 0.2);
+  border-radius: 14px;
+  padding: 0.9rem 1.3rem;
+  min-width: 72px;
+}
+.countdown-num {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: #00D4FF;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+.countdown-lbl {
+  font-size: 0.68rem;
+  color: rgba(255,255,255,0.45);
+  margin-top: 0.35rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.countdown-sep {
+  font-size: 2rem;
+  font-weight: 700;
+  color: rgba(0,212,255,0.4);
+  line-height: 1;
+  padding-bottom: 1.2rem;
+}
+.countdown-done {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #FF6B35;
+  padding: 0.5rem 0;
+}
+
 /* ===== RACES ===== */
 .races-athlete-selector {
   display: flex;
