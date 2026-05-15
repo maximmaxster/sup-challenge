@@ -116,7 +116,7 @@ header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 76px;
+  height: 82px;
   gap: 1rem;
 }
 
@@ -155,15 +155,16 @@ header {
 
 .logo-text {
   font-family: var(--font-display);
-  font-size: 1.55rem;
+  font-size: 2.2rem;
   font-weight: 800;
-  letter-spacing: 1px;
+  letter-spacing: 2px;
   text-transform: uppercase;
   background: linear-gradient(135deg, #FFFFFF 0%, var(--accent-cyan) 60%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   line-height: 1;
+  filter: drop-shadow(0 0 12px rgba(0, 200, 240, 0.4));
 }
 
 .logo-text-challenge {
@@ -171,7 +172,7 @@ header {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  filter: drop-shadow(0 0 8px rgba(232, 75, 26, 0.5));
+  filter: drop-shadow(0 0 12px rgba(232, 75, 26, 0.6));
 }
 
 nav {
