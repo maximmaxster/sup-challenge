@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SUP Challenge — בחירת פלטה</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700;800&family=Barlow+Condensed:wght@700;800&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: 'Heebo', sans-serif; background: #111; color: #fff; padding: 2rem; direction: rtl; }
+h1 { text-align:center; font-family:'Barlow Condensed',sans-serif; font-size:2rem; color:#aaa; margin-bottom:2rem; letter-spacing:2px; }
+
+.palettes { display: grid; grid-template-columns: repeat(2,1fr); gap: 2rem; max-width:1200px; margin:0 auto; }
+
+.palette { border-radius: 16px; overflow: hidden; cursor: pointer; border: 3px solid transparent; transition: all .3s; }
+.palette:hover { transform: scale(1.02); }
+.palette.selected { border-color: #fff; }
+
+.palette-label {
+  padding: 1rem 1.5rem;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 1.3rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+/* ── Mock dashboard card ── */
+.mock { padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; }
+.mock-header { display:flex; justify-content:space-between; align-items:center; }
+.mock-title { font-size:.75rem; letter-spacing:.1em; text-transform:uppercase; opacity:.5; }
+.mock-badge { font-size:.7rem; padding:.25rem .7rem; border-radius:20px; font-weight:700; }
+.mock-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:.75rem; }
+.mock-stat { border-radius:10px; padding:1rem; text-align:center; }
+.mock-stat-val { font-family:'Barlow Condensed',sans-serif; font-size:1.8rem; font-weight:700; line-height:1; }
+.mock-stat-lbl { font-size:.65rem; opacity:.5; margin-top:.3rem; text-transform:uppercase; letter-spacing:.08em; }
+.mock-bar { border-radius:4px; overflow:hidden; height:6px; margin-top:.5rem; }
+.mock-bar-fill { height:100%; border-radius:4px; }
+.mock-nav { display:flex; gap:.5rem; }
+.mock-nav span { font-size:.75rem; padding:.35rem .8rem; border-radius:6px; opacity:.6; }
+.mock-nav span.active { opacity:1; font-weight:700; }
+.mock-countdown { display:flex; gap:.5rem; justify-content:center; }
+.mock-cd { border-radius:8px; padding:.5rem .75rem; text-align:center; }
+.mock-cd-num { font-family:'Barlow Condensed',sans-serif; font-size:1.4rem; font-weight:700; }
+.mock-cd-lbl { font-size:.6rem; opacity:.5; }
+
+/* ══════════════════════════════════
+   A — DEEP OCEAN
+══════════════════════════════════ */
+.a { background: #041420; }
+.a .palette-label { background: linear-gradient(135deg,#041420,#062030); color: #00FFD1; border-bottom: 1px solid rgba(0,255,209,.15); }
+.a .mock-header .mock-title { color: #7ABFBF; }
+.a .mock-badge { background: rgba(0,255,209,.15); color:#00FFD1; }
+.a .mock-stat { background: rgba(0,80,80,.4); border: 1px solid rgba(0,255,209,.1); }
+.a .mock-stat-val { color: #00FFD1; }
+.a .mock-stat-lbl { color: #7ABFBF; }
+.a .mock-bar { background: rgba(0,255,209,.1); }
+.a .mock-bar-fill { background: linear-gradient(90deg,#00FFD1,#FFB300); }
+.a .mock-nav { background: rgba(0,30,40,.8); border-radius:8px; padding:.4rem; }
+.a .mock-nav span { color:#7ABFBF; }
+.a .mock-nav span.active { background:rgba(0,255,209,.15); color:#00FFD1; }
+.a .mock-cd { background: rgba(0,255,209,.08); border:1px solid rgba(0,255,209,.2); }
+.a .mock-cd-num { color:#00FFD1; }
+.a .mock-cd-lbl { color:#7ABFBF; }
+
+/* ══════════════════════════════════
+   B — ELECTRIC VIOLET
+══════════════════════════════════ */
+.b { background: #0A0818; }
+.b .palette-label { background: linear-gradient(135deg,#0A0818,#140A2E); color: #A855F7; border-bottom: 1px solid rgba(168,85,247,.15); }
+.b .mock-header .mock-title { color: #9070BB; }
+.b .mock-badge { background: rgba(168,85,247,.15); color:#A855F7; }
+.b .mock-stat { background: rgba(60,0,100,.35); border: 1px solid rgba(168,85,247,.12); }
+.b .mock-stat-val { color: #C084FC; }
+.b .mock-stat-lbl { color: #9070BB; }
+.b .mock-bar { background: rgba(168,85,247,.1); }
+.b .mock-bar-fill { background: linear-gradient(90deg,#A855F7,#F97316); }
+.b .mock-nav { background: rgba(20,10,40,.8); border-radius:8px; padding:.4rem; }
+.b .mock-nav span { color:#9070BB; }
+.b .mock-nav span.active { background:rgba(168,85,247,.15); color:#C084FC; }
+.b .mock-cd { background: rgba(168,85,247,.08); border:1px solid rgba(168,85,247,.2); }
+.b .mock-cd-num { color:#C084FC; }
+.b .mock-cd-lbl { color:#9070BB; }
+
+/* ══════════════════════════════════
+   C — NEON RACE
+══════════════════════════════════ */
+.c { background: #05080A; }
+.c .palette-label { background: linear-gradient(135deg,#05080A,#091210); color: #00FF88; border-bottom: 1px solid rgba(0,255,136,.15); }
+.c .mock-header .mock-title { color: #60A880; }
+.c .mock-badge { background: rgba(0,255,136,.12); color:#00FF88; }
+.c .mock-stat { background: rgba(0,40,20,.5); border: 1px solid rgba(0,255,136,.1); }
+.c .mock-stat-val { color: #00FF88; }
+.c .mock-stat-lbl { color: #60A880; }
+.c .mock-bar { background: rgba(0,255,136,.08); }
+.c .mock-bar-fill { background: linear-gradient(90deg,#00FF88,#FF4500); }
+.c .mock-nav { background: rgba(5,15,10,.8); border-radius:8px; padding:.4rem; }
+.c .mock-nav span { color:#60A880; }
+.c .mock-nav span.active { background:rgba(0,255,136,.12); color:#00FF88; }
+.c .mock-cd { background: rgba(0,255,136,.07); border:1px solid rgba(0,255,136,.18); }
+.c .mock-cd-num { color:#00FF88; }
+.c .mock-cd-lbl { color:#60A880; }
+
+/* ══════════════════════════════════
+   D — CARBON PREMIUM
+══════════════════════════════════ */
+.d { background: #0D0F12; }
+.d .palette-label { background: linear-gradient(135deg,#0D0F12,#161A20); color: #60A5FA; border-bottom: 1px solid rgba(96,165,250,.15); }
+.d .mock-header .mock-title { color: #7090B0; }
+.d .mock-badge { background: rgba(96,165,250,.12); color:#60A5FA; }
+.d .mock-stat { background: rgba(20,28,40,.7); border: 1px solid rgba(96,165,250,.1); }
+.d .mock-stat-val { color: #93C5FD; }
+.d .mock-stat-lbl { color: #7090B0; }
+.d .mock-bar { background: rgba(96,165,250,.08); }
+.d .mock-bar-fill { background: linear-gradient(90deg,#60A5FA,#F59E0B); }
+.d .mock-nav { background: rgba(15,20,28,.8); border-radius:8px; padding:.4rem; }
+.d .mock-nav span { color:#7090B0; }
+.d .mock-nav span.active { background:rgba(96,165,250,.12); color:#93C5FD; }
+.d .mock-cd { background: rgba(96,165,250,.07); border:1px solid rgba(96,165,250,.18); }
+.d .mock-cd-num { color:#93C5FD; }
+.d .mock-cd-lbl { color:#7090B0; }
+
+.pick-btn {
+  display: block;
+  width: calc(100% - 3rem);
+  margin: 0 1.5rem 1.5rem;
+  padding: .75rem;
+  border-radius: 10px;
+  border: none;
+  font-family: 'Barlow Condensed',sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all .2s;
+}
+.a .pick-btn { background:#00FFD1; color:#041420; }
+.b .pick-btn { background:#A855F7; color:#fff; }
+.c .pick-btn { background:#00FF88; color:#05080A; }
+.d .pick-btn { background:#60A5FA; color:#0D0F12; }
+.pick-btn:hover { filter:brightness(1.15); transform:scale(1.02); }
+</style>
+</head>
+<body>
+<h1>🎨 בחר פלטת צבעים — SUP CHALLENGE</h1>
+
+<div class="palettes">
+
+  <!-- A: Deep Ocean -->
+  <div class="palette a">
+    <div class="palette-label">A — 🌊 Deep Ocean</div>
+    <div class="mock">
+      <div class="mock-header">
+        <span class="mock-title">אימון אחרון — 15.05.2026</span>
+        <span class="mock-badge">טמפו</span>
+      </div>
+      <div class="mock-stats">
+        <div class="mock-stat"><div class="mock-stat-val">9.1</div><div class="mock-stat-lbl">ק"מ</div></div>
+        <div class="mock-stat"><div class="mock-stat-val">7.6</div><div class="mock-stat-lbl">קמ"ש</div></div>
+        <div class="mock-stat"><div class="mock-stat-val">135</div><div class="mock-stat-lbl">BPM</div></div>
+      </div>
+      <div class="mock-bar"><div class="mock-bar-fill" style="width:72%"></div></div>
+      <div class="mock-nav">
+        <span class="active">ראשי</span><span>אימונים</span><span>גרפים</span><span>תחרויות</span>
+      </div>
+      <div class="mock-countdown">
+        <div class="mock-cd"><div class="mock-cd-num">21</div><div class="mock-cd-lbl">ימים</div></div>
+        <div class="mock-cd"><div class="mock-cd-num">10</div><div class="mock-cd-lbl">שעות</div></div>
+        <div class="mock-cd"><div class="mock-cd-num">15</div><div class="mock-cd-lbl">דקות</div></div>
+      </div>
+    </div>
+    <button class="pick-btn" onclick="pick('A')">✓ בחר פלטה A</button>
+  </div>
+
+  <!-- B: Electric Violet -->
+  <div class="palette b">
+    <div class="palette-label">B — ⚡ Electric Violet</div>
+    <div class="mock">
+      <div class="mock-header">
+        <span class="mock-title">אימון אחרון — 15.05.2026</span>
+        <span class="mock-badge">טמפו</span>
+      </div>
+      <div class="mock-stats">
+        <div class="mock-stat"><div class="mock-stat-val">9.1</div><div class="mock-stat-lbl">ק"מ</div></div>
+        <div class="mock-stat"><div class="mock-stat-val">7.6</div><div class="mock-stat-lbl">קמ"ש</div></div>
+        <div class="mock-stat"><div class="mock-stat-val">135</div><div class="mock-stat-lbl">BPM</div></div>
+      </div>
+      <div class="mock-bar"><div class="mock-bar-fill" style="width:72%"></div></div>
+      <div class="mock-nav">
+        <span class="active">ראשי</span><span>אימונים</span><span>גרפים</span><span>תחרויות</span>
+      </div>
+      <div class="mock-countdown">
+        <div class="mock-cd"><div class="mock-cd-num">21</div><div class="mock-cd-lbl">ימים</div></div>
+        <div class="mock-cd"><div class="mock-cd-num">10</div><div class="mock-cd-lbl">שעות</div></div>
+        <div class="mock-cd"><div class="mock-cd-num">15</div><div class="mock-cd-lbl">דקות</div></div>
+      </div>
+    </div>
+    <button class="pick-btn" onclick="pick('B')">✓ בחר פלטה B</button>
+  </div>
+
+  <!-- C: Neon Race -->
+  <div class="palette c">
+    <div class="palette-label">C — 🌿 Neon Race</div>
+    <div class="mock">
+      <div class="mock-header">
+        <span class="mock-title">אימון אחרון — 15.05.2026</span>
+        <span class="mock-badge">טמפו</span>
+      </div>
+      <div class="mock-stats">
+        <div class="mock-stat"><div class="mock-stat-val">9.1</div><div class="mock-stat-lbl">ק"מ</div></div>
+        <div class="mock-stat"><div class="mock-stat-val">7.6</div><div class="mock-stat-lbl">קמ"ש</div></div>
+        <div class="mock-stat"><div class="mock-stat-val">135</div><div class="mock-stat-lbl">BPM</div></div>
+      </div>
+      <div class="mock-bar"><div class="mock-bar-fill" style="width:72%"></div></div>
+      <div class="mock-nav">
+        <span class="active">ראשי</span><span>אימונים</span><span>גרפים</span><span>תחרויות</span>
+      </div>
+      <div class="mock-countdown">
+        <div class="mock-cd"><div class="mock-cd-num">21</div><div class="mock-cd-lbl">ימים</div></div>
+        <div class="mock-cd"><div class="mock-cd-num">10</div><div class="mock-cd-lbl">שעות</div></div>
+        <div class="mock-cd"><div class="mock-cd-num">15</div><div class="mock-cd-lbl">דקות</div></div>
+      </div>
+    </div>
+    <button class="pick-btn" onclick="pick('C')">✓ בחר פלטה C</button>
+  </div>
+
+  <!-- D: Carbon Premium -->
+  <div class="palette d">
+    <div class="palette-label">D — 🔥 Carbon Premium</div>
+    <div class="mock">
+      <div class="mock-header">
+        <span class="mock-title">אימון אחרון — 15.05.2026</span>
+        <span class="mock-badge">טמפו</span>
+      </div>
+      <div class="mock-stats">
+        <div class="mock-stat"><div class="mock-stat-val">9.1</div><div class="mock-stat-lbl">ק"מ</div></div>
+        <div class="mock-stat"><div class="mock-stat-val">7.6</div><div class="mock-stat-lbl">קמ"ש</div></div>
+        <div class="mock-stat"><div class="mock-stat-val">135</div><div class="mock-stat-lbl">BPM</div></div>
+      </div>
+      <div class="mock-bar"><div class="mock-bar-fill" style="width:72%"></div></div>
+      <div class="mock-nav">
+        <span class="active">ראשי</span><span>אימונים</span><span>גרפים</span><span>תחרויות</span>
+      </div>
+      <div class="mock-countdown">
+        <div class="mock-cd"><div class="mock-cd-num">21</div><div class="mock-cd-lbl">ימים</div></div>
+        <div class="mock-cd"><div class="mock-cd-num">10</div><div class="mock-cd-lbl">שעות</div></div>
+        <div class="mock-cd"><div class="mock-cd-num">15</div><div class="mock-cd-lbl">דקות</div></div>
+      </div>
+    </div>
+    <button class="pick-btn" onclick="pick('D')">✓ בחר פלטה D</button>
+  </div>
+
+</div>
+
+<script>
+function pick(p) {
+  alert('בחרת פלטה ' + p + '!\nשלח לי את הבחירה שלך ואני מיישם על האתר מיד 🚀');
+}
+</script>
+</body>
+</html>
