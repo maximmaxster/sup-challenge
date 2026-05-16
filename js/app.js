@@ -661,9 +661,7 @@ const PROG_PERIODS = {
   q3:       { start: new Date(2026,6,1),  end: new Date(2026,8,30),  label: 'Q3 — יולי-ספטמבר 2026',      baseRef: 'q2',       showVsDec: true  },
   q4:       { start: new Date(2026,9,1),  end: new Date(2026,11,31), label: 'Q4 — אוקטובר-דצמבר 2026',    baseRef: 'q3',       showVsDec: true  },
   h1:       { isH1: true,                                             label: 'חצי שנתי — ממוצע Q1+Q2',     baseRef: 'base',     showVsDec: false },
-  year2024: { yearNum: 2024,                                          label: '2024 — שנה מלאה',             baseRef: null,       showVsDec: false },
-  year2025: { yearNum: 2025,                                          label: '2025 — שנה מלאה',             baseRef: 'year2024', showVsDec: false },
-  year:     { yearNum: 2026, isYear: true,                            label: '2026 — שנה מלאה',             baseRef: 'year2025', showVsDec: false },
+  year:     { isMultiYear: true,                                      label: 'שנה — 2024 / 2025 / 2026',   baseRef: null,       showVsDec: false },
 };
 // Base reference = Q4 2025 (אוקטובר–דצמבר 2025)
 const PROG_BASE = { start: new Date(2025,9,1), end: new Date(2025,11,31) };
@@ -869,9 +867,69 @@ function renderProgCard(typeConf, base, curr, decBase, showVsDec, periodKey) {
     </div>`;
 }
 
+function renderYearCards() {
+  const ath   = progAthlete === 1 ? athlete1Data : athlete2Data;
+  const years = [2024, 2025, 2026];
+
+  // calc stats per year per type
+  const stats = years.map(y =>
+    PROG_TYPES.reduce((acc, t) => {
+      acc[t.key] = progCalcStats(ath.workouts, new Date(y,0,1), new Date(y,11,31), t.types);
+      return acc;
+    }, {})
+  );
+
+  const infoEl = document.getElementById('prog-period-info');
+  if (infoEl) infoEl.innerHTML =
+    `<span class="ppi-period">השוואה שנתית</span><span class="ppi-sep">·</span><span class="ppi-base">2024 vs 2025 vs 2026</span>`;
+
+  const cardsEl = document.getElementById('prog-cards');
+  if (!cardsEl) return;
+
+  cardsEl.innerHTML = PROG_TYPES.map(t => {
+    const [s24, s25, s26] = stats.map(s => s[t.key]);
+    if (!s24 && !s25 && !s26) return `
+      <div class="prog-card glass-card">
+        <div class="prog-card-hdr"><span class="prog-icon">${t.icon}</span><span class="prog-type-lbl">${t.label}</span></div>
+        <div class="prog-empty">אין נתונים לסוג אימון זה</div>
+      </div>`;
+
+    const counts = [s24, s25, s26].map(s => s ? `${s.count}` : '0');
+
+    const rows = t.metrics.map(m => {
+      const vals = [s24, s25, s26].map(s =>
+        (s && s[m.key]) ? `${progFmtVal(s[m.key], m.key)}<small>${m.unit}</small>` : '—'
+      );
+      return `
+        <div class="pm-row pm-row-year">
+          <span class="pm-lbl">${m.label}</span>
+          <span class="pm-yv">${vals[0]}</span>
+          <span class="pm-yv">${vals[1]}</span>
+          <span class="pm-yv">${vals[2]}</span>
+        </div>`;
+    }).join('');
+
+    return `
+      <div class="prog-card glass-card">
+        <div class="prog-card-hdr">
+          <div><span class="prog-icon">${t.icon}</span><span class="prog-type-lbl">${t.label}</span></div>
+          <div class="prog-counts">${counts[0]} · ${counts[1]} · ${counts[2]} אימונים</div>
+        </div>
+        <div class="pm-head-row pm-head-year">
+          <span></span><span>2024</span><span>2025</span><span>2026</span>
+        </div>
+        ${rows}
+      </div>`;
+  }).join('');
+
+  renderEfficiencyChart();
+}
+
 function renderProgress() {
   const ath = progAthlete === 1 ? athlete1Data : athlete2Data;
   const p   = PROG_PERIODS[progPeriod];
+
+  if (p.isMultiYear) { renderYearCards(); return; }
   const base    = progGetBase(ath.workouts, p.baseRef);
   const curr    = progGetStats(ath.workouts, progPeriod);
   const decBase = progGetDecBase(ath.workouts);   // always Dec 2025, for extra column
