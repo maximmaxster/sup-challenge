@@ -656,14 +656,17 @@ function populateYearFilter() {
 // ===========================
 
 const PROG_PERIODS = {
-  q1:   { start: new Date(2026,0,1),  end: new Date(2026,2,31),  label: 'Q1 — ינואר-מרץ 2026',        baseRef: 'base', showVsDec: false },
-  q2:   { start: new Date(2026,3,1),  end: new Date(2026,5,30),  label: 'Q2 — אפריל-יוני 2026',        baseRef: 'q1',   showVsDec: false },
-  q3:   { start: new Date(2026,6,1),  end: new Date(2026,8,30),  label: 'Q3 — יולי-ספטמבר 2026',      baseRef: 'q2',   showVsDec: true  },
-  q4:   { start: new Date(2026,9,1),  end: new Date(2026,11,31), label: 'Q4 — אוקטובר-דצמבר 2026',    baseRef: 'q3',   showVsDec: true  },
-  h1:   { isH1: true,                                             label: 'חצי שנתי — ממוצע Q1+Q2',     baseRef: 'base', showVsDec: false },
-  year: { isYear: true,                                           label: 'שנתי — ממוצע שנה מלאה',       baseRef: 'base', showVsDec: false },
+  q1:       { start: new Date(2026,0,1),  end: new Date(2026,2,31),  label: 'Q1 — ינואר-מרץ 2026',        baseRef: 'base',     showVsDec: false },
+  q2:       { start: new Date(2026,3,1),  end: new Date(2026,5,30),  label: 'Q2 — אפריל-יוני 2026',        baseRef: 'q1',       showVsDec: false },
+  q3:       { start: new Date(2026,6,1),  end: new Date(2026,8,30),  label: 'Q3 — יולי-ספטמבר 2026',      baseRef: 'q2',       showVsDec: true  },
+  q4:       { start: new Date(2026,9,1),  end: new Date(2026,11,31), label: 'Q4 — אוקטובר-דצמבר 2026',    baseRef: 'q3',       showVsDec: true  },
+  h1:       { isH1: true,                                             label: 'חצי שנתי — ממוצע Q1+Q2',     baseRef: 'base',     showVsDec: false },
+  year2024: { yearNum: 2024,                                          label: '2024 — שנה מלאה',             baseRef: null,       showVsDec: false },
+  year2025: { yearNum: 2025,                                          label: '2025 — שנה מלאה',             baseRef: 'year2024', showVsDec: false },
+  year:     { yearNum: 2026, isYear: true,                            label: '2026 — שנה מלאה',             baseRef: 'year2025', showVsDec: false },
 };
-const PROG_BASE = { start: new Date(2025,11,1), end: new Date(2025,11,31) };
+// Base reference = Q4 2025 (אוקטובר–דצמבר 2025)
+const PROG_BASE = { start: new Date(2025,9,1), end: new Date(2025,11,31) };
 
 const PROG_TYPES = [
   {
@@ -735,11 +738,9 @@ function progGetStats(workouts, periodKey) {
   const p = PROG_PERIODS[periodKey];
   return PROG_TYPES.reduce((acc, t) => {
     if (p.isH1) {
-      // חצי שנתי = ממוצע כל Q1+Q2 (ינואר-יוני)
       acc[t.key] = progCalcStats(workouts, PROG_PERIODS.q1.start, PROG_PERIODS.q2.end, t.types);
-    } else if (p.isYear) {
-      // שנתי = ממוצע כל השנה (ינואר-דצמבר 2026)
-      acc[t.key] = progCalcStats(workouts, new Date(2026,0,1), new Date(2026,11,31), t.types);
+    } else if (p.yearNum) {
+      acc[t.key] = progCalcStats(workouts, new Date(p.yearNum,0,1), new Date(p.yearNum,11,31), t.types);
     } else {
       acc[t.key] = progCalcStats(workouts, p.start, p.end, t.types);
     }
@@ -748,10 +749,17 @@ function progGetStats(workouts, periodKey) {
 }
 
 function progGetBase(workouts, baseRef) {
-  // baseRef = 'base' (Dec 2025) | 'q1' | 'q2' | 'q3' (previous quarter)
-  const range = baseRef === 'base'
-    ? { start: PROG_BASE.start, end: PROG_BASE.end }
-    : { start: PROG_PERIODS[baseRef].start, end: PROG_PERIODS[baseRef].end };
+  // baseRef = null | 'base' (Q4 2025) | 'q1'/'q2'/'q3' | 'year2024'/'year2025'
+  if (!baseRef) return PROG_TYPES.reduce((acc, t) => { acc[t.key] = null; return acc; }, {});
+  let range;
+  if (baseRef === 'base') {
+    range = { start: PROG_BASE.start, end: PROG_BASE.end };
+  } else if (PROG_PERIODS[baseRef]?.yearNum) {
+    const y = PROG_PERIODS[baseRef].yearNum;
+    range = { start: new Date(y,0,1), end: new Date(y,11,31) };
+  } else {
+    range = { start: PROG_PERIODS[baseRef].start, end: PROG_PERIODS[baseRef].end };
+  }
   return PROG_TYPES.reduce((acc, t) => {
     acc[t.key] = progCalcStats(workouts, range.start, range.end, t.types);
     return acc;
@@ -827,10 +835,13 @@ function renderProgCard(typeConf, base, curr, decBase, showVsDec, periodKey) {
   const currN = c?.count ?? 0;
   // Period label for header column (e.g. Q1, Q2, etc.)
   const baseRef = PROG_PERIODS[periodKey]?.baseRef;
-  const baseLabel = baseRef === 'base' ? "דצמ'25" : baseRef.toUpperCase(); // Q1/Q2/Q3
-  const currLabel = PROG_PERIODS[periodKey]?.isH1   ? 'H1'
-                  : PROG_PERIODS[periodKey]?.isYear  ? 'שנה'
-                  : periodKey.toUpperCase(); // Q1/Q2/Q3/Q4
+  const baseLabel = !baseRef          ? '—'
+    : baseRef === 'base'              ? "Q4 '25"
+    : PROG_PERIODS[baseRef]?.yearNum  ? String(PROG_PERIODS[baseRef].yearNum)
+    : baseRef.toUpperCase();
+  const currLabel = PROG_PERIODS[periodKey]?.isH1    ? 'H1'
+                  : PROG_PERIODS[periodKey]?.yearNum  ? String(PROG_PERIODS[periodKey].yearNum)
+                  : periodKey.toUpperCase();
 
   // Warning if very few workouts
   const fewWarning = (baseN <= 1 || currN <= 1)
@@ -866,11 +877,14 @@ function renderProgress() {
   const decBase = progGetDecBase(ath.workouts);   // always Dec 2025, for extra column
 
   // Info bar
-  const baseLabel = p.baseRef === 'base' ? 'דצמבר 2025'
-    : p.baseRef === 'q1' ? 'ממוצע Q1' : p.baseRef === 'q2' ? 'ממוצע Q2' : 'ממוצע Q3';
+  const baseLabelMap = { 'base': "Q4 2025", 'q1': 'ממוצע Q1', 'q2': 'ממוצע Q2', 'q3': 'ממוצע Q3' };
+  const baseLabel = !p.baseRef ? null
+    : baseLabelMap[p.baseRef]
+    || (PROG_PERIODS[p.baseRef]?.yearNum ? String(PROG_PERIODS[p.baseRef].yearNum) : p.baseRef);
   const infoEl = document.getElementById('prog-period-info');
-  if (infoEl) infoEl.innerHTML =
-    `<span class="ppi-period">${p.label}</span><span class="ppi-sep">·</span><span class="ppi-base">השוואה מול ${baseLabel}${p.showVsDec ? ' + עמודת vs דצמ\'25' : ''}</span>`;
+  if (infoEl) infoEl.innerHTML = baseLabel
+    ? `<span class="ppi-period">${p.label}</span><span class="ppi-sep">·</span><span class="ppi-base">השוואה מול ${baseLabel}</span>`
+    : `<span class="ppi-period">${p.label}</span>`;
 
   // Cards
   const cardsEl = document.getElementById('prog-cards');
