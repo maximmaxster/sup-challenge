@@ -688,21 +688,23 @@ const PROG_TYPES = [
   {
     key: 'aerobic', types: ['אירובי'], label: 'אירובי', icon: '🏄',
     metrics: [
-      { key: 'distance', label: 'מרחק',    unit: "ק\"מ", lb: false },
-      { key: 'hr',       label: 'דופק',    unit: 'BPM',  lb: true  },
-      { key: 'dps',      label: 'DPS',     unit: "מ'",   lb: false },
-      { key: 'speed',    label: 'מהירות',  unit: 'קמ"ש', lb: false },
-      { key: 'eff',      label: 'יעילות',  unit: '',     lb: false },
+      { key: 'distance_total', label: "סה\"כ מרחק", unit: "ק\"מ", lb: false },
+      { key: 'distance',       label: 'ממוצע מרחק', unit: "ק\"מ", lb: false },
+      { key: 'hr',             label: 'דופק',        unit: 'BPM',  lb: true  },
+      { key: 'dps',            label: 'DPS',          unit: "מ'",   lb: false },
+      { key: 'speed',          label: 'מהירות',       unit: 'קמ"ש', lb: false },
+      { key: 'eff',            label: 'יעילות',       unit: '',     lb: false },
     ]
   },
   {
     key: 'aerobic_long', types: ['אירובי ארוך'], label: 'אירובי ארוך', icon: '🌅',
     metrics: [
-      { key: 'distance', label: 'מרחק',    unit: "ק\"מ", lb: false },
-      { key: 'hr',       label: 'דופק',    unit: 'BPM',  lb: true  },
-      { key: 'dps',      label: 'DPS',     unit: "מ'",   lb: false },
-      { key: 'speed',    label: 'מהירות',  unit: 'קמ"ש', lb: false },
-      { key: 'eff',      label: 'יעילות',  unit: '',     lb: false },
+      { key: 'distance_total', label: "סה\"כ מרחק", unit: "ק\"מ", lb: false },
+      { key: 'distance',       label: 'ממוצע מרחק', unit: "ק\"מ", lb: false },
+      { key: 'hr',             label: 'דופק',        unit: 'BPM',  lb: true  },
+      { key: 'dps',            label: 'DPS',          unit: "מ'",   lb: false },
+      { key: 'speed',          label: 'מהירות',       unit: 'קמ"ש', lb: false },
+      { key: 'eff',            label: 'יעילות',       unit: '',     lb: false },
     ]
   },
 ];
@@ -722,8 +724,11 @@ function progCalcStats(workouts, start, end, types) {
   if (!ws.length) return null;
   const vm = key => { const v = ws.map(w=>w[key]||0).filter(x=>x>0); return v.length ? v.reduce((a,b)=>a+b,0)/v.length : 0; };
   const spd = vm('avg_speed'), hr = vm('avg_hr');
+  const distTotal = ws.reduce((s,w)=>s+(w.distance||0),0);
   return { count: ws.length, speed: spd, hr, dps: vm('dps'), spm: vm('spm'),
-           distance: ws.reduce((s,w)=>s+w.distance,0)/ws.length, eff: hr>0 ? +(spd/hr*100).toFixed(3) : 0 };
+           distance_total: distTotal,
+           distance: distTotal / ws.length,
+           eff: hr>0 ? +(spd/hr*100).toFixed(3) : 0 };
 }
 
 function progGetStats(workouts, periodKey) {
@@ -766,7 +771,8 @@ function progFmtVal(val, key) {
   if (key === 'speed')    return (+val).toFixed(1);
   if (key === 'hr' || key === 'spm') return Math.round(val);
   if (key === 'dps')      return (+val).toFixed(2);
-  if (key === 'distance') return (+val).toFixed(1);
+  if (key === 'distance')       return (+val).toFixed(1);
+  if (key === 'distance_total') return (+val).toFixed(1);
   return val;
 }
 
