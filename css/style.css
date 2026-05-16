@@ -1579,6 +1579,7 @@ footer span {
 
 /* ===== YEAR COMPARISON LAYOUT ===== */
 .prog-year-card {
+  grid-column: 1 / -1;          /* span all grid columns */
   width: 100%;
   display: flex;
   flex-direction: row-reverse;   /* RTL: data right, chart left */
