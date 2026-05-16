@@ -1577,7 +1577,35 @@ footer span {
 .pm-bv small, .pm-cv small { font-size: 0.6rem; color: var(--text-muted); margin-right: 2px; }
 .pm-sep { text-align: center; color: var(--text-muted); font-size: 0.7rem; }
 
-/* Year comparison (2024/2025/2026) — 4-column grid */
+/* ===== YEAR COMPARISON LAYOUT ===== */
+.prog-year-card {
+  width: 100%;
+  display: flex;
+  flex-direction: row-reverse;   /* RTL: data right, chart left */
+  gap: 1.5rem;
+  padding: 1.2rem 1.4rem;
+  margin-bottom: 1rem;
+  align-items: stretch;
+  min-height: 200px;
+}
+.prog-year-data {
+  flex: 0 0 46%;
+  display: flex;
+  flex-direction: column;
+}
+.prog-year-chart-wrap {
+  flex: 1;
+  position: relative;
+  min-height: 180px;
+}
+.prog-year-chart-wrap canvas {
+  position: absolute;
+  inset: 0;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* 4-column grid for data table */
 .pm-head-row.pm-head-year { grid-template-columns: 1.6fr 1fr 1fr 1fr; }
 .pm-head-year span:nth-child(2) { color: var(--text-muted); }
 .pm-head-year span:nth-child(3) { color: var(--accent-cyan-dim); }
@@ -1590,7 +1618,12 @@ footer span {
   text-align: center;
 }
 .pm-yv small { font-size: 0.6rem; color: var(--text-muted); margin-right: 2px; }
-.pm-yv.pm-no-data { color: var(--text-muted); font-weight: 400; }
+
+@media (max-width: 700px) {
+  .prog-year-card { flex-direction: column; }
+  .prog-year-data  { flex: none; }
+  .prog-year-chart-wrap { min-height: 160px; }
+}
 
 .pm-delta {
   text-align: center;

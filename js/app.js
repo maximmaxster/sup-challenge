@@ -867,11 +867,80 @@ function renderProgCard(typeConf, base, curr, decBase, showVsDec, periodKey) {
     </div>`;
 }
 
+// metric shown in the trend chart per type
+const YEAR_CHART_METRICS = {
+  aerobic:      [{ key:'distance_total', label:"סה\"כ מרחק", color:'#00C8F0' }, { key:'distance', label:'ממוצע', color:'#E84B1A' }],
+  aerobic_long: [{ key:'distance_total', label:"סה\"כ מרחק", color:'#00C8F0' }, { key:'distance', label:'ממוצע', color:'#E84B1A' }],
+  tempo:        [{ key:'speed',  label:'מהירות', color:'#00C8F0' }, { key:'dps', label:'DPS', color:'#E84B1A' }],
+  sprints:      [{ key:'speed',  label:'מהירות', color:'#00C8F0' }, { key:'hr',  label:'דופק', color:'#FF1744' }],
+};
+const yearCharts = {};
+
+function destroyYearCharts() {
+  Object.values(yearCharts).forEach(c => { try { c.destroy(); } catch(e){} });
+  Object.keys(yearCharts).forEach(k => delete yearCharts[k]);
+}
+
+function buildYearChart(canvasId, typeKey, statsArr) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  const metrics = YEAR_CHART_METRICS[typeKey] || [{ key:'distance_total', label:"סה\"כ מרחק", color:'#00C8F0' }];
+  const labels  = ['2024','2025','2026'];
+  const barData = metrics[0];
+  const lineData= metrics[1];
+
+  const datasets = [
+    {
+      type: 'bar',
+      label: barData.label,
+      data: statsArr.map(s => s ? +(s[barData.key]||0).toFixed(1) : 0),
+      backgroundColor: ['rgba(100,120,160,0.5)','rgba(0,144,184,0.6)','rgba(0,200,240,0.75)'],
+      borderColor:     ['#6478A0','#0090B8','#00C8F0'],
+      borderWidth: 1.5,
+      borderRadius: 5,
+      yAxisID: 'y',
+    },
+  ];
+  if (lineData) {
+    datasets.push({
+      type: 'line',
+      label: lineData.label,
+      data: statsArr.map(s => s ? +(s[lineData.key]||0).toFixed(2) : null),
+      borderColor: lineData.color,
+      backgroundColor: 'transparent',
+      pointBackgroundColor: lineData.color,
+      pointRadius: 5,
+      borderWidth: 2,
+      tension: 0.4,
+      spanGaps: true,
+      yAxisID: 'y2',
+    });
+  }
+
+  yearCharts[canvasId] = new Chart(canvas, {
+    data: { labels, datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: { duration: 600 },
+      plugins: {
+        legend: { display: true, labels: { color:'#8899BB', font:{ size:11 }, boxWidth:12, padding:8 } },
+        tooltip: { mode:'index', intersect:false },
+      },
+      scales: {
+        x: { ticks:{ color:'#8899BB', font:{size:11} }, grid:{ color:'rgba(136,153,187,0.08)' } },
+        y: { position:'right', ticks:{ color:'#8899BB', font:{size:10} }, grid:{ color:'rgba(136,153,187,0.08)' } },
+        y2:{ position:'left', ticks:{ color:'#E84B1A', font:{size:10} }, grid:{ display:false } },
+      },
+    },
+  });
+}
+
 function renderYearCards() {
+  destroyYearCharts();
   const ath   = progAthlete === 1 ? athlete1Data : athlete2Data;
   const years = [2024, 2025, 2026];
 
-  // calc stats per year per type
   const stats = years.map(y =>
     PROG_TYPES.reduce((acc, t) => {
       acc[t.key] = progCalcStats(ath.workouts, new Date(y,0,1), new Date(y,11,31), t.types);
@@ -887,17 +956,18 @@ function renderYearCards() {
   if (!cardsEl) return;
 
   cardsEl.innerHTML = PROG_TYPES.map(t => {
-    const [s24, s25, s26] = stats.map(s => s[t.key]);
-    if (!s24 && !s25 && !s26) return `
-      <div class="prog-card glass-card">
+    const sArr = stats.map(s => s[t.key]);
+    if (!sArr.some(Boolean)) return `
+      <div class="prog-year-card glass-card">
         <div class="prog-card-hdr"><span class="prog-icon">${t.icon}</span><span class="prog-type-lbl">${t.label}</span></div>
         <div class="prog-empty">אין נתונים לסוג אימון זה</div>
       </div>`;
 
-    const counts = [s24, s25, s26].map(s => s ? `${s.count}` : '0');
+    const counts = sArr.map(s => s ? s.count : 0);
+    const chartId = `year-chart-${t.key}`;
 
     const rows = t.metrics.map(m => {
-      const vals = [s24, s25, s26].map(s =>
+      const vals = sArr.map(s =>
         (s && s[m.key]) ? `${progFmtVal(s[m.key], m.key)}<small>${m.unit}</small>` : '—'
       );
       return `
@@ -910,17 +980,30 @@ function renderYearCards() {
     }).join('');
 
     return `
-      <div class="prog-card glass-card">
-        <div class="prog-card-hdr">
-          <div><span class="prog-icon">${t.icon}</span><span class="prog-type-lbl">${t.label}</span></div>
-          <div class="prog-counts">${counts[0]} · ${counts[1]} · ${counts[2]} אימונים</div>
+      <div class="prog-year-card glass-card">
+        <div class="prog-year-data">
+          <div class="prog-card-hdr">
+            <div><span class="prog-icon">${t.icon}</span><span class="prog-type-lbl">${t.label}</span></div>
+            <div class="prog-counts">${counts[0]} · ${counts[1]} · ${counts[2]} אימונים</div>
+          </div>
+          <div class="pm-head-row pm-head-year">
+            <span></span><span>2024</span><span>2025</span><span>2026</span>
+          </div>
+          ${rows}
         </div>
-        <div class="pm-head-row pm-head-year">
-          <span></span><span>2024</span><span>2025</span><span>2026</span>
+        <div class="prog-year-chart-wrap">
+          <canvas id="${chartId}"></canvas>
         </div>
-        ${rows}
       </div>`;
   }).join('');
+
+  // draw charts after DOM is ready
+  setTimeout(() => {
+    PROG_TYPES.forEach(t => {
+      const sArr = stats.map(s => s[t.key]);
+      if (sArr.some(Boolean)) buildYearChart(`year-chart-${t.key}`, t.key, sArr);
+    });
+  }, 50);
 
   renderEfficiencyChart();
 }
