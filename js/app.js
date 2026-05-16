@@ -792,7 +792,7 @@ function progDelta(bv, cv, lb) {
 
 function progDeltaHtml(delta) {
   if (!delta) return '<span class="pm-delta">—</span>';
-  const cls   = delta.good ? 'good' : delta.bad ? 'bad' : 'neutral';
+  const cls   = delta.pct > 0 ? 'good' : delta.pct < 0 ? 'bad' : 'neutral';
   const arrow = delta.pct > 0 ? '↑' : '↓';
   const sign  = delta.pct > 0 ? '+' : '';
   return `<span class="pm-delta ${cls}">${arrow} ${sign}${delta.pct.toFixed(1)}%</span>`;
@@ -842,8 +842,7 @@ function renderProgCard(typeConf, base, curr, decBase, showVsDec, periodKey) {
                   : periodKey.toUpperCase();
 
   // Warning if very few workouts
-  const fewWarning = (baseN <= 1 || currN <= 1)
-    ? `<div class="prog-few-warn">⚠️ ממוצע מ-${Math.min(baseN,currN)} אימון — פחות אמין</div>` : '';
+  const fewWarning = '';
 
   const vsDecHeader = showVsDec ? `<span>vs דצמ'25</span>` : '';
 
@@ -1061,6 +1060,7 @@ function renderEfficiencyChart() {
   const QUARTERS = [];
   for (let y = 2024; y <= now.getFullYear(); y++) {
     for (let q = 0; q < 4; q++) {
+      if (y === 2024 && q < 2) continue;   // מתחיל מ-Q3 2024
       const qStart = new Date(y, q * 3, 1);
       if (qStart > now) break;
       const qEnd = new Date(y, q * 3 + 3, 0); // last day of quarter
