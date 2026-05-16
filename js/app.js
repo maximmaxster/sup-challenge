@@ -668,25 +668,6 @@ const PROG_BASE = { start: new Date(2025,9,1), end: new Date(2025,11,31) };
 
 const PROG_TYPES = [
   {
-    key: 'sprints', types: ['ספרינטים'], label: 'ספרינטים', icon: '⚡',
-    metrics: [
-      { key: 'speed', label: 'מהירות', unit: 'קמ"ש', lb: false },
-      { key: 'spm',   label: 'SPM',    unit: '',      lb: false },
-      { key: 'hr',    label: 'דופק',   unit: 'BPM',   lb: true  },
-      { key: 'eff',   label: 'יעילות', unit: '',      lb: false },
-    ]
-  },
-  {
-    key: 'tempo', types: ['טמפו'], label: 'טמפו / אינטרוואלים', icon: '🌊',
-    metrics: [
-      { key: 'dps',      label: 'DPS',     unit: "מ'",   lb: false },
-      { key: 'speed',    label: 'מהירות',  unit: 'קמ"ש', lb: false },
-      { key: 'hr',       label: 'דופק',    unit: 'BPM',  lb: true  },
-      { key: 'distance', label: 'מרחק',    unit: "ק\"מ", lb: false },
-      { key: 'eff',      label: 'יעילות',  unit: '',     lb: false },
-    ]
-  },
-  {
     key: 'aerobic', types: ['אירובי'], label: 'אירובי', icon: '🏄',
     metrics: [
       { key: 'distance_total', label: "סה\"כ מרחק", unit: "ק\"מ", lb: false },
@@ -706,6 +687,25 @@ const PROG_TYPES = [
       { key: 'dps',            label: 'DPS',          unit: "מ'",   lb: false },
       { key: 'speed',          label: 'מהירות',       unit: 'קמ"ש', lb: false },
       { key: 'eff',            label: 'יעילות',       unit: '',     lb: false },
+    ]
+  },
+  {
+    key: 'tempo', types: ['טמפו'], label: 'טמפו / אינטרוואלים', icon: '🌊',
+    metrics: [
+      { key: 'dps',      label: 'DPS',     unit: "מ'",   lb: false },
+      { key: 'speed',    label: 'מהירות',  unit: 'קמ"ש', lb: false },
+      { key: 'hr',       label: 'דופק',    unit: 'BPM',  lb: true  },
+      { key: 'distance', label: 'מרחק',    unit: "ק\"מ", lb: false },
+      { key: 'eff',      label: 'יעילות',  unit: '',     lb: false },
+    ]
+  },
+  {
+    key: 'sprints', types: ['ספרינטים'], label: 'ספרינטים', icon: '⚡',
+    metrics: [
+      { key: 'speed', label: 'מהירות', unit: 'קמ"ש', lb: false },
+      { key: 'spm',   label: 'SPM',    unit: '',      lb: false },
+      { key: 'hr',    label: 'דופק',   unit: 'BPM',   lb: true  },
+      { key: 'eff',   label: 'יעילות', unit: '',      lb: false },
     ]
   },
 ];
@@ -867,13 +867,6 @@ function renderProgCard(typeConf, base, curr, decBase, showVsDec, periodKey) {
     </div>`;
 }
 
-// metric shown in the trend chart per type
-const YEAR_CHART_METRICS = {
-  aerobic:      [{ key:'distance_total', label:"סה\"כ מרחק", color:'#00C8F0' }, { key:'distance', label:'ממוצע', color:'#E84B1A' }],
-  aerobic_long: [{ key:'distance_total', label:"סה\"כ מרחק", color:'#00C8F0' }, { key:'distance', label:'ממוצע', color:'#E84B1A' }],
-  tempo:        [{ key:'speed',  label:'מהירות', color:'#00C8F0' }, { key:'dps', label:'DPS', color:'#E84B1A' }],
-  sprints:      [{ key:'speed',  label:'מהירות', color:'#00C8F0' }, { key:'hr',  label:'דופק', color:'#FF1744' }],
-};
 const yearCharts = {};
 
 function destroyYearCharts() {
@@ -884,53 +877,64 @@ function destroyYearCharts() {
 function buildYearChart(canvasId, typeKey, statsArr) {
   const canvas = document.getElementById(canvasId);
   if (!canvas) return;
-  const metrics = YEAR_CHART_METRICS[typeKey] || [{ key:'distance_total', label:"סה\"כ מרחק", color:'#00C8F0' }];
-  const labels  = ['2024','2025','2026'];
-  const barData = metrics[0];
-  const lineData= metrics[1];
+  const labels = ['2024','2025','2026'];
+  const effVals = statsArr.map(s => s ? +(s.eff||0).toFixed(3) : 0);
+  const counts  = statsArr.map(s => s ? s.count : 0);
+  const BAR_COLOR = 'rgba(74, 222, 128, 0.75)';   // ירוק
 
-  const datasets = [
-    {
-      type: 'bar',
-      label: barData.label,
-      data: statsArr.map(s => s ? +(s[barData.key]||0).toFixed(1) : 0),
-      backgroundColor: ['rgba(100,120,160,0.5)','rgba(0,144,184,0.6)','rgba(0,200,240,0.75)'],
-      borderColor:     ['#6478A0','#0090B8','#00C8F0'],
-      borderWidth: 1.5,
-      borderRadius: 5,
-      yAxisID: 'y',
-    },
-  ];
-  if (lineData) {
-    datasets.push({
-      type: 'line',
-      label: lineData.label,
-      data: statsArr.map(s => s ? +(s[lineData.key]||0).toFixed(2) : null),
-      borderColor: lineData.color,
-      backgroundColor: 'transparent',
-      pointBackgroundColor: lineData.color,
-      pointRadius: 5,
-      borderWidth: 2,
-      tension: 0.4,
-      spanGaps: true,
-      yAxisID: 'y2',
-    });
-  }
+  // custom plugin: count label inside each bar
+  const countLabelPlugin = {
+    id: 'countLabel',
+    afterDatasetsDraw(chart) {
+      const { ctx } = chart;
+      chart.getDatasetMeta(0).data.forEach((bar, i) => {
+        if (!counts[i]) return;
+        const cx  = bar.x;
+        const mid = (bar.y + bar.base) / 2;
+        ctx.save();
+        ctx.textAlign = 'center';
+        ctx.fillStyle = '#080D18';
+        ctx.font = 'bold 20px "Barlow Condensed", sans-serif';
+        ctx.fillText(counts[i], cx, mid - 7);
+        ctx.font = '11px "Heebo", sans-serif';
+        ctx.fillText('אימונים', cx, mid + 10);
+        ctx.restore();
+      });
+    }
+  };
 
   yearCharts[canvasId] = new Chart(canvas, {
-    data: { labels, datasets },
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'יעילות',
+        data: effVals,
+        backgroundColor: BAR_COLOR,
+        borderColor: '#4ADE80',
+        borderWidth: 1.5,
+        borderRadius: 6,
+        barPercentage: 0.42,
+        categoryPercentage: 0.6,
+      }]
+    },
+    plugins: [countLabelPlugin],
     options: {
       responsive: true,
       maintainAspectRatio: false,
       animation: { duration: 600 },
       plugins: {
-        legend: { display: true, labels: { color:'#8899BB', font:{ size:11 }, boxWidth:12, padding:8 } },
-        tooltip: { mode:'index', intersect:false },
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => ` יעילות: ${ctx.parsed.y}  |  ${counts[ctx.dataIndex]} אימונים`
+          }
+        },
       },
       scales: {
-        x: { ticks:{ color:'#8899BB', font:{size:11} }, grid:{ color:'rgba(136,153,187,0.08)' } },
-        y: { position:'right', ticks:{ color:'#8899BB', font:{size:10} }, grid:{ color:'rgba(136,153,187,0.08)' } },
-        y2:{ position:'left', ticks:{ color:'#E84B1A', font:{size:10} }, grid:{ display:false } },
+        x: { ticks:{ color:'#8899BB', font:{size:12} }, grid:{ color:'rgba(136,153,187,0.06)' } },
+        y: { ticks:{ color:'#8899BB', font:{size:10} }, grid:{ color:'rgba(136,153,187,0.06)' },
+             title:{ display:true, text:'יעילות', color:'#4ADE80', font:{size:10} } },
       },
     },
   });
