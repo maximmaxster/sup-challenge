@@ -668,7 +668,7 @@ const PROG_BASE = { start: new Date(2025,9,1), end: new Date(2025,11,31) };
 
 const PROG_TYPES = [
   {
-    key: 'aerobic', types: ['אירובי'], label: 'אירובי', icon: '🏄',
+    key: 'aerobic_long', types: ['אירובי ארוך'], label: 'אירובי ארוך', icon: '🌅',
     metrics: [
       { key: 'distance_total', label: "סה\"כ מרחק", unit: "ק\"מ", lb: false },
       { key: 'distance',       label: 'ממוצע מרחק', unit: "ק\"מ", lb: false },
@@ -679,7 +679,7 @@ const PROG_TYPES = [
     ]
   },
   {
-    key: 'aerobic_long', types: ['אירובי ארוך'], label: 'אירובי ארוך', icon: '🌅',
+    key: 'aerobic', types: ['אירובי'], label: 'אירובי', icon: '🏄',
     metrics: [
       { key: 'distance_total', label: "סה\"כ מרחק", unit: "ק\"מ", lb: false },
       { key: 'distance',       label: 'ממוצע מרחק', unit: "ק\"מ", lb: false },
@@ -882,22 +882,37 @@ function buildYearChart(canvasId, typeKey, statsArr) {
   const counts  = statsArr.map(s => s ? s.count : 0);
   const BAR_COLOR = 'rgba(74, 222, 128, 0.75)';   // ירוק
 
-  // custom plugin: count label inside each bar
-  const countLabelPlugin = {
-    id: 'countLabel',
+  // y-axis max = 2x data max → bars fill ~50% height → room for label above
+  const maxEff = Math.max(...effVals.filter(v => v > 0), 1);
+  const yMax   = +(maxEff * 2.1).toFixed(2);
+
+  // custom plugin: eff value in yellow ABOVE bar + count inside bar
+  const barLabelPlugin = {
+    id: 'barLabel',
     afterDatasetsDraw(chart) {
       const { ctx } = chart;
       chart.getDatasetMeta(0).data.forEach((bar, i) => {
-        if (!counts[i]) return;
         const cx  = bar.x;
+        const top = bar.y;
         const mid = (bar.y + bar.base) / 2;
         ctx.save();
         ctx.textAlign = 'center';
-        ctx.fillStyle = '#080D18';
-        ctx.font = 'bold 20px "Barlow Condensed", sans-serif';
-        ctx.fillText(counts[i], cx, mid - 7);
-        ctx.font = '11px "Heebo", sans-serif';
-        ctx.fillText('אימונים', cx, mid + 10);
+
+        // efficiency value ABOVE bar — yellow
+        if (effVals[i]) {
+          ctx.fillStyle = '#FFD60A';
+          ctx.font = 'bold 14px "Barlow Condensed", sans-serif';
+          ctx.fillText(effVals[i].toFixed(2), cx, top - 8);
+        }
+
+        // count INSIDE bar — dark
+        if (counts[i] && (bar.base - bar.y) > 30) {
+          ctx.fillStyle = '#080D18';
+          ctx.font = 'bold 18px "Barlow Condensed", sans-serif';
+          ctx.fillText(counts[i], cx, mid - 6);
+          ctx.font = '10px "Heebo", sans-serif';
+          ctx.fillText('אימונים', cx, mid + 9);
+        }
         ctx.restore();
       });
     }
@@ -918,7 +933,7 @@ function buildYearChart(canvasId, typeKey, statsArr) {
         categoryPercentage: 0.6,
       }]
     },
-    plugins: [countLabelPlugin],
+    plugins: [barLabelPlugin],
     options: {
       responsive: true,
       maintainAspectRatio: false,
@@ -933,8 +948,7 @@ function buildYearChart(canvasId, typeKey, statsArr) {
       },
       scales: {
         x: { ticks:{ color:'#8899BB', font:{size:12} }, grid:{ color:'rgba(136,153,187,0.06)' } },
-        y: { ticks:{ color:'#8899BB', font:{size:10} }, grid:{ color:'rgba(136,153,187,0.06)' },
-             title:{ display:true, text:'יעילות', color:'#4ADE80', font:{size:10} } },
+        y: { max: yMax, ticks:{ color:'#8899BB', font:{size:10} }, grid:{ color:'rgba(136,153,187,0.06)' } },
       },
     },
   });
