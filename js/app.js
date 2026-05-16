@@ -1056,18 +1056,23 @@ function renderProgress() {
 }
 
 function renderEfficiencyChart() {
-  const MONTHS = [
-    { lbl:"דצמ'25", s:new Date(2025,11,1), e:new Date(2025,11,31) },
-    { lbl:"ינו'26", s:new Date(2026,0,1),  e:new Date(2026,0,31)  },
-    { lbl:"פבר'26", s:new Date(2026,1,1),  e:new Date(2026,1,28)  },
-    { lbl:"מרץ'26", s:new Date(2026,2,1),  e:new Date(2026,2,31)  },
-    { lbl:"אפר'26", s:new Date(2026,3,1),  e:new Date(2026,3,30)  },
-    { lbl:"מאי'26", s:new Date(2026,4,1),  e:new Date(2026,4,31)  },
-  ];
-  const eff = (data) => MONTHS.map(m => {
+  // Build quarters from Q1 2024 up to current quarter
+  const now = new Date();
+  const QUARTERS = [];
+  for (let y = 2024; y <= now.getFullYear(); y++) {
+    for (let q = 0; q < 4; q++) {
+      const qStart = new Date(y, q * 3, 1);
+      if (qStart > now) break;
+      const qEnd = new Date(y, q * 3 + 3, 0); // last day of quarter
+      const shortY = String(y).slice(2);
+      QUARTERS.push({ lbl: `Q${q+1}'${shortY}`, s: qStart, e: qEnd });
+    }
+  }
+
+  const eff = (data) => QUARTERS.map(q => {
     const ws = data.workouts.filter(w => {
       if (!w.distance||!w.avg_speed||!w.avg_hr||w.avg_hr===0) return false;
-      const d = parseDMY(w.date); return d>=m.s && d<=m.e;
+      const d = parseDMY(w.date); return d>=q.s && d<=q.e;
     });
     if (!ws.length) return null;
     const spd = ws.reduce((s,w)=>s+w.avg_speed,0)/ws.length;
@@ -1081,7 +1086,7 @@ function renderEfficiencyChart() {
   charts['efficiencyChart'] = new Chart(ctx, {
     type: 'line',
     data: {
-      labels: MONTHS.map(m=>m.lbl),
+      labels: QUARTERS.map(q=>q.lbl),
       datasets: [
         { label: athlete1Data.name, data: eff(athlete1Data), borderColor: COLORS.cyan,   backgroundColor:'rgba(0,212,255,0.08)', pointBackgroundColor:COLORS.cyan,   pointRadius:6, tension:0.4, spanGaps:true },
         { label: athlete2Data.name, data: eff(athlete2Data), borderColor: COLORS.orange, backgroundColor:'rgba(255,107,53,0.08)',  pointBackgroundColor:COLORS.orange, pointRadius:6, tension:0.4, spanGaps:true },
