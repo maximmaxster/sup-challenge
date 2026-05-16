@@ -657,7 +657,7 @@ function populateYearFilter() {
 
 const PROG_PERIODS = {
   q1:   { start: new Date(2026,0,1),  end: new Date(2026,2,31),  label: 'Q1 — ינואר-מרץ 2026',        baseRef: 'base', showVsDec: false },
-  q2:   { start: new Date(2026,3,1),  end: new Date(2026,5,30),  label: 'Q2 — אפריל-יוני 2026',        baseRef: 'q1',   showVsDec: true  },
+  q2:   { start: new Date(2026,3,1),  end: new Date(2026,5,30),  label: 'Q2 — אפריל-יוני 2026',        baseRef: 'q1',   showVsDec: false },
   q3:   { start: new Date(2026,6,1),  end: new Date(2026,8,30),  label: 'Q3 — יולי-ספטמבר 2026',      baseRef: 'q2',   showVsDec: true  },
   q4:   { start: new Date(2026,9,1),  end: new Date(2026,11,31), label: 'Q4 — אוקטובר-דצמבר 2026',    baseRef: 'q3',   showVsDec: true  },
   h1:   { isH1: true,                                             label: 'חצי שנתי — ממוצע Q1+Q2',     baseRef: 'base', showVsDec: false },
