@@ -686,7 +686,17 @@ const PROG_TYPES = [
     ]
   },
   {
-    key: 'aerobic', types: ['אירובי','אירובי ארוך'], label: 'אירובי', icon: '🏄',
+    key: 'aerobic', types: ['אירובי'], label: 'אירובי', icon: '🏄',
+    metrics: [
+      { key: 'distance', label: 'מרחק',    unit: "ק\"מ", lb: false },
+      { key: 'hr',       label: 'דופק',    unit: 'BPM',  lb: true  },
+      { key: 'dps',      label: 'DPS',     unit: "מ'",   lb: false },
+      { key: 'speed',    label: 'מהירות',  unit: 'קמ"ש', lb: false },
+      { key: 'eff',      label: 'יעילות',  unit: '',     lb: false },
+    ]
+  },
+  {
+    key: 'aerobic_long', types: ['אירובי ארוך'], label: 'אירובי ארוך', icon: '🌅',
     metrics: [
       { key: 'distance', label: 'מרחק',    unit: "ק\"מ", lb: false },
       { key: 'hr',       label: 'דופק',    unit: 'BPM',  lb: true  },
