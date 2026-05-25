@@ -32,8 +32,8 @@ except ImportError:
 load_dotenv()
 
 # ===== EMAIL CONFIG =====
-GMAIL_USER     = "maxim.maxster@gmail.com"
-GMAIL_PASSWORD = "wueohtjazghiiqwq"
+GMAIL_USER     = os.getenv("GMAIL_USER", "maxim.maxster@gmail.com")
+GMAIL_PASSWORD = os.getenv("GMAIL_PASSWORD", "")
 
 # מייל לכל ספורטאי — מקסים כבר מקבל מה-tracker, כאן רק ויקטור
 ATHLETE_EMAILS = {
@@ -60,7 +60,10 @@ ATHLETES = [
         "output": Path("data/athlete2.json"),
         "profile_image": "images/athlete2_profile.jpg",
         "token_dir": Path(".garth_tokens_2"),
-        "tempo_z4_sec": 1200,  # >20 דקות = טמפו (ויקטור)
+        "tempo_z4_sec": 1200,  # >20 דקות = טמפו (ויקטור) — אך ראה גם long_z4_sec
+        "long_z4_sec":  1500,  # Z4<25 דק' + dist>11 + dur>1:40 → אירובי ארוך
+        "long_min_dist": 11,
+        "long_min_dur":  6000, # 100 דק' = 1:40:00
     },
 ]
 
@@ -145,14 +148,26 @@ def get_zone_time(zones: list, zone_number: int) -> str:
 
 # ===== WORKOUT TYPE (same logic as Excel tracker) =====
 def detect_type(z4_str: str, z5_str: str, avg_hr: int, dist_km: float, dur_sec: int,
-                tempo_z4_sec: int = 900) -> str:
+                tempo_z4_sec: int = 900,
+                long_z4_sec: int = None,
+                long_min_dist: float = 11,
+                long_min_dur: int = 0) -> str:
     z4_sec = hms_to_sec(z4_str)
     z5_sec = hms_to_sec(z5_str)
 
     if z5_sec > 30:
         return "ספרינטים"
+
+    # אירובי ארוך: Z4 מתחת לסף ארוך + מרחק ומשך מינימלי
+    long_threshold = long_z4_sec if long_z4_sec is not None else tempo_z4_sec
+    if (z4_sec < long_threshold
+            and dist_km >= long_min_dist
+            and dur_sec >= long_min_dur):
+        return "אירובי ארוך"
+
     if z4_sec > tempo_z4_sec:
         return "טמפו"
+
     if dist_km > 11:
         return "אירובי ארוך"
     return "אירובי"
@@ -191,7 +206,10 @@ def parse_activity(act: dict, zones: list, cfg: dict = None) -> dict:
 
     location, lat = get_location(act)
     workout_type = detect_type(z4, z5, avg_hr, dist_km, dur_sec,
-                               tempo_z4_sec=cfg.get("tempo_z4_sec", 900))
+                               tempo_z4_sec=cfg.get("tempo_z4_sec", 900),
+                               long_z4_sec=cfg.get("long_z4_sec"),
+                               long_min_dist=cfg.get("long_min_dist", 11),
+                               long_min_dur=cfg.get("long_min_dur", 0))
 
     return {
         "id": str(act.get("activityId", "")),
