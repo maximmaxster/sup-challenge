@@ -1,7 +1,7 @@
 {
   "name": "מקסים רפופורט",
   "profile_image": "images/athlete1_profile.jpg",
-  "last_sync": "2026-05-25T07:02:36Z",
+  "last_sync": "2026-05-26T07:02:14Z",
   "workouts": [
     {
       "id": "23001936617",
@@ -3084,7 +3084,7 @@
     {
       "id": "17705467099",
       "date": "07.12.2024",
-      "type": "אירובי",
+      "type": "אירובי ארוך",
       "location": "ים",
       "lat": 32.15697261504829,
       "distance": 11.0,
