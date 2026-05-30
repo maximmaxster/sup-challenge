@@ -41,7 +41,7 @@ function renderAthleteBio(prefix, data) {
   const races = data.races || [];
   if (!races.length) { compEl.innerHTML = ''; return; }
 
-  const sorted = [...races].sort((a, b) => parseDMY(a.date) - parseDMY(b.date));
+  const sorted = [...races].sort((a, b) => parseDMY(b.date) - parseDMY(a.date));
   const catIcon  = { world: '🌍', local: '🏅' };
   const catLabel = { world: 'עולמי', local: 'בארץ' };
 
