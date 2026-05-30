@@ -4291,6 +4291,23 @@
   "races": [
     {
       "category": "world",
+      "name": "SUP CITY 11 CHALLENGE 220 KM",
+      "location": "HOLLAND",
+      "date": "01.09.2024",
+      "distance_km": null,
+      "duration": null,
+      "avg_speed": null,
+      "avg_hr": null,
+      "spm": null,
+      "dps": null,
+      "z3": null,
+      "z4": null,
+      "z5": null,
+      "place": null,
+      "notes": ""
+    },
+    {
+      "category": "world",
       "name": "ICF SUP WORLD CHAMPIONSHIP",
       "location": "ABU DHABI",
       "date": "02.11.2025",
