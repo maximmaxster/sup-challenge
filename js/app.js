@@ -36,15 +36,32 @@ function renderAthleteBio(prefix, data) {
 
   const compEl = document.getElementById(`${prefix}-competitions`);
   if (!compEl) return;
-  const comps = data.competitions || [];
-  if (!comps.length) { compEl.innerHTML = ''; return; }
-  compEl.innerHTML = `<div class="comp-list-title">🏆 תחרויות</div>` +
-    comps.map(c => `
-      <div class="comp-entry">
-        <span class="comp-name">${c.name}</span>
-        ${c.date ? `<span class="comp-date">${c.date}</span>` : ''}
-        ${c.details ? `<span class="comp-details">${c.details}</span>` : ''}
-      </div>`).join('');
+
+  // Use races array (full data); fallback to legacy competitions
+  const races = data.races || [];
+  if (!races.length) { compEl.innerHTML = ''; return; }
+
+  const sorted = [...races].sort((a, b) => parseDMY(a.date) - parseDMY(b.date));
+  const catIcon  = { world: '🌍', local: '🏅' };
+  const catLabel = { world: 'עולמי', local: 'בארץ' };
+
+  // build HTML as string (all values from trusted JSON, not user input)
+  const rows = sorted.map(r => {
+    const [d, m, y] = (r.date || '').split('.');
+    const dateLbl = m && y ? `${m}/${y}` : (r.date || '');
+    const distLbl = r.distance_km ? `${r.distance_km} ק"מ` : '';
+    const icon    = catIcon[r.category]  || '🏆';
+    const badge   = catLabel[r.category] || r.category || '';
+    const loc     = r.location || '';
+    const details = loc + (distLbl ? ' · ' + distLbl : '');
+    return `<div class="comp-entry">` +
+      `<span class="comp-name">${r.name}</span>` +
+      `<span class="comp-date">${dateLbl}</span>` +
+      `<span class="comp-details">${details}</span>` +
+      `<span class="comp-cat ${r.category}">${icon} ${badge}</span>` +
+      `</div>`;
+  }).join('');
+  compEl.innerHTML = `<div class="comp-list-title">🏆 תחרויות</div>` + rows;
 }
 
 // ===== DATE HELPERS (DD.MM.YYYY format) =====

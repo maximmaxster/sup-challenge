@@ -485,6 +485,22 @@ section {
   color: var(--text-secondary);
 }
 
+.comp-cat {
+  font-size: 0.62rem;
+  font-weight: 700;
+  padding: 0.1rem 0.35rem;
+  border-radius: 5px;
+  white-space: nowrap;
+}
+.comp-cat.world {
+  background: rgba(0,200,240,0.12);
+  color: var(--accent-cyan);
+}
+.comp-cat.local {
+  background: rgba(0,230,118,0.12);
+  color: var(--accent-green);
+}
+
 /* ── Period label above stats ── */
 .athlete-period {
   display: flex;
