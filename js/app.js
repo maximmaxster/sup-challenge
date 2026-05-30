@@ -53,9 +53,10 @@ function renderAthleteBio(prefix, data) {
     const icon    = catIcon[r.category]  || '🏆';
     const badge   = catLabel[r.category] || r.category || '';
     const loc     = r.location || '';
-    const details = loc + (dateLbl ? ' · ' + dateLbl : '') + (distLbl ? ' · ' + distLbl : '');
+    const details = loc + (distLbl ? ' · ' + distLbl : '');
     return `<div class="comp-entry">` +
       `<span class="comp-name">${r.name}</span>` +
+      `<span class="comp-date">${dateLbl}</span>` +
       `<span class="comp-details">${details}</span>` +
       `<span class="comp-cat ${r.category}">${icon} ${badge}</span>` +
       `</div>`;
