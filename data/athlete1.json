@@ -1,8 +1,26 @@
 {
   "name": "מקסים רפופורט",
   "profile_image": "images/athlete1_profile.jpg",
-  "last_sync": "2026-05-31T07:02:27Z",
+  "last_sync": "2026-06-01T08:26:58Z",
   "workouts": [
+    {
+      "id": "23086548714",
+      "date": "01.06.2026",
+      "type": "טמפו",
+      "location": "ים",
+      "lat": 32.15769957751036,
+      "distance": 9.27,
+      "duration": "1:14:12",
+      "dur_sec": 4452,
+      "avg_speed": 7.5,
+      "max_speed": 9.8,
+      "avg_hr": 143,
+      "spm": 38,
+      "dps": 3.29,
+      "z3": "36:09",
+      "z4": "28:46",
+      "z5": "0:00"
+    },
     {
       "id": "23062789812",
       "date": "30.05.2026",
