@@ -155,7 +155,7 @@ def detect_type(z4_str: str, z5_str: str, avg_hr: int, dist_km: float, dur_sec: 
     z4_sec = hms_to_sec(z4_str)
     z5_sec = hms_to_sec(z5_str)
 
-    if z5_sec > 30:
+    if z5_sec > 75:   # יותר מ-1:15 ב-Zone5 = ספרינטים
         return "ספרינטים"
 
     # אירובי ארוך: Z4 מתחת לסף ארוך + מרחק ומשך מינימלי
