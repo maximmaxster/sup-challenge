@@ -992,6 +992,26 @@ section {
   font-weight: 700;
   color: #FF6B35;
   padding: 0.5rem 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+.btn-view-results {
+  font-family: 'Heebo', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #080D18;
+  background: var(--accent-cyan);
+  border: none;
+  border-radius: 999px;
+  padding: 0.55rem 1.6rem;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.btn-view-results:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--glow-cyan);
 }
 
 /* ===== RACES ===== */
@@ -1032,12 +1052,34 @@ section {
   margin-bottom: 0.5rem;
 }
 .race-card {
+  position: relative;
   background: var(--bg-card);
   border: 1px solid var(--border-color);
   border-radius: 16px;
   padding: 1.25rem;
   transition: transform 0.2s, box-shadow 0.2s;
 }
+.race-place-badge {
+  position: absolute;
+  top: -10px;
+  inset-inline-start: -10px;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: linear-gradient(135deg, #FFD60A, #FF9F0A);
+  color: #080D18;
+  font-weight: 800;
+  font-size: 0.78rem;
+  border-radius: 999px;
+  padding: 0.3rem 0.75rem;
+  box-shadow: 0 2px 10px rgba(255,159,10,0.4);
+  z-index: 2;
+}
+.race-place-badge.place-1 { background: linear-gradient(135deg, #FFD60A, #FFB800); }
+.race-place-badge.place-2 { background: linear-gradient(135deg, #E2E8F0, #A6B0BD); }
+.race-place-badge.place-3 { background: linear-gradient(135deg, #E8A36B, #C97D45); }
+.rpb-emoji { font-size: 1.05rem; }
+.rpb-text { white-space: nowrap; }
 .race-card:hover {
   transform: translateY(-2px);
   box-shadow: var(--glow-cyan);

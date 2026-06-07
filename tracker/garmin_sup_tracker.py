@@ -284,7 +284,7 @@ def detect_training_type(distance_km, duration_sec, z4_str, z5_str, hr_values):
         return "ספרינטים", conf
 
     # 3. טמפו
-    if z4_sec > 1200:   # 20 דקות
+    if z4_sec > 900:   # 15 דקות
         return "טמפו", 0.88
 
     # 4. אירובי
@@ -969,16 +969,17 @@ def main():
                 data["location"] = detected_loc
                 location_known = True
             else:
-                # מיקום לא מוכר — שאל
-                print(f"  מיקום לא מוכר (lat={lat:.4f}, lon={lon:.4f})")
-                ans = input("  מיקום (ים/נחל): ").strip()
-                data["location"] = ans
-                # שמור מיקום חדש
+                # מיקום לא מוכר — fallback לפי קו רוחב (ים/נחל)
+                auto = "ים" if float(lat) > 32.13 else "נחל"
+                print(f"  מיקום לא מוכר (lat={lat:.4f}) — fallback: {auto}")
+                data["location"] = auto
+                # שמור לשימוש הבא
                 locs = load_locations()
-                locs.append({"name": ans, "lat": lat, "lon": lon})
+                locs.append({"name": auto, "lat": lat, "lon": lon})
                 save_locations(locs)
+                location_known = True
         else:
-            data["location"] = input("  מיקום (ים/נחל): ").strip()
+            data["location"] = "לא ידוע"
 
         # ── זיהוי סוג אימון ──
         training_type, confidence = detect_training_type(

@@ -4752,6 +4752,23 @@
       "z5": "43:09",
       "place": null,
       "notes": ""
+    },
+    {
+      "category": "local",
+      "name": "חיפה-עכו 2026",
+      "location": "ים",
+      "date": "06.06.2026",
+      "distance_km": 6.61,
+      "duration": "2:01:58",
+      "avg_speed": 3.3,
+      "avg_hr": 161,
+      "spm": 44,
+      "dps": 4.53,
+      "z3": "1:08",
+      "z4": "57:53",
+      "z5": "59:20",
+      "place": 2,
+      "notes": ""
     }
   ],
   "dob": "16.06.1982",

@@ -545,6 +545,15 @@ function renderRaces(athleteNum) {
   localEl.innerHTML = localRaces.length ? localRaces.map(raceCard).join('') : '<div class="race-card-pending">אין נתונים</div>';
 }
 
+// Medal emoji by place (1/2/3 get medals, others get a generic ribbon)
+function placeEmoji(place) {
+  if (!place) return '';
+  if (place === 1) return '🥇';
+  if (place === 2) return '🥈';
+  if (place === 3) return '🥉';
+  return '🏅';
+}
+
 function raceCard(r) {
   const hasDat = r.distance_km !== null;
   const statsHtml = hasDat ? `
@@ -560,13 +569,18 @@ function raceCard(r) {
       ${r.z5 ? `<div class="race-stat"><div class="race-stat-val" style="color:#FF1744">${r.z5}</div><div class="race-stat-lbl">Z5</div></div>` : ''}
     </div>` : `<div class="race-card-pending">⏳ ${r.notes || 'נתונים בהמתנה'}</div>`;
 
+  const placeBadge = r.place
+    ? `<div class="race-place-badge place-${r.place}"><span class="rpb-emoji">${placeEmoji(r.place)}</span><span class="rpb-text">מקום ${r.place}</span></div>`
+    : '';
+
   return `
     <div class="race-card">
+      ${placeBadge}
       <div class="race-card-header">
         <div class="race-card-name">${r.name}</div>
         <div class="race-card-date">${r.date}</div>
       </div>
-      <div class="race-card-location">📍 ${r.location}${r.place ? ' &nbsp;|&nbsp; 🏅 מקום ' + r.place : ''}</div>
+      <div class="race-card-location">📍 ${r.location}</div>
       ${statsHtml}
     </div>`;
 }
@@ -1166,24 +1180,87 @@ function setupNav() {
   sections.forEach(s => observer.observe(s));
 }
 
-// ===== COUNTDOWN =====
+// ===== RACE SCHEDULE =====
+// ⚠️ הוסיפו כאן כל תחרות עתידית לפני שהיא מתקיימת — הספירה לאחור תמצא אותה אוטומטית,
+// ולאחר שהאירוע יסתיים תוצג הודעת סיום + קישור לתוצאות בלשונית "תחרויות"
+// (יש להוסיף את התחרות גם למערך races בקובצי ה-JSON עם הנתונים בסיום)
+const RACE_SCHEDULE = [
+  { name: 'חיפה–עכו 2026', date: '2026-06-06T08:00:00+03:00', location: 'ים' },
+  // { name: 'שם התחרות הבאה', date: '2026-09-01T09:00:00+03:00', location: '...' },
+];
+
 function startCountdown() {
-  // תאריך האירוע — חיפה-עכו 06.06.2026 08:00 שעון ישראל
-  const TARGET = new Date('2026-06-06T08:00:00+03:00');
+  const banner = document.querySelector('.countdown-banner');
+  if (!banner) return;
 
-  const elDays  = document.getElementById('cd-days');
-  const elHours = document.getElementById('cd-hours');
-  const elMins  = document.getElementById('cd-mins');
-  const elSecs  = document.getElementById('cd-secs');
-  const banner  = document.querySelector('.countdown-boxes');
+  const nameEl  = banner.querySelector('.countdown-event-name');
+  const dateEl  = banner.querySelector('.countdown-date-label');
+  const boxesEl = banner.querySelector('.countdown-boxes');
+  const pad = n => String(n).padStart(2, '0');
+  const fmtDateLabel = d => `${pad(d.getDate())}.${pad(d.getMonth()+1)}.${d.getFullYear()} &nbsp;|&nbsp; ${pad(d.getHours())}:${pad(d.getMinutes())}`;
 
+  const now = Date.now();
+  const RECENT_WINDOW = 72 * 3600 * 1000; // 72h — כמה זמן להציג הודעת "הסתיים" אחרי האירוע
+
+  const scheduled = RACE_SCHEDULE
+    .map(r => ({ ...r, targetMs: new Date(r.date).getTime() }))
+    .sort((a, b) => a.targetMs - b.targetMs);
+
+  const nextRace  = scheduled.find(r => r.targetMs > now);
+  const justEnded = scheduled
+    .filter(r => r.targetMs <= now && (now - r.targetMs) < RECENT_WINDOW)
+    .sort((a, b) => b.targetMs - a.targetMs)[0];
+
+  // אין אירוע קרוב ולא הסתיים אירוע לאחרונה — הסתר את הבאנר
+  if (!nextRace && !justEnded) {
+    banner.style.display = 'none';
+    return;
+  }
+  banner.style.display = '';
+
+  // אירוע הסתיים לאחרונה ואין אירוע עתידי קרוב — מצב "תוצאות"
+  if (!nextRace) {
+    if (nameEl) nameEl.textContent = `🏁 ${justEnded.name}`;
+    if (dateEl) dateEl.innerHTML   = `${fmtDateLabel(new Date(justEnded.targetMs))} &nbsp;—&nbsp; האירוע הסתיים`;
+    if (boxesEl) boxesEl.innerHTML = `
+      <div class="countdown-done">
+        🎉 כל הכבוד על הסיום! התוצאות עלו ללשונית התחרויות
+        <button type="button" class="btn-view-results" onclick="document.getElementById('races').scrollIntoView({behavior:'smooth'})">
+          צפה בתוצאות 🏆
+        </button>
+      </div>`;
+    return;
+  }
+
+  // יש אירוע עתידי — הצג ספירה לאחור
+  const TARGET = new Date(nextRace.targetMs);
+  if (nameEl) nameEl.textContent = `🏄 ${nextRace.name}`;
+  if (dateEl) dateEl.innerHTML   = fmtDateLabel(TARGET);
+
+  // החזר את מבנה התיבות אם הוחלף קודם להודעת סיום
+  if (boxesEl && !document.getElementById('cd-days')) {
+    boxesEl.innerHTML = `
+      <div class="countdown-box"><div class="countdown-num" id="cd-days">--</div><div class="countdown-lbl">ימים</div></div>
+      <div class="countdown-sep">:</div>
+      <div class="countdown-box"><div class="countdown-num" id="cd-hours">--</div><div class="countdown-lbl">שעות</div></div>
+      <div class="countdown-sep">:</div>
+      <div class="countdown-box"><div class="countdown-num" id="cd-mins">--</div><div class="countdown-lbl">דקות</div></div>
+      <div class="countdown-sep">:</div>
+      <div class="countdown-box"><div class="countdown-num" id="cd-secs">--</div><div class="countdown-lbl">שניות</div></div>`;
+  }
+
+  let timer = null;
   function tick() {
     const diff = TARGET - Date.now();
     if (diff <= 0) {
-      if (banner) banner.innerHTML = '<div class="countdown-done">🏁 האירוע מתחיל עכשיו!</div>';
+      if (timer) clearInterval(timer);
+      startCountdown(); // עבור אוטומטית למצב "הסתיים" / לאירוע הבא
       return;
     }
-    const pad = n => String(n).padStart(2, '0');
+    const elDays  = document.getElementById('cd-days');
+    const elHours = document.getElementById('cd-hours');
+    const elMins  = document.getElementById('cd-mins');
+    const elSecs  = document.getElementById('cd-secs');
     const d = Math.floor(diff / 86400000);
     const h = Math.floor((diff % 86400000) / 3600000);
     const m = Math.floor((diff % 3600000) / 60000);
@@ -1195,7 +1272,7 @@ function startCountdown() {
   }
 
   tick();
-  setInterval(tick, 1000);
+  timer = setInterval(tick, 1000);
 }
 
 // ===== INIT =====

@@ -52,6 +52,11 @@ ATHLETES = [
         "profile_image": "images/athlete1_profile.jpg",
         "token_dir": Path(".garth_tokens_1"),
         "tempo_z4_sec": 900,   # >15 דקות = טמפו (מקסים)
+        # IDs of race activities to exclude from workouts (added to races array manually):
+        "race_ids": [
+            "23062789812",   # 30.05.2026 ZAZIK race
+            "23147784816",   # 06.06.2026 חיפה-עכו 2026
+        ],
     },
     {
         "name": os.getenv("ATHLETE2_NAME", "ויקטור מוראטוב"),
@@ -64,6 +69,11 @@ ATHLETES = [
         "long_z4_sec":  1500,  # Z4<25 דק' + dist>11 + dur>1:40 → אירובי ארוך
         "long_min_dist": 11,
         "long_min_dur":  6000, # 100 דק' = 1:40:00
+        # IDs of race activities to exclude from workouts:
+        "race_ids": [
+            "23062800478",   # 30.05.2026 ZAZIK race
+            "23146775905",   # 06.06.2026 חיפה-עכו 2026
+        ],
     },
 ]
 
@@ -269,6 +279,15 @@ def fetch_athlete(cfg: dict) -> dict:
 
     # Sort newest first
     workouts.sort(key=lambda w: w["date"].split(".")[::-1], reverse=True)
+
+    # Exclude race activities (they are manually added to the races array)
+    race_ids = set(str(x) for x in cfg.get("race_ids", []))
+    if race_ids:
+        before = len(workouts)
+        workouts = [w for w in workouts if w["id"] not in race_ids]
+        excluded = before - len(workouts)
+        if excluded:
+            print(f"  הוסרו {excluded} פעילויות תחרות מהאימונים")
 
     return {
         "name": cfg["name"],
