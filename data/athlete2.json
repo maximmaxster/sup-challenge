@@ -1,8 +1,26 @@
 {
   "name": "ויקטור מוראטוב",
   "profile_image": "images/athlete2_profile.jpg",
-  "last_sync": "2026-06-25T07:04:43Z",
+  "last_sync": "2026-06-26T07:40:09Z",
   "workouts": [
+    {
+      "id": "23381908581",
+      "date": "26.06.2026",
+      "type": "אירובי",
+      "location": "ים",
+      "lat": 32.15708635747433,
+      "distance": 8.16,
+      "duration": "1:12:35",
+      "dur_sec": 4355,
+      "avg_speed": 6.7,
+      "max_speed": 11.8,
+      "avg_hr": 142,
+      "spm": 37,
+      "dps": 3.02,
+      "z3": "1:01:13",
+      "z4": "10:37",
+      "z5": "0:37"
+    },
     {
       "id": "23359167615",
       "date": "24.06.2026",
