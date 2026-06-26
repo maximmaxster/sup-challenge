@@ -699,17 +699,6 @@ const PROG_BASE = { start: new Date(2025,9,1), end: new Date(2025,11,31) };
 
 const PROG_TYPES = [
   {
-    key: 'aerobic_long', types: ['אירובי ארוך'], label: 'אירובי ארוך', icon: '🌅',
-    metrics: [
-      { key: 'distance_total', label: "סה\"כ מרחק", unit: "ק\"מ", lb: false },
-      { key: 'distance',       label: 'ממוצע מרחק', unit: "ק\"מ", lb: false },
-      { key: 'hr',             label: 'דופק',        unit: 'BPM',  lb: true  },
-      { key: 'dps',            label: 'DPS',          unit: "מ'",   lb: false },
-      { key: 'speed',          label: 'מהירות',       unit: 'קמ"ש', lb: false },
-      { key: 'eff',            label: 'יעילות',       unit: '',     lb: false },
-    ]
-  },
-  {
     key: 'aerobic', types: ['אירובי'], label: 'אירובי', icon: '🏄',
     metrics: [
       { key: 'distance_total', label: "סה\"כ מרחק", unit: "ק\"מ", lb: false },
@@ -723,11 +712,23 @@ const PROG_TYPES = [
   {
     key: 'tempo', types: ['טמפו'], label: 'טמפו / אינטרוואלים', icon: '🌊',
     metrics: [
-      { key: 'dps',      label: 'DPS',     unit: "מ'",   lb: false },
-      { key: 'speed',    label: 'מהירות',  unit: 'קמ"ש', lb: false },
-      { key: 'hr',       label: 'דופק',    unit: 'BPM',  lb: true  },
-      { key: 'distance', label: 'מרחק',    unit: "ק\"מ", lb: false },
-      { key: 'eff',      label: 'יעילות',  unit: '',     lb: false },
+      { key: 'distance_total', label: "סה\"כ מרחק", unit: "ק\"מ", lb: false },
+      { key: 'distance',       label: 'ממוצע מרחק', unit: "ק\"מ", lb: false },
+      { key: 'hr',             label: 'דופק',        unit: 'BPM',  lb: true  },
+      { key: 'dps',            label: 'DPS',          unit: "מ'",   lb: false },
+      { key: 'speed',          label: 'מהירות',       unit: 'קמ"ש', lb: false },
+      { key: 'eff',            label: 'יעילות',       unit: '',     lb: false },
+    ]
+  },
+  {
+    key: 'aerobic_long', types: ['אירובי ארוך'], label: 'אירובי ארוך', icon: '🌅',
+    metrics: [
+      { key: 'distance_total', label: "סה\"כ מרחק", unit: "ק\"מ", lb: false },
+      { key: 'distance',       label: 'ממוצע מרחק', unit: "ק\"מ", lb: false },
+      { key: 'hr',             label: 'דופק',        unit: 'BPM',  lb: true  },
+      { key: 'dps',            label: 'DPS',          unit: "מ'",   lb: false },
+      { key: 'speed',          label: 'מהירות',       unit: 'קמ"ש', lb: false },
+      { key: 'eff',            label: 'יעילות',       unit: '',     lb: false },
     ]
   },
   {
@@ -1178,15 +1179,15 @@ function renderTrendCharts() {
   if (!gridEl) return;
 
   gridEl.innerHTML = PROG_TYPES.map(t => {
-    const res = trendResolution[t.key] || 'year';
+    const res = trendResolution[t.key] || 'month';
     const chartId = `trend-chart-${t.key}`;
     return `
       <div class="glass-card prog-trend-card">
         <div class="prog-trend-header">
           <div class="prog-trend-title">${t.icon} ${t.label} — מגמת יעילות</div>
           <div class="prog-trend-toggle" data-type="${t.key}">
-            <button class="prog-trend-btn ${res === 'year' ? 'active' : ''}" data-res="year">שנה</button>
             <button class="prog-trend-btn ${res === 'month' ? 'active' : ''}" data-res="month">חודש</button>
+            <button class="prog-trend-btn ${res === 'year' ? 'active' : ''}" data-res="year">שנה</button>
           </div>
         </div>
         <div class="chart-canvas-wrapper prog-trend-canvas-wrap">
@@ -1196,7 +1197,7 @@ function renderTrendCharts() {
   }).join('');
 
   PROG_TYPES.forEach(t => {
-    const res = trendResolution[t.key] || 'year';
+    const res = trendResolution[t.key] || 'month';
     const { labels, effVals, counts } = computeTrendBuckets(ath.workouts, t.types, res);
     if (!labels.length) {
       const wrap = document.querySelector(`#prog-trend-grid [data-type="${t.key}"]`)?.closest('.prog-trend-card')?.querySelector('.prog-trend-canvas-wrap');
