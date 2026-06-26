@@ -104,7 +104,7 @@
 
   <!-- ========== SECTION 1: ATHLETE CARDS ========== -->
   <section id="athletes" class="section-tab">
-    <div class="section-title">חותרים</div>
+    <h2 class="section-title">חותרים</h2>
 
     <div class="athletes-grid">
 
@@ -188,7 +188,7 @@
 
   <!-- ========== SECTION 2: LAST WORKOUT COMPARISON ========== -->
   <section id="comparison" class="section-tab">
-    <div class="section-title">לוח תוצאות האימון האחרון</div>
+    <h2 class="section-title">לוח תוצאות האימון האחרון</h2>
     <div class="last-workout-meta">
       <span class="lw-type-badge" id="last-workout-type"></span>
       <span class="lw-date" id="last-workout-date"></span>
@@ -198,9 +198,9 @@
       <table class="comparison-table">
         <thead>
           <tr>
-            <th id="athlete1-name-table" style="width:38%">חותר 1</th>
-            <th style="width:24%">קטגוריה</th>
-            <th id="athlete2-name-table" style="width:38%;text-align:left">חותר 2</th>
+            <th id="athlete1-name-table" scope="col" style="width:38%">חותר 1</th>
+            <th scope="col" style="width:24%">קטגוריה</th>
+            <th id="athlete2-name-table" scope="col" style="width:38%;text-align:left">חותר 2</th>
           </tr>
         </thead>
         <tbody id="comparison-tbody">
@@ -212,7 +212,7 @@
 
   <!-- ========== SECTION 3: CHARTS ========== -->
   <section id="charts" class="section-tab">
-    <div class="section-title">גרפים</div>
+    <h2 class="section-title">גרפים</h2>
 
     <div class="charts-grid">
 
@@ -222,8 +222,8 @@
           <div>
             <div class="chart-title">⚡ מהירות ממוצעת (קמ"ש)</div>
             <div class="chart-legend" style="margin-top:0.4rem">
-              <span><span class="legend-dot" style="background:#00D4FF"></span><span id="legend-speed-1">חותר 1</span></span>
-              <span><span class="legend-dot" style="background:#FF6B35"></span><span id="legend-speed-2">חותר 2</span></span>
+              <span><span class="legend-dot" style="background:var(--accent-cyan)"></span><span id="legend-speed-1">חותר 1</span></span>
+              <span><span class="legend-dot" style="background:var(--accent-orange)"></span><span id="legend-speed-2">חותר 2</span></span>
             </div>
           </div>
           <div class="toggle-group" data-chart="speed">
@@ -243,8 +243,8 @@
           <div>
             <div class="chart-title">📏 מרחק מצטבר (ק"מ)</div>
             <div class="chart-legend" style="margin-top:0.4rem">
-              <span><span class="legend-dot" style="background:#00D4FF"></span><span id="legend-dist-1">חותר 1</span></span>
-              <span><span class="legend-dot" style="background:#FF6B35"></span><span id="legend-dist-2">חותר 2</span></span>
+              <span><span class="legend-dot" style="background:var(--accent-cyan)"></span><span id="legend-dist-1">חותר 1</span></span>
+              <span><span class="legend-dot" style="background:var(--accent-orange)"></span><span id="legend-dist-2">חותר 2</span></span>
             </div>
           </div>
           <div class="toggle-group" data-chart="distance">
@@ -264,8 +264,8 @@
           <div>
             <div class="chart-title">❤️ דופק ממוצע (BPM)</div>
             <div class="chart-legend" style="margin-top:0.4rem">
-              <span><span class="legend-dot" style="background:#00D4FF"></span><span id="legend-hr-1">חותר 1</span></span>
-              <span><span class="legend-dot" style="background:#FF6B35"></span><span id="legend-hr-2">חותר 2</span></span>
+              <span><span class="legend-dot" style="background:var(--accent-cyan)"></span><span id="legend-hr-1">חותר 1</span></span>
+              <span><span class="legend-dot" style="background:var(--accent-orange)"></span><span id="legend-hr-2">חותר 2</span></span>
             </div>
           </div>
           <div class="toggle-group" data-chart="hr">
@@ -285,8 +285,8 @@
           <div>
             <div class="chart-title">🚣 DPS התקדמות (מ')</div>
             <div class="chart-legend" style="margin-top:0.4rem">
-              <span><span class="legend-dot" style="background:#00D4FF"></span><span id="legend-dps-1">חותר 1</span></span>
-              <span><span class="legend-dot" style="background:#FF6B35"></span><span id="legend-dps-2">חותר 2</span></span>
+              <span><span class="legend-dot" style="background:var(--accent-cyan)"></span><span id="legend-dps-1">חותר 1</span></span>
+              <span><span class="legend-dot" style="background:var(--accent-orange)"></span><span id="legend-dps-2">חותר 2</span></span>
             </div>
           </div>
           <div class="toggle-group" data-chart="dps">
@@ -305,7 +305,7 @@
 
   <!-- ========== SECTION 4: WORKOUTS TABLE ========== -->
   <section id="workouts" class="section-tab">
-    <div class="section-title">כל האימונים</div>
+    <h2 class="section-title">כל האימונים</h2>
 
     <div class="filters-bar">
       <select id="filter-athlete" class="filter-select filter-athlete">
@@ -332,19 +332,19 @@
       <table class="workouts-table">
         <thead>
           <tr>
-            <th>תאריך</th>
-            <th>חותר</th>
-            <th>סוג אימון</th>
-            <th>מיקום</th>
-            <th>מרחק (ק"מ)</th>
-            <th>זמן</th>
-            <th>מהירות (קמ"ש)</th>
-            <th>דופק ממוצע</th>
-            <th>SPM</th>
-            <th>DPS (מ')</th>
-            <th>זמן Z3</th>
-            <th>זמן Z4</th>
-            <th>זמן Z5</th>
+            <th scope="col">תאריך</th>
+            <th scope="col">חותר</th>
+            <th scope="col">סוג אימון</th>
+            <th scope="col">מיקום</th>
+            <th scope="col">מרחק (ק"מ)</th>
+            <th scope="col">זמן</th>
+            <th scope="col">מהירות (קמ"ש)</th>
+            <th scope="col">דופק ממוצע</th>
+            <th scope="col">SPM</th>
+            <th scope="col">DPS (מ')</th>
+            <th scope="col">זמן Z3</th>
+            <th scope="col">זמן Z4</th>
+            <th scope="col">זמן Z5</th>
           </tr>
         </thead>
         <tbody id="workouts-tbody">
@@ -356,7 +356,7 @@
 
   <!-- ========== SECTION 5: PROGRESS ========== -->
   <section id="progress" class="section-tab">
-    <div class="section-title">התקדמות</div>
+    <h2 class="section-title">התקדמות</h2>
 
     <!-- Controls -->
     <div class="prog-controls">
@@ -380,6 +380,9 @@
     <!-- Cards -->
     <div class="prog-cards-grid" id="prog-cards"></div>
 
+    <!-- Per-type trend charts (full width, year/month toggle) -->
+    <div class="prog-trend-grid" id="prog-trend-grid"></div>
+
     <!-- Efficiency chart -->
     <div class="glass-card prog-eff-card">
       <div class="prog-eff-header">
@@ -387,8 +390,8 @@
         <div class="prog-eff-sub">מהירות ÷ דופק × 100 — ערך גבוה יותר = כושר טוב יותר</div>
       </div>
       <div class="chart-legend" style="margin-bottom:0.75rem;gap:1.5rem;display:flex">
-        <span><span class="legend-dot" style="background:#00D4FF"></span><span id="eff-legend-1">מקסים</span></span>
-        <span><span class="legend-dot" style="background:#FF6B35"></span><span id="eff-legend-2">ויקטור</span></span>
+        <span><span class="legend-dot" style="background:var(--accent-cyan)"></span><span id="eff-legend-1">מקסים</span></span>
+        <span><span class="legend-dot" style="background:var(--accent-orange)"></span><span id="eff-legend-2">ויקטור</span></span>
       </div>
       <div class="chart-canvas-wrapper">
         <canvas id="efficiencyChart"></canvas>
@@ -398,7 +401,7 @@
 
   <!-- ========== SECTION 6: RACES ========== -->
   <section id="races" class="section-tab">
-    <div class="section-title">🏆 תחרויות</div>
+    <h2 class="section-title">🏆 תחרויות</h2>
 
     <!-- Athlete selector -->
     <div class="races-athlete-selector">
@@ -417,7 +420,7 @@
 
   <!-- ========== SECTION 7: GALLERY ========== -->
   <section id="gallery" class="section-tab">
-    <div class="section-title">גלריה</div>
+    <h2 class="section-title">גלריה</h2>
     <div id="gallery-grid" class="gallery-grid">
       <!-- populated by JS -->
     </div>
@@ -427,7 +430,7 @@
 
 <!-- ===== LIGHTBOX ===== -->
 <div id="lightbox" class="lightbox">
-  <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+  <button class="lightbox-close" onclick="closeLightbox()" aria-label="סגור תמונה">✕</button>
   <div class="lightbox-inner">
     <img id="lightbox-img" src="" alt="" class="lightbox-img">
     <div id="lightbox-caption" class="lightbox-caption"></div>

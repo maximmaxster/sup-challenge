@@ -159,19 +159,13 @@ header {
   font-weight: 800;
   letter-spacing: 2px;
   text-transform: uppercase;
-  background: linear-gradient(135deg, #FFFFFF 0%, var(--accent-cyan) 60%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--brand-white);
   line-height: 1;
   filter: drop-shadow(0 0 12px rgba(0, 200, 240, 0.4));
 }
 
 .logo-text-challenge {
-  background: linear-gradient(135deg, var(--accent-orange) 0%, #FF8C42 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--accent-orange);
   filter: drop-shadow(0 0 12px rgba(232, 75, 26, 0.6));
 }
 
@@ -195,6 +189,12 @@ nav a:hover,
 nav a.active {
   color: var(--accent-cyan);
   background: rgba(0, 212, 255, 0.1);
+}
+
+nav a:focus-visible {
+  outline: 2px solid var(--accent-cyan);
+  outline-offset: 3px;
+  border-radius: 6px;
 }
 
 .header-meta {
@@ -245,20 +245,16 @@ section {
 }
 
 .section-title::before {
-  content: '';
-  display: block;
-  width: 4px;
-  height: 22px;
-  background: linear-gradient(180deg, var(--accent-cyan), var(--accent-orange));
-  border-radius: 2px;
+  content: '▸';
+  color: var(--accent-cyan);
+  font-size: 0.9rem;
   flex-shrink: 0;
+  opacity: 0.8;
 }
 
 /* ===== GLASS CARD ===== */
 .glass-card {
   background: linear-gradient(145deg, rgba(17, 30, 53, 0.9), rgba(13, 21, 37, 0.95));
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-lg);
   box-shadow: var(--card-shadow);
@@ -459,9 +455,9 @@ section {
   flex-wrap: wrap;
   padding: 0.3rem 0.6rem;
   margin-bottom: 0.25rem;
-  background: rgba(0,212,255,0.05);
-  border-right: 2px solid var(--accent-cyan);
-  border-radius: 0 8px 8px 0;
+  background: rgba(0,212,255,0.07);
+  border: 1px solid rgba(0,212,255,0.18);
+  border-radius: 8px;
   font-size: 0.76rem;
 }
 
@@ -1572,6 +1568,66 @@ footer span {
   gap: 0.6rem;
 }
 
+/* Per-type trend charts (full width) */
+.prog-trend-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.prog-trend-card { padding: 1.5rem; }
+
+.prog-trend-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.prog-trend-title {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.prog-trend-toggle {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.prog-trend-btn {
+  padding: 0.4rem 0.95rem;
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.04);
+  color: var(--text-secondary);
+  font-family: 'Heebo', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+}
+.prog-trend-btn.active {
+  background: linear-gradient(135deg, rgba(0,212,255,0.2), rgba(0,212,255,0.08));
+  border-color: var(--accent-cyan);
+  color: var(--accent-cyan);
+}
+.prog-trend-btn:hover { opacity: 1; filter: brightness(1.15); }
+
+.prog-trend-canvas-wrap { height: 320px; }
+@media (max-width: 640px) { .prog-trend-canvas-wrap { height: 260px; } }
+
+.prog-trend-empty {
+  text-align: center;
+  color: var(--text-muted);
+  padding: 2rem 0;
+  font-size: 0.9rem;
+}
+
 .prog-card-hdr {
   display: flex;
   justify-content: space-between;
@@ -1831,4 +1887,25 @@ footer span {
   .wb { font-size: 0.65rem; }
   .training-tabs { flex-wrap: wrap; width: 100%; }
   .training-tab-btn { flex: 1; text-align: center; }
+}
+
+/* ===== FOCUS & INTERACTION STATES ===== */
+button:focus-visible,
+select:focus-visible,
+.toggle-btn:focus-visible,
+.prog-athlete-btn:focus-visible,
+.prog-period-btn:focus-visible,
+.races-athlete-btn:focus-visible {
+  outline: 2px solid var(--accent-cyan);
+  outline-offset: 3px;
+}
+
+/* ===== REDUCED MOTION ===== */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

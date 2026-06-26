@@ -81,39 +81,18 @@ def load_config():
 
 def connect_garmin():
     """
-    התחברות חכמה לגרמין:
-    1. אם קיים טוקן שמור — נשתמש בו (ללא login חדש)
-    2. אחרת — login עם email+password ושמירת טוקן
+    התחברות לגרמין עם שמירת טוקן (פורמט garminconnect 0.3+)
     """
     token_dir = os.path.join(_PROJ, ".garth_tokens_1")
+    os.makedirs(token_dir, exist_ok=True)
 
-    # נסה טוקן שמור קודם
-    if os.path.exists(token_dir):
-        try:
-            api = garminconnect.Garmin()
-            api.login(tokenstore=token_dir)
-            print("  [Garmin] כניסה עם טוקן שמור")
-            return api
-        except Exception:
-            pass  # טוקן פג — נחדש
-
-    # כניסה עם פרטים
     creds = load_config()
     email    = creds.get("email")    or input("אימייל גרמין קונקט: ").strip()
     password = creds.get("password") or getpass.getpass("סיסמה: ")
     try:
         api = garminconnect.Garmin(email, password)
-        api.login()
-        # שמור טוקן לשימוש הבא
-        os.makedirs(token_dir, exist_ok=True)
-        api.garth.dump(token_dir)
-        print("  [Garmin] כניסה בוצעה, טוקן נשמר")
-        # שמור פרטים אם אין
-        if not creds:
-            ans = input("שמור פרטי כניסה? (כ/ל): ").strip().lower()
-            if ans == "כ":
-                with open(CONFIG_FILE, "w", encoding="utf-8") as f:
-                    json.dump({"email": email, "password": password}, f)
+        api.login(tokenstore=token_dir)
+        print("  [Garmin] כניסה הצליחה ✓")
         return api
     except garminconnect.GarminConnectAuthenticationError:
         print("שגיאת אימות — בדוק אימייל/סיסמה.")

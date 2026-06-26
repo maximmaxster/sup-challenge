@@ -1054,6 +1054,7 @@ function renderYearCards() {
   }, 50);
 
   renderEfficiencyChart();
+  renderTrendCharts();
 }
 
 function renderProgress() {
@@ -1083,6 +1084,143 @@ function renderProgress() {
 
   // Efficiency chart
   renderEfficiencyChart();
+  renderTrendCharts();
+}
+
+// ===== PER-TYPE EFFICIENCY TREND CHARTS (year/month toggle) =====
+const trendResolution = {};   // { [typeKey]: 'year' | 'month' }
+const trendCharts = {};
+
+const HEB_MONTHS_SHORT = ['ינו', 'פבר', 'מרץ', 'אפר', 'מאי', 'יונ', 'יול', 'אוג', 'ספט', 'אוק', 'נוב', 'דצמ'];
+
+function computeTrendBuckets(workouts, types, resolution) {
+  const ws = workouts.filter(w => w.distance > 0 && types.includes(w.type));
+  if (!ws.length) return { labels: [], effVals: [], counts: [] };
+
+  const buckets = {};   // key -> { speedSum, hrSum, n }
+  ws.forEach(w => {
+    const d = parseDMY(w.date);
+    if (!d) return;
+    const key = resolution === 'year'
+      ? `${d.getFullYear()}`
+      : `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+    if (!buckets[key]) buckets[key] = { speedSum: 0, hrSum: 0, n: 0, count: 0 };
+    buckets[key].count++;
+    if (w.avg_speed > 0 && w.avg_hr > 0) {
+      buckets[key].speedSum += w.avg_speed;
+      buckets[key].hrSum    += w.avg_hr;
+      buckets[key].n++;
+    }
+  });
+
+  const keys = Object.keys(buckets).sort();
+  const labels = keys.map(k => {
+    if (resolution === 'year') return k;
+    const [y, m] = k.split('-');
+    return `${HEB_MONTHS_SHORT[+m - 1]} ${y.slice(2)}`;
+  });
+  const effVals = keys.map(k => {
+    const b = buckets[k];
+    return b.n > 0 ? +((b.speedSum / b.n) / (b.hrSum / b.n) * 100).toFixed(3) : null;
+  });
+  const counts = keys.map(k => buckets[k].count);
+
+  return { labels, effVals, counts };
+}
+
+function buildTrendChart(canvasId, labels, effVals, counts) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  if (trendCharts[canvasId]) { trendCharts[canvasId].destroy(); delete trendCharts[canvasId]; }
+
+  trendCharts[canvasId] = new Chart(canvas, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: 'יעילות',
+        data: effVals,
+        borderColor: '#00D4FF',
+        backgroundColor: 'rgba(0,212,255,0.12)',
+        tension: 0.3,
+        fill: true,
+        spanGaps: true,
+        pointRadius: 3,
+        pointBackgroundColor: '#00D4FF',
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => {
+              const i = ctx.dataIndex;
+              const v = ctx.parsed.y;
+              return v == null ? 'אין נתונים' : `יעילות: ${v.toFixed(2)} (${counts[i]} אימונים)`;
+            }
+          }
+        }
+      },
+      scales: {
+        x: { ticks: { color: 'rgba(230,238,250,0.6)' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+        y: { ticks: { color: 'rgba(230,238,250,0.6)' }, grid: { color: 'rgba(255,255,255,0.05)' } }
+      }
+    }
+  });
+}
+
+function renderTrendCharts() {
+  const ath = progAthlete === 1 ? athlete1Data : athlete2Data;
+  const gridEl = document.getElementById('prog-trend-grid');
+  if (!gridEl) return;
+
+  gridEl.innerHTML = PROG_TYPES.map(t => {
+    const res = trendResolution[t.key] || 'year';
+    const chartId = `trend-chart-${t.key}`;
+    return `
+      <div class="glass-card prog-trend-card">
+        <div class="prog-trend-header">
+          <div class="prog-trend-title">${t.icon} ${t.label} — מגמת יעילות</div>
+          <div class="prog-trend-toggle" data-type="${t.key}">
+            <button class="prog-trend-btn ${res === 'year' ? 'active' : ''}" data-res="year">שנה</button>
+            <button class="prog-trend-btn ${res === 'month' ? 'active' : ''}" data-res="month">חודש</button>
+          </div>
+        </div>
+        <div class="chart-canvas-wrapper prog-trend-canvas-wrap">
+          <canvas id="${chartId}"></canvas>
+        </div>
+      </div>`;
+  }).join('');
+
+  PROG_TYPES.forEach(t => {
+    const res = trendResolution[t.key] || 'year';
+    const { labels, effVals, counts } = computeTrendBuckets(ath.workouts, t.types, res);
+    if (!labels.length) {
+      const wrap = document.querySelector(`#prog-trend-grid [data-type="${t.key}"]`)?.closest('.prog-trend-card')?.querySelector('.prog-trend-canvas-wrap');
+      if (wrap) wrap.innerHTML = `<div class="prog-trend-empty">אין נתונים לסוג אימון זה</div>`;
+      return;
+    }
+    buildTrendChart(`trend-chart-${t.key}`, labels, effVals, counts);
+  });
+
+  // Toggle buttons
+  gridEl.querySelectorAll('.prog-trend-toggle').forEach(group => {
+    const typeKey = group.dataset.type;
+    group.querySelectorAll('.prog-trend-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        group.querySelectorAll('.prog-trend-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        trendResolution[typeKey] = btn.dataset.res;
+        const t = PROG_TYPES.find(t => t.key === typeKey);
+        const a = progAthlete === 1 ? athlete1Data : athlete2Data;
+        const { labels, effVals, counts } = computeTrendBuckets(a.workouts, t.types, btn.dataset.res);
+        buildTrendChart(`trend-chart-${typeKey}`, labels, effVals, counts);
+      });
+    });
+  });
 }
 
 function renderEfficiencyChart() {
