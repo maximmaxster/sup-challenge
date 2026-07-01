@@ -851,7 +851,7 @@ section {
 .row-aerobic { border-right: 3px solid #00D4FF; }
 .row-long-aerobic { border-right: 3px solid #7C4DFF; }
 .row-tempo { border-right: 3px solid #FF6B35; }
-.row-sprints { border-right: 3px solid #FF1744; }
+.row-sprints { border-right: 3px solid #FFD600; }
 
 .badge-athlete1 {
   display: inline-block;
@@ -886,7 +886,7 @@ section {
 .type-aerobic { background: rgba(0, 212, 255, 0.12); color: var(--accent-cyan); }
 .type-long { background: rgba(124, 77, 255, 0.12); color: #B39DDB; }
 .type-tempo { background: rgba(255, 107, 53, 0.12); color: var(--accent-orange); }
-.type-sprints { background: rgba(255, 23, 68, 0.12); color: #FF5252; }
+.type-sprints { background: rgba(255, 214, 0, 0.12); color: #FFD600; }
 
 .location-icon { margin-left: 0.3rem; }
 
@@ -1836,7 +1836,7 @@ footer span {
   flex-shrink: 0;
 }
 .wc-badge.tempo { background:rgba(0,212,255,.1); color:var(--accent-cyan); border:1px solid rgba(0,212,255,.25); }
-.wc-badge.sprints { background:rgba(255,23,68,.1); color:#FF5252; border:1px solid rgba(255,23,68,.25); }
+.wc-badge.sprints { background:rgba(255,214,0,.1); color:#FFD600; border:1px solid rgba(255,214,0,.25); }
 
 /* Timeline bar */
 .wc-bar {
