@@ -161,11 +161,16 @@ def detect_type(z4_str: str, z5_str: str, avg_hr: int, dist_km: float, dur_sec: 
                 tempo_z4_sec: int = 900,
                 long_z4_sec: int = None,
                 long_min_dist: float = 11,
-                long_min_dur: int = 0) -> str:
+                long_min_dur: int = 0,
+                spm_max: int = 0) -> str:
     z4_sec = hms_to_sec(z4_str)
     z5_sec = hms_to_sec(z5_str)
 
     if z5_sec > 75:   # יותר מ-1:15 ב-Zone5 = ספרינטים
+        return "ספרינטים"
+
+    # SPM max > 80 — ספרינטים גם אם הדופק היה בזון 4
+    if spm_max > 80:
         return "ספרינטים"
 
     # אירובי ארוך: Z4 מתחת לסף ארוך + מרחק ומשך מינימלי
@@ -208,6 +213,7 @@ def parse_activity(act: dict, zones: list, cfg: dict = None) -> dict:
     # SPM
     strokes = act.get("strokes") or 0
     spm = int(round(strokes / (dur_sec / 60))) if dur_sec and strokes else 0
+    spm_max = int(act.get("maxStrokeCadence") or act.get("maxRunCadence") or act.get("maxCadence") or 0)
 
     # Zone times
     z3 = get_zone_time(zones, 3)
@@ -219,7 +225,8 @@ def parse_activity(act: dict, zones: list, cfg: dict = None) -> dict:
                                tempo_z4_sec=cfg.get("tempo_z4_sec", 900),
                                long_z4_sec=cfg.get("long_z4_sec"),
                                long_min_dist=cfg.get("long_min_dist", 11),
-                               long_min_dur=cfg.get("long_min_dur", 0))
+                               long_min_dur=cfg.get("long_min_dur", 0),
+                               spm_max=spm_max)
 
     return {
         "id": str(act.get("activityId", "")),
@@ -234,6 +241,7 @@ def parse_activity(act: dict, zones: list, cfg: dict = None) -> dict:
         "max_speed": max_speed,
         "avg_hr": avg_hr,
         "spm": spm,
+        "spm_max": spm_max,
         "dps": dps,
         "z3": z3,
         "z4": z4,
@@ -261,10 +269,11 @@ def fetch_athlete(cfg: dict) -> dict:
         except Exception:
             zones = []
 
-        # Try to get extra details (avgStrokeDistance, strokes)
+        # Try to get extra details (avgStrokeDistance, strokes, SPM max)
         try:
             detail = api.get_activity(act_id)
-            for key in ["avgStrokeDistance", "strokes", "avgStrokeCadence"]:
+            for key in ["avgStrokeDistance", "strokes", "avgStrokeCadence",
+                        "maxStrokeCadence", "maxRunCadence", "maxCadence"]:
                 if detail.get(key) and not act.get(key):
                     act[key] = detail[key]
         except Exception:
