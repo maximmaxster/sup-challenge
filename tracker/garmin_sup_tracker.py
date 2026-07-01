@@ -241,7 +241,7 @@ def detect_training_type(distance_km, duration_sec, z4_str, z5_str, hr_values, s
     זיהוי סוג אימון אוטומטי + רמת ביטחון (0-1).
     סדר עדיפויות:
       1. אירובי ארוך — מרחק > 11 ק"מ
-      2. ספרינטים    — Z5 ברור, גרף דופק ≥3 מחזורים, או SPM max > 80
+      2. ספרינטים    — כל 3 חייבים: Z5 > 30 שנ' AND ≥2 מחזורי דופק AND SPM max > 80
       3. טמפו        — Z4 > 15 דקות
       4. אירובי      — ברירת מחדל
     """
@@ -253,18 +253,11 @@ def detect_training_type(distance_km, duration_sec, z4_str, z5_str, hr_values, s
     if distance_km > 11:
         return "אירובי ארוך", 0.95
 
-    # 2. ספרינטים — Z5 ברור, גרף דופק עם מחזורים, או SPM max > 80
-    if z5_sec > 30:
-        return "ספרינטים", 0.90
-
+    # 2. ספרינטים — כל 3 פרמטרים חייבים להתקיים ביחד
     cycles = count_sprint_cycles(hr_values) if hr_values else 0
-    if cycles >= 3:
-        conf = min(0.70 + cycles * 0.05, 0.95)
+    if z5_sec > 30 and cycles >= 2 and spm_max > 80:
+        conf = min(0.85 + cycles * 0.02, 0.98)
         return "ספרינטים", conf
-
-    # SPM max > 80 — ספרינטים גם אם הדופק היה בזון 4
-    if spm_max > 80:
-        return "ספרינטים", 0.85
 
     # 3. טמפו
     if z4_sec > 900:   # 15 דקות

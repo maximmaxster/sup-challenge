@@ -146,6 +146,46 @@ def get_location(activity: dict) -> tuple:
     return ("ים" if lat > 32.13 else "נחל"), lat
 
 
+# ===== HR TIMESERIES + SPRINT CYCLE DETECTION =====
+def get_hr_timeseries(api, activity_id: int) -> list:
+    try:
+        details = api.get_activity_details(activity_id, maxChartSize=2000)
+        descriptors = details.get("metricDescriptors", [])
+        hr_idx = next((d["metricsIndex"] for d in descriptors if d.get("key") == "directHeartRate"), None)
+        if hr_idx is None:
+            return []
+        return [float(p["metrics"][hr_idx]) for p in details.get("activityDetailMetrics", [])
+                if hr_idx < len(p.get("metrics", [])) and p["metrics"][hr_idx] is not None]
+    except Exception:
+        return []
+
+def _smooth(data: list, window: int = 12) -> list:
+    arr, kernel = data[:], [1/window]*window
+    out = []
+    for i in range(len(arr)):
+        start = max(0, i - window//2)
+        end = min(len(arr), i + window//2 + 1)
+        out.append(sum(arr[start:end]) / (end - start))
+    return out
+
+def count_sprint_cycles(hr_values: list, min_prominence: int = 15) -> int:
+    if len(hr_values) < 40:
+        return 0
+    s = _smooth(hr_values)
+    n = len(s)
+    peaks   = [i for i in range(1, n-1) if s[i] > s[i-1] and s[i] >= s[i+1]]
+    valleys = [i for i in range(1, n-1) if s[i] < s[i-1] and s[i] <= s[i+1]]
+    cycles = 0
+    for p in peaks:
+        prev_v = [v for v in valleys if v < p]
+        next_v = [v for v in valleys if v > p]
+        if prev_v and next_v:
+            if (s[p] - s[max(prev_v)] >= min_prominence and
+                    s[p] - s[min(next_v)] >= min_prominence):
+                cycles += 1
+    return cycles
+
+
 # ===== ZONE TIME =====
 def get_zone_time(zones: list, zone_number: int) -> str:
     if not zones:
@@ -162,15 +202,14 @@ def detect_type(z4_str: str, z5_str: str, avg_hr: int, dist_km: float, dur_sec: 
                 long_z4_sec: int = None,
                 long_min_dist: float = 11,
                 long_min_dur: int = 0,
-                spm_max: int = 0) -> str:
+                spm_max: int = 0,
+                hr_values: list = None) -> str:
     z4_sec = hms_to_sec(z4_str)
     z5_sec = hms_to_sec(z5_str)
 
-    if z5_sec > 75:   # יותר מ-1:15 ב-Zone5 = ספרינטים
-        return "ספרינטים"
-
-    # SPM max > 80 — ספרינטים גם אם הדופק היה בזון 4
-    if spm_max > 80:
+    # ספרינטים — כל 3 פרמטרים חייבים להתקיים ביחד
+    cycles = count_sprint_cycles(hr_values) if hr_values else 0
+    if z5_sec > 30 and cycles >= 2 and spm_max > 80:
         return "ספרינטים"
 
     # אירובי ארוך: Z4 מתחת לסף ארוך + מרחק ומשך מינימלי
@@ -189,9 +228,11 @@ def detect_type(z4_str: str, z5_str: str, avg_hr: int, dist_km: float, dur_sec: 
 
 
 # ===== PARSE ACTIVITY =====
-def parse_activity(act: dict, zones: list, cfg: dict = None) -> dict:
+def parse_activity(act: dict, zones: list, cfg: dict = None, hr_values: list = None) -> dict:
     if cfg is None:
         cfg = {}
+    if hr_values is None:
+        hr_values = []
     start_dt = datetime.fromisoformat(act["startTimeLocal"].replace("Z", ""))
     dist_km = round((act.get("distance") or 0) / 1000, 2)
     dur_sec = int(act.get("duration") or 0)
@@ -226,7 +267,8 @@ def parse_activity(act: dict, zones: list, cfg: dict = None) -> dict:
                                long_z4_sec=cfg.get("long_z4_sec"),
                                long_min_dist=cfg.get("long_min_dist", 11),
                                long_min_dur=cfg.get("long_min_dur", 0),
-                               spm_max=spm_max)
+                               spm_max=spm_max,
+                               hr_values=hr_values)
 
     return {
         "id": str(act.get("activityId", "")),
@@ -279,8 +321,11 @@ def fetch_athlete(cfg: dict) -> dict:
         except Exception:
             pass
 
+        # HR timeseries for sprint cycle detection
+        hr_ts = get_hr_timeseries(api, act_id)
+
         try:
-            w = parse_activity(act, zones, cfg=cfg)
+            w = parse_activity(act, zones, cfg=cfg, hr_values=hr_ts)
             workouts.append(w)
             print(f"    ✓ {w['date']}  {w['type']:10s}  {w['distance']}ק\"מ  {w['avg_speed']}קמ\"ש  Z4:{w['z4']}")
         except Exception as e:
