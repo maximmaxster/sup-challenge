@@ -236,13 +236,13 @@ def hms_to_sec(t):
         return parts[0]*3600 + parts[1]*60 + parts[2]
     return parts[0]*60 + parts[1]
 
-def detect_training_type(distance_km, duration_sec, z4_str, z5_str, hr_values):
+def detect_training_type(distance_km, duration_sec, z4_str, z5_str, hr_values, spm_max=0):
     """
     זיהוי סוג אימון אוטומטי + רמת ביטחון (0-1).
     סדר עדיפויות:
-      1. אירובי ארוך — מרחק > 11 ק"מ AND זמן > 90 דקות
-      2. ספרינטים    — גרף דופק מציג ≥3 מחזורי פסגה-שפל (≥15 bpm)
-      3. טמפו        — Z4 > 20 דקות
+      1. אירובי ארוך — מרחק > 11 ק"מ
+      2. ספרינטים    — Z5 ברור, גרף דופק ≥3 מחזורים, או SPM max > 80
+      3. טמפו        — Z4 > 15 דקות
       4. אירובי      — ברירת מחדל
     """
     duration_min = duration_sec / 60
@@ -253,7 +253,7 @@ def detect_training_type(distance_km, duration_sec, z4_str, z5_str, hr_values):
     if distance_km > 11:
         return "אירובי ארוך", 0.95
 
-    # 2. ספרינטים — Z5 ברור, או גרף דופק עם מחזורים
+    # 2. ספרינטים — Z5 ברור, גרף דופק עם מחזורים, או SPM max > 80
     if z5_sec > 30:
         return "ספרינטים", 0.90
 
@@ -261,6 +261,10 @@ def detect_training_type(distance_km, duration_sec, z4_str, z5_str, hr_values):
     if cycles >= 3:
         conf = min(0.70 + cycles * 0.05, 0.95)
         return "ספרינטים", conf
+
+    # SPM max > 80 — ספרינטים גם אם הדופק היה בזון 4
+    if spm_max > 80:
+        return "ספרינטים", 0.85
 
     # 3. טמפו
     if z4_sec > 900:   # 15 דקות
@@ -430,6 +434,8 @@ def format_activity(activity, zones):
     # SPM — חשב מסך משיכות / דקות
     total_strokes = activity.get("strokes", 0) or 0
     avg_spm = int(round(total_strokes / (dur_sec / 60))) if dur_sec and total_strokes else 0
+    # SPM max — גרמין מספק maxStrokeCadence (לעיתים maxRunCadence / maxCadence)
+    spm_max = int(activity.get("maxStrokeCadence", 0) or activity.get("maxRunCadence", 0) or activity.get("maxCadence", 0) or 0)
 
     # DPS — avgStrokeDistance מגיע בסנטימטרים → המר למטרים
     avg_stroke_dist = activity.get("avgStrokeDistance", 0) or 0
@@ -444,6 +450,7 @@ def format_activity(activity, zones):
         "speed":      speed,
         "avg_hr":     avg_hr,
         "spm":        avg_spm,
+        "spm_max":    spm_max,
         "dps":        avg_dps,
         "z1":         get_zone_time(zones, 1),
         "z2":         get_zone_time(zones, 2),
@@ -927,10 +934,11 @@ def main():
         # HR time series לזיהוי ספרינטים
         hr_ts = get_hr_timeseries(api, act_id)
 
-        # נסה לקבל פרטים נוספים (SPM, DPS) מהאימון
+        # נסה לקבל פרטים נוספים (SPM, DPS, SPM max) מהאימון
         try:
             act_detail = api.get_activity(act_id)
-            for key in ["averageStrokeCadence", "avgStrokeCadence", "avgStrideLength", "avgStrokeDistance"]:
+            for key in ["averageStrokeCadence", "avgStrokeCadence", "avgStrideLength",
+                        "avgStrokeDistance", "maxStrokeCadence", "maxRunCadence", "maxCadence"]:
                 if act_detail.get(key) and not act.get(key):
                     act[key] = act_detail[key]
         except Exception:
@@ -963,7 +971,7 @@ def main():
         # ── זיהוי סוג אימון ──
         training_type, confidence = detect_training_type(
             data["distance"], data["dur_sec"],
-            data["z4"], data["z5"], hr_ts
+            data["z4"], data["z5"], hr_ts, data["spm_max"]
         )
         data["type"] = training_type
 
@@ -971,7 +979,7 @@ def main():
         sprint_cycles = count_sprint_cycles(hr_ts) if hr_ts else "N/A"
         print(f"  מרחק: {data['distance']} ק\"מ  |  זמן: {data['duration']}  |  "
               f"מהירות: {data['speed']} קמ\"ש")
-        print(f"  דופק: {data['avg_hr']} bpm  |  SPM: {data['spm']}  |  DPS: {data['dps']} מ'")
+        print(f"  דופק: {data['avg_hr']} bpm  |  SPM: {data['spm']} (max: {data['spm_max']})  |  DPS: {data['dps']} מ'")
         print(f"  Z3: {data['z3']}  |  Z4: {data['z4']}  |  Z5: {data['z5']}  |  "
               f"מחזורי ספרינט: {sprint_cycles}")
         print(f"  מיקום:  {data['location']} {'✓' if location_known else '(חדש)'}")
