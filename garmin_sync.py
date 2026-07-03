@@ -52,6 +52,11 @@ ATHLETES = [
         "profile_image": "images/athlete1_profile.jpg",
         "token_dir": Path(".garth_tokens_1"),
         "tempo_z4_sec": 900,   # >15 דקות = טמפו (מקסים)
+        # Manual type overrides — date: type (never overwritten by auto-classification)
+        "manual_types": {
+            "01.07.2026": "ספרינטים",
+            "22.06.2026": "ספרינטים",
+        },
         # IDs of race activities to exclude from workouts (added to races array manually):
         "race_ids": [
             "23062789812",   # 30.05.2026 ZAZIK race
@@ -65,6 +70,11 @@ ATHLETES = [
         "output": Path("data/athlete2.json"),
         "profile_image": "images/athlete2_profile.jpg",
         "token_dir": Path(".garth_tokens_2"),
+        # Manual type overrides — date: type (never overwritten by auto-classification)
+        "manual_types": {
+            "01.07.2026": "ספרינטים",
+            "22.06.2026": "ספרינטים",
+        },
         "tempo_z4_sec": 1200,  # >20 דקות = טמפו (ויקטור) — אך ראה גם long_z4_sec
         "long_z4_sec":  1500,  # Z4<25 דק' + dist>11 + dur>1:40 → אירובי ארוך
         "long_min_dist": 11,
@@ -262,17 +272,22 @@ def parse_activity(act: dict, zones: list, cfg: dict = None, hr_values: list = N
     z5 = get_zone_time(zones, 5)
 
     location, lat = get_location(act)
-    workout_type = detect_type(z4, z5, avg_hr, dist_km, dur_sec,
-                               tempo_z4_sec=cfg.get("tempo_z4_sec", 900),
-                               long_z4_sec=cfg.get("long_z4_sec"),
-                               long_min_dist=cfg.get("long_min_dist", 11),
-                               long_min_dur=cfg.get("long_min_dur", 0),
-                               spm_max=spm_max,
-                               hr_values=hr_values)
+    date_str = start_dt.strftime("%d.%m.%Y")
+    manual = cfg.get("manual_types", {})
+    if date_str in manual:
+        workout_type = manual[date_str]
+    else:
+        workout_type = detect_type(z4, z5, avg_hr, dist_km, dur_sec,
+                                   tempo_z4_sec=cfg.get("tempo_z4_sec", 900),
+                                   long_z4_sec=cfg.get("long_z4_sec"),
+                                   long_min_dist=cfg.get("long_min_dist", 11),
+                                   long_min_dur=cfg.get("long_min_dur", 0),
+                                   spm_max=spm_max,
+                                   hr_values=hr_values)
 
     return {
         "id": str(act.get("activityId", "")),
-        "date": start_dt.strftime("%d.%m.%Y"),
+        "date": date_str,
         "type": workout_type,
         "location": location,
         "lat": lat,
