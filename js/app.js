@@ -1306,8 +1306,13 @@ function showSection(id) {
   document.querySelectorAll('nav a').forEach(a => {
     a.classList.toggle('active', a.getAttribute('href') === `#${id}`);
   });
-  // update URL hash without scroll
   history.replaceState(null, '', `#${id}`);
+  // After section is visible: resize existing charts + re-render section-specific ones
+  requestAnimationFrame(() => {
+    window.dispatchEvent(new Event('resize'));
+    if (id === 'progress')  { renderTrendCharts(); renderProgress(); }
+    if (id === 'charts')    { renderSpeedChart(currentRange.speed); renderDistanceChart(currentRange.distance); renderHrChart(currentRange.hr); renderDpsChart(currentRange.dps); }
+  });
 }
 
 function setupNav() {
