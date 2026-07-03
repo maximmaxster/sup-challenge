@@ -408,18 +408,25 @@
       <button class="races-athlete-btn" data-athlete="2" id="races-btn-2">ויקטור</button>
     </div>
 
+    <div class="races-filters">
+      <button class="races-filter-btn active" data-filter="all">הכל</button>
+      <button class="races-filter-btn" data-filter="local">ארץ</button>
+      <button class="races-filter-btn" data-filter="world">חו"ל</button>
+    </div>
+
     <div id="races-table-container">
       <table class="races-table" id="races-table">
         <thead>
           <tr>
-            <th>תאריך</th>
-            <th>שם תחרות</th>
-            <th>מיקום</th>
-            <th>סוג</th>
-            <th>מקצה</th>
-            <th>מרחק (ק"מ)</th>
-            <th>זמן</th>
-            <th>מקום</th>
+            <th data-col="category" class="sortable">סוג <span class="sort-icon">↕</span></th>
+            <th data-col="date" class="sortable">תאריך <span class="sort-icon">↕</span></th>
+            <th data-col="name" class="sortable">שם תחרות <span class="sort-icon">↕</span></th>
+            <th data-col="location">מיקום</th>
+            <th data-col="discipline">מקצה</th>
+            <th data-col="distance_km" class="sortable">מרחק (ק"מ) <span class="sort-icon">↕</span></th>
+            <th data-col="duration">זמן</th>
+            <th data-col="place" class="sortable">מקום <span class="sort-icon">↕</span></th>
+            <th></th>
           </tr>
         </thead>
         <tbody id="races-tbody"></tbody>

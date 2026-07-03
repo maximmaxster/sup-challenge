@@ -523,10 +523,12 @@ function renderWorkoutsTable(filterAthlete = 'all', filterType = 'all', filterLo
 // ===== RACES =====
 let currentRacesAthlete = 1;
 
+let racesSort = { col: 'date', dir: 'desc' };
+let racesFilter = 'all';
+
 function renderRaces(athleteNum) {
   currentRacesAthlete = athleteNum;
   const data = athleteNum === 1 ? athlete1Data : athlete2Data;
-  const races = (data.races || []).slice().sort((a, b) => parseDMY(b.date) - parseDMY(a.date));
 
   document.querySelectorAll('.races-athlete-btn').forEach(btn => {
     btn.classList.toggle('active', +btn.dataset.athlete === athleteNum);
@@ -534,8 +536,33 @@ function renderRaces(athleteNum) {
   document.getElementById('races-btn-1').textContent = athlete1Data.name;
   document.getElementById('races-btn-2').textContent = athlete2Data.name;
 
+  renderRacesTable(data.races || []);
+}
+
+function renderRacesTable(allRaces) {
   const tbody = document.getElementById('races-tbody');
   const emptyMsg = document.getElementById('races-empty');
+
+  let races = allRaces.slice();
+  if (racesFilter !== 'all') races = races.filter(r => r.category === racesFilter);
+
+  races.sort((a, b) => {
+    const col = racesSort.col;
+    let va = a[col], vb = b[col];
+    if (col === 'date') { va = parseDMY(a.date); vb = parseDMY(b.date); }
+    if (col === 'distance_km' || col === 'place') { va = va || 0; vb = vb || 0; }
+    if (va == null) va = '';
+    if (vb == null) vb = '';
+    if (va < vb) return racesSort.dir === 'asc' ? -1 : 1;
+    if (va > vb) return racesSort.dir === 'asc' ? 1 : -1;
+    return 0;
+  });
+
+  // Update sort icons
+  document.querySelectorAll('.races-table th.sortable').forEach(th => {
+    th.classList.remove('sort-asc', 'sort-desc');
+    if (th.dataset.col === racesSort.col) th.classList.add(`sort-${racesSort.dir}`);
+  });
 
   if (!races.length) {
     tbody.innerHTML = '';
@@ -551,20 +578,88 @@ function renderRaces(athleteNum) {
     return `<span${cls}>${em} ${p}</span>`;
   };
 
-  tbody.innerHTML = races.map(r => {
+  tbody.innerHTML = races.map((r, idx) => {
     const catClass = r.category === 'world' ? 'race-type-world' : 'race-type-local';
-    const catLabel = r.category === 'world' ? '🌍 חו"ל' : '🇮🇱 ארץ';
-    return `<tr>
+    const catLabel = r.category === 'world' ? 'חו"ל' : 'ארץ';
+    return `<tr data-race-idx="${idx}">
+      <td class="${catClass}">${catLabel}</td>
       <td>${r.date || '—'}</td>
       <td>${r.name || '—'}</td>
       <td>${r.location || '—'}</td>
-      <td class="${catClass}">${catLabel}</td>
       <td>${r.discipline || '—'}</td>
       <td>${r.distance_km != null ? r.distance_km : '—'}</td>
       <td>${r.duration || '—'}</td>
       <td>${placeHtml(r.place)}</td>
+      <td><button class="btn-edit-race" data-race-idx="${idx}">✏️ עריכה</button></td>
     </tr>`;
   }).join('');
+
+  // Store current sorted races for edit reference
+  tbody._races = races;
+}
+
+function setupRacesTableControls() {
+  // Athlete filter buttons (category)
+  document.querySelectorAll('.races-filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      racesFilter = btn.dataset.filter;
+      document.querySelectorAll('.races-filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const data = currentRacesAthlete === 2 ? athlete2Data : athlete1Data;
+      renderRacesTable(data.races || []);
+    });
+  });
+
+  // Column sort
+  document.querySelectorAll('.races-table th.sortable').forEach(th => {
+    th.addEventListener('click', () => {
+      const col = th.dataset.col;
+      if (racesSort.col === col) {
+        racesSort.dir = racesSort.dir === 'asc' ? 'desc' : 'asc';
+      } else {
+        racesSort.col = col;
+        racesSort.dir = col === 'date' ? 'desc' : 'asc';
+      }
+      const data = currentRacesAthlete === 2 ? athlete2Data : athlete1Data;
+      renderRacesTable(data.races || []);
+    });
+  });
+
+  // Row edit (delegated)
+  document.getElementById('races-tbody').addEventListener('click', e => {
+    const btn = e.target.closest('.btn-edit-race');
+    if (!btn) return;
+    const idx = +btn.dataset.raceIdx;
+    const tbody = document.getElementById('races-tbody');
+    const race = tbody._races[idx];
+    if (!race) return;
+    const tr = btn.closest('tr');
+    const catOpts = `<option value="local"${race.category==='local'?' selected':''}>ארץ</option><option value="world"${race.category==='world'?' selected':''}>חו"ל</option>`;
+    const discOpts = ['','ספרינט','טכני','לונג דיסטנס'].map(d => `<option value="${d}"${race.discipline===d?' selected':''}>${d||'—'}</option>`).join('');
+    tr.innerHTML = `
+      <td><select class="edit-cell" name="category">${catOpts}</select></td>
+      <td><input class="edit-cell" name="date" value="${race.date||''}" placeholder="DD.MM.YYYY"></td>
+      <td><input class="edit-cell" name="name" value="${race.name||''}"></td>
+      <td><input class="edit-cell" name="location" value="${race.location||''}"></td>
+      <td><select class="edit-cell" name="discipline">${discOpts}</select></td>
+      <td><input class="edit-cell" name="distance_km" type="number" step="0.01" value="${race.distance_km??''}"></td>
+      <td><input class="edit-cell" name="duration" value="${race.duration||''}"></td>
+      <td><input class="edit-cell" name="place" type="number" min="1" value="${race.place||''}"></td>
+      <td><button class="btn-save-edit">שמור</button></td>`;
+
+    tr.querySelector('.btn-save-edit').addEventListener('click', () => {
+      race.category    = tr.querySelector('[name=category]').value;
+      race.date        = tr.querySelector('[name=date]').value;
+      race.name        = tr.querySelector('[name=name]').value.trim();
+      race.location    = tr.querySelector('[name=location]').value.trim();
+      race.discipline  = tr.querySelector('[name=discipline]').value;
+      race.distance_km = parseFloat(tr.querySelector('[name=distance_km]').value) || null;
+      race.duration    = tr.querySelector('[name=duration]').value.trim() || null;
+      race.place       = parseInt(tr.querySelector('[name=place]').value) || null;
+      const data = currentRacesAthlete === 2 ? athlete2Data : athlete1Data;
+      renderRacesTable(data.races || []);
+    });
+  });
 }
 
 // Medal emoji by place (1/2/3 get medals, others get a generic ribbon)
@@ -1498,6 +1593,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setupFilters();
   setupProgress();
   setupRacesButtons();
+  setupRacesTableControls();
   setupNav();
   startCountdown();
   loadData();
