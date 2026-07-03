@@ -30,8 +30,9 @@ function calcAge(dobStr) {
 
 function renderAthleteBio(prefix, data) {
   const el = id => document.getElementById(`${prefix}-${id}`);
-  if (el('dob')) el('dob').textContent = data.dob || '—';
-  if (el('age')) el('age').textContent = data.dob ? calcAge(data.dob) : '—';
+  const bday = data.birthdate || data.dob;
+  if (el('dob')) el('dob').textContent = bday || '—';
+  if (el('age')) el('age').textContent = bday ? calcAge(bday) : '—';
   if (el('sup-start')) el('sup-start').textContent = data.sup_start || '—';
 
   const compEl = document.getElementById(`${prefix}-competitions`);
@@ -89,9 +90,10 @@ function formatShort(str) {
 // ===== LOAD DATA =====
 async function loadData() {
   try {
+    const v = Date.now();
     const [r1, r2] = await Promise.all([
-      fetch('data/athlete1.json'),
-      fetch('data/athlete2.json'),
+      fetch(`data/athlete1.json?v=${v}`),
+      fetch(`data/athlete2.json?v=${v}`),
     ]);
     athlete1Data = await r1.json();
     athlete2Data = await r2.json();
@@ -524,25 +526,45 @@ let currentRacesAthlete = 1;
 function renderRaces(athleteNum) {
   currentRacesAthlete = athleteNum;
   const data = athleteNum === 1 ? athlete1Data : athlete2Data;
-  const races = data.races || [];
+  const races = (data.races || []).slice().sort((a, b) => parseDMY(b.date) - parseDMY(a.date));
 
-  // Update buttons
   document.querySelectorAll('.races-athlete-btn').forEach(btn => {
     btn.classList.toggle('active', +btn.dataset.athlete === athleteNum);
   });
-
-  // Update name in buttons
   document.getElementById('races-btn-1').textContent = athlete1Data.name;
   document.getElementById('races-btn-2').textContent = athlete2Data.name;
 
-  const worldEl = document.getElementById('races-world');
-  const localEl = document.getElementById('races-local');
+  const tbody = document.getElementById('races-tbody');
+  const emptyMsg = document.getElementById('races-empty');
 
-  const worldRaces = races.filter(r => r.category === 'world');
-  const localRaces = races.filter(r => r.category === 'local');
+  if (!races.length) {
+    tbody.innerHTML = '';
+    emptyMsg.style.display = '';
+    return;
+  }
+  emptyMsg.style.display = 'none';
 
-  worldEl.innerHTML = worldRaces.length ? worldRaces.map(raceCard).join('') : '<div class="race-card-pending">אין נתונים</div>';
-  localEl.innerHTML = localRaces.length ? localRaces.map(raceCard).join('') : '<div class="race-card-pending">אין נתונים</div>';
+  const placeHtml = p => {
+    if (!p) return '—';
+    const cls = p <= 3 ? ` class="race-place-${p}"` : '';
+    const em = p === 1 ? '🥇' : p === 2 ? '🥈' : p === 3 ? '🥉' : '🏅';
+    return `<span${cls}>${em} ${p}</span>`;
+  };
+
+  tbody.innerHTML = races.map(r => {
+    const catClass = r.category === 'world' ? 'race-type-world' : 'race-type-local';
+    const catLabel = r.category === 'world' ? '🌍 חו"ל' : '🇮🇱 ארץ';
+    return `<tr>
+      <td>${r.date || '—'}</td>
+      <td>${r.name || '—'}</td>
+      <td>${r.location || '—'}</td>
+      <td class="${catClass}">${catLabel}</td>
+      <td>${r.discipline || '—'}</td>
+      <td>${r.distance_km != null ? r.distance_km : '—'}</td>
+      <td>${r.duration || '—'}</td>
+      <td>${placeHtml(r.place)}</td>
+    </tr>`;
+  }).join('');
 }
 
 // Medal emoji by place (1/2/3 get medals, others get a generic ribbon)
@@ -588,6 +610,52 @@ function raceCard(r) {
 function setupRacesButtons() {
   document.querySelectorAll('.races-athlete-btn').forEach(btn => {
     btn.addEventListener('click', () => renderRaces(+btn.dataset.athlete));
+  });
+
+  // Modal open/close
+  const modal = document.getElementById('modal-add-race');
+  document.getElementById('btn-add-race').addEventListener('click', () => {
+    modal.style.display = 'flex';
+  });
+  const closeModal = () => { modal.style.display = 'none'; };
+  document.getElementById('modal-close').addEventListener('click', closeModal);
+  document.getElementById('modal-cancel').addEventListener('click', closeModal);
+  modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
+
+  // Form submit — add race to in-memory data and re-render
+  document.getElementById('form-add-race').addEventListener('submit', e => {
+    e.preventDefault();
+
+    const dateRaw = document.getElementById('race-date').value; // YYYY-MM-DD
+    const [y, m, d] = dateRaw.split('-');
+    const dateStr = `${d}.${m}.${y}`;
+
+    const newRace = {
+      category:    document.getElementById('race-category').value,
+      name:        document.getElementById('race-name').value.trim(),
+      location:    document.getElementById('race-location').value.trim(),
+      discipline:  document.getElementById('race-discipline').value,
+      date:        dateStr,
+      distance_km: parseFloat(document.getElementById('race-distance').value) || null,
+      duration:    document.getElementById('race-duration').value.trim() || null,
+      place:       parseInt(document.getElementById('race-place').value) || null,
+      avg_speed: null, avg_hr: null, spm: null, dps: null,
+      z3: null, z4: null, z5: null, notes: '',
+    };
+
+    const athleteVal = document.getElementById('race-athlete').value;
+    if (athleteVal === '1' || athleteVal === 'both') {
+      athlete1Data.races = athlete1Data.races || [];
+      athlete1Data.races.push(newRace);
+    }
+    if (athleteVal === '2' || athleteVal === 'both') {
+      athlete2Data.races = athlete2Data.races || [];
+      athlete2Data.races.push({...newRace});
+    }
+
+    closeModal();
+    document.getElementById('form-add-race').reset();
+    renderRaces(currentRacesAthlete || 1);
   });
 }
 
@@ -1312,6 +1380,7 @@ function showSection(id) {
     window.dispatchEvent(new Event('resize'));
     if (id === 'progress')  { renderTrendCharts(); renderProgress(); }
     if (id === 'charts')    { renderSpeedChart(currentRange.speed); renderDistanceChart(currentRange.distance); renderHrChart(currentRange.hr); renderDpsChart(currentRange.dps); }
+    if (id === 'races')     { renderRaces(currentRacesAthlete || 1); }
   });
 }
 

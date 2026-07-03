@@ -1033,6 +1033,126 @@ section {
   border-color: var(--accent-cyan);
   color: #000;
 }
+/* ===== RACES HEADER & ADD BUTTON ===== */
+.races-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.25rem;
+}
+.races-header-row .section-title { margin-bottom: 0; }
+
+.btn-add-race {
+  padding: 0.5rem 1.25rem;
+  border-radius: 999px;
+  border: 2px solid var(--accent-cyan);
+  background: transparent;
+  color: var(--accent-cyan);
+  font-family: 'Heebo', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-add-race:hover { background: var(--accent-cyan); color: #000; }
+
+/* ===== RACES TABLE ===== */
+#races-table-container { overflow-x: auto; margin-top: 1rem; }
+
+.races-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+  direction: rtl;
+}
+.races-table th {
+  background: rgba(255,255,255,0.04);
+  color: var(--text-secondary);
+  font-weight: 600;
+  padding: 0.65rem 0.8rem;
+  text-align: right;
+  border-bottom: 2px solid var(--border-color);
+  white-space: nowrap;
+}
+.races-table td {
+  padding: 0.65rem 0.8rem;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  color: var(--text-primary);
+  vertical-align: middle;
+}
+.races-table tr:hover td { background: rgba(255,255,255,0.03); }
+.races-table .race-type-world { color: var(--accent-cyan); font-weight: 600; }
+.races-table .race-type-local { color: var(--accent-orange); font-weight: 600; }
+.races-table .race-place-1 { color: #FFD60A; font-weight: 800; }
+.races-table .race-place-2 { color: #C0C0C0; font-weight: 700; }
+.races-table .race-place-3 { color: #CD7F32; font-weight: 700; }
+.races-empty-msg { color: var(--text-secondary); text-align: center; padding: 2rem; }
+
+/* ===== MODAL ===== */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 9999;
+  background: rgba(0,0,0,0.7);
+  display: flex; align-items: center; justify-content: center;
+  backdrop-filter: blur(4px);
+}
+.modal-box {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  padding: 1.75rem;
+  width: 100%;
+  max-width: 420px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.5);
+}
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.25rem;
+}
+.modal-title { font-size: 1.15rem; font-weight: 700; color: var(--text-primary); }
+.modal-close {
+  background: none; border: none; color: var(--text-secondary);
+  font-size: 1.2rem; cursor: pointer; line-height: 1;
+}
+.modal-close:hover { color: var(--text-primary); }
+.modal-form { display: flex; flex-direction: column; gap: 0.85rem; }
+.form-row { display: flex; flex-direction: column; gap: 0.3rem; }
+.form-row label { font-size: 0.82rem; color: var(--text-secondary); font-weight: 600; }
+.form-row input, .form-row select {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  color: var(--text-primary);
+  font-family: 'Heebo', sans-serif;
+  font-size: 0.95rem;
+  padding: 0.55rem 0.75rem;
+  width: 100%;
+  box-sizing: border-box;
+  direction: rtl;
+}
+.form-row input:focus, .form-row select:focus {
+  outline: none;
+  border-color: var(--accent-cyan);
+}
+.form-row select option { background: #1a1f2e; }
+.modal-actions {
+  display: flex; gap: 0.75rem; margin-top: 0.5rem; justify-content: flex-end;
+}
+.btn-cancel {
+  padding: 0.6rem 1.25rem; border-radius: 999px;
+  border: 1px solid var(--border-color); background: transparent;
+  color: var(--text-secondary); cursor: pointer; font-family: 'Heebo', sans-serif;
+}
+.btn-save-race {
+  padding: 0.6rem 1.5rem; border-radius: 999px;
+  border: none; background: var(--accent-cyan); color: #000;
+  font-family: 'Heebo', sans-serif; font-weight: 700; cursor: pointer;
+}
+.btn-save-race:hover { opacity: 0.85; }
+
 .races-category-title {
   font-size: 1.1rem;
   font-weight: 700;

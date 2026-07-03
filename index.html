@@ -399,22 +399,99 @@
 
   <!-- ========== SECTION 6: RACES ========== -->
   <section id="races" class="section-tab">
-    <h2 class="section-title">🏆 תחרויות</h2>
+    <div class="races-header-row">
+      <h2 class="section-title">🏆 תחרויות</h2>
+      <button class="btn-add-race" id="btn-add-race">+ הוסף תחרות</button>
+    </div>
 
-    <!-- Athlete selector -->
     <div class="races-athlete-selector">
       <button class="races-athlete-btn active" data-athlete="1" id="races-btn-1">מקסים</button>
       <button class="races-athlete-btn" data-athlete="2" id="races-btn-2">ויקטור</button>
     </div>
 
-    <!-- World Championships -->
-    <div class="races-category-title">🌍 אליפויות העולם</div>
-    <div id="races-world" class="races-grid"></div>
-
-    <!-- Local Races -->
-    <div class="races-category-title">🇮🇱 תחרויות בארץ</div>
-    <div id="races-local" class="races-grid"></div>
+    <div id="races-table-container">
+      <table class="races-table" id="races-table">
+        <thead>
+          <tr>
+            <th>תאריך</th>
+            <th>שם תחרות</th>
+            <th>מיקום</th>
+            <th>סוג</th>
+            <th>מקצה</th>
+            <th>מרחק (ק"מ)</th>
+            <th>זמן</th>
+            <th>מקום</th>
+          </tr>
+        </thead>
+        <tbody id="races-tbody"></tbody>
+      </table>
+      <div id="races-empty" class="races-empty-msg" style="display:none">אין תחרויות רשומות</div>
+    </div>
   </section>
+
+  <!-- ========== MODAL: ADD RACE ========== -->
+  <div id="modal-add-race" class="modal-overlay" style="display:none">
+    <div class="modal-box" dir="rtl">
+      <div class="modal-header">
+        <span class="modal-title">הוספת תחרות</span>
+        <button class="modal-close" id="modal-close">✕</button>
+      </div>
+      <form id="form-add-race" class="modal-form">
+        <div class="form-row">
+          <label>תאריך</label>
+          <input type="date" id="race-date" required>
+        </div>
+        <div class="form-row">
+          <label>שם התחרות</label>
+          <input type="text" id="race-name" placeholder="שם התחרות" required>
+        </div>
+        <div class="form-row">
+          <label>מיקום</label>
+          <input type="text" id="race-location" placeholder="עיר / מקום">
+        </div>
+        <div class="form-row">
+          <label>סוג</label>
+          <select id="race-category">
+            <option value="local">ארץ 🇮🇱</option>
+            <option value="world">חו"ל 🌍</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label>סוג מקצה</label>
+          <select id="race-discipline">
+            <option value="">בחר...</option>
+            <option value="ספרינט">ספרינט</option>
+            <option value="טכני">טכני</option>
+            <option value="לונג דיסטנס">לונג דיסטנס</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label>מרחק (ק"מ)</label>
+          <input type="number" id="race-distance" step="0.01" min="0" placeholder="0.00">
+        </div>
+        <div class="form-row">
+          <label>זמן (שע:דק:שנ)</label>
+          <input type="text" id="race-duration" placeholder="1:30:00">
+        </div>
+        <div class="form-row">
+          <label>מקום</label>
+          <input type="number" id="race-place" min="1" placeholder="מיקום סופי">
+        </div>
+        <div class="form-row">
+          <label>לספורטאי</label>
+          <select id="race-athlete">
+            <option value="1">מקסים רפופורט</option>
+            <option value="2">ויקטור מורטוב</option>
+            <option value="both">שניהם</option>
+          </select>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn-cancel" id="modal-cancel">ביטול</button>
+          <button type="submit" class="btn-save-race">שמור תחרות</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
   <!-- ========== SECTION 7: GALLERY ========== -->
   <section id="gallery" class="section-tab">
