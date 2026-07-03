@@ -98,7 +98,7 @@ async function loadData() {
   } catch (e) {
     console.error('Error loading data:', e);
     athlete1Data = { name: 'מקסים רפופורט', profile_image: '', workouts: [] };
-    athlete2Data = { name: 'ויקטור מוראטוב', profile_image: '', workouts: [] };
+    athlete2Data = { name: 'ויקטור מורטוב', profile_image: '', workouts: [] };
   }
 
   document.getElementById('athlete1-name').textContent = athlete1Data.name;
@@ -596,7 +596,7 @@ function renderGallery() {
   const grid = document.getElementById('gallery-grid');
   const files = [
     { name: 'מקסים רפופורט.JPEG', label: 'מקסים רפופורט', date: '' },
-    { name: 'ויקטור מוראטוב.JPEG', label: 'ויקטור מוראטוב', date: '' },
+    { name: 'ויקטור מורטוב.JPEG', label: 'ויקטור מורטוב', date: '' },
   ];
 
   grid.innerHTML = '';
@@ -1296,27 +1296,31 @@ function setupProgress() {
 }
 
 // ===== NAV =====
+function showSection(id) {
+  document.querySelectorAll('.section-tab').forEach(s => s.classList.remove('section-active'));
+  const target = document.getElementById(id);
+  if (target) {
+    target.classList.add('section-active');
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }
+  document.querySelectorAll('nav a').forEach(a => {
+    a.classList.toggle('active', a.getAttribute('href') === `#${id}`);
+  });
+  // update URL hash without scroll
+  history.replaceState(null, '', `#${id}`);
+}
+
 function setupNav() {
   document.querySelectorAll('nav a[href^="#"]').forEach(link => {
     link.addEventListener('click', e => {
       e.preventDefault();
-      document.querySelector(link.getAttribute('href'))?.scrollIntoView({ behavior: 'smooth' });
-      document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
-      link.classList.add('active');
+      showSection(link.getAttribute('href').slice(1));
     });
   });
 
-  const sections = document.querySelectorAll('section[id]');
-  const observer = new IntersectionObserver(entries => {
-    entries.forEach(e => {
-      if (e.isIntersecting) {
-        document.querySelectorAll('nav a').forEach(a => {
-          a.classList.toggle('active', a.getAttribute('href') === `#${e.target.id}`);
-        });
-      }
-    });
-  }, { threshold: 0.3, rootMargin: '-80px 0px 0px 0px' });
-  sections.forEach(s => observer.observe(s));
+  // show initial section from hash or default to athletes
+  const initial = (location.hash.slice(1)) || 'athletes';
+  showSection(initial);
 }
 
 // ===== RACE SCHEDULE =====
@@ -1364,7 +1368,7 @@ function startCountdown() {
     if (boxesEl) boxesEl.innerHTML = `
       <div class="countdown-done">
         🎉 כל הכבוד על הסיום! התוצאות עלו ללשונית התחרויות
-        <button type="button" class="btn-view-results" onclick="document.getElementById('races').scrollIntoView({behavior:'smooth'})">
+        <button type="button" class="btn-view-results" onclick="showSection('races')">
           צפה בתוצאות 🏆
         </button>
       </div>`;

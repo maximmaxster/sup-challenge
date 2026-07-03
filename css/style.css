@@ -1395,9 +1395,26 @@ footer span {
   to { background-position: 200% 0; }
 }
 
-/* Section tabs for navigation */
+/* Section tabs — fade transition navigation */
 .section-tab {
-  scroll-margin-top: 80px;
+  display: none;
+  opacity: 0;
+  transform: translateY(12px);
+  animation: none;
+}
+
+.section-tab.section-active {
+  display: block;
+  animation: sectionFadeIn 0.38s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+}
+
+@keyframes sectionFadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .section-tab.section-active { animation: none; opacity: 1; transform: none; }
 }
 
 /* Empty state */

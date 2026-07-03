@@ -37,7 +37,7 @@ GMAIL_PASSWORD = os.getenv("GMAIL_PASSWORD", "")
 
 # מייל לכל ספורטאי — מקסים כבר מקבל מה-tracker, כאן רק ויקטור
 ATHLETE_EMAILS = {
-    "ויקטור מוראטוב": "Victormuratov@gmail.com",
+    "ויקטור מורטוב": "Victormuratov@gmail.com",
 }
 
 DAYS_HEB = {0:"שני",1:"שלישי",2:"רביעי",3:"חמישי",4:"שישי",5:"שבת",6:"ראשון"}
@@ -59,7 +59,7 @@ ATHLETES = [
         ],
     },
     {
-        "name": os.getenv("ATHLETE2_NAME", "ויקטור מוראטוב"),
+        "name": os.getenv("ATHLETE2_NAME", "ויקטור מורטוב"),
         "email": os.getenv("GARMIN_EMAIL_2"),
         "password": os.getenv("GARMIN_PASSWORD_2"),
         "output": Path("data/athlete2.json"),
