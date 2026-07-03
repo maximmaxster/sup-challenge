@@ -372,11 +372,11 @@ def save_json(data: dict, path: Path):
     # Preserve fields that sync doesn't touch (e.g. races, dob, sup_start)
     if path.exists():
         try:
-            with open(path, "r", encoding="utf-8") as f:
+            with open(path, "r", encoding="utf-8-sig") as f:
                 existing = json.load(f)
-            for key in ("races", "dob", "sup_start", "competitions"):
-                if key in existing:
-                    data.setdefault(key, existing[key])
+            for key in ("races", "dob", "sup_start", "competitions", "birthdate", "age"):
+                if existing.get(key):
+                    data[key] = existing[key]
         except Exception:
             pass
     with open(path, "w", encoding="utf-8") as f:
