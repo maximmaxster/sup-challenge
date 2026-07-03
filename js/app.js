@@ -188,7 +188,6 @@ function renderAll() {
   populateYearFilter();
   renderWorkoutsTable();
   renderProgress();
-  renderGallery();
   renderRaces(1);
 }
 
