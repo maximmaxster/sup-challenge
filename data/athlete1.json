@@ -1,7 +1,7 @@
 {
   "name": "מקסים רפופורט",
   "profile_image": "images/athlete1_profile.jpg",
-  "last_sync": "2026-07-02T07:02:30Z",
+  "last_sync": "2026-07-03T13:17:06Z",
   "workouts": [
     {
       "id": "23437458148",
@@ -5031,6 +5031,6 @@
       "notes": ""
     }
   ],
-  "birthdate": "16.06.1982",
-  "sup_start": "01.06.2021"
+  "sup_start": "01.06.2021",
+  "birthdate": "16.06.1982"
 }
