@@ -422,16 +422,18 @@ section {
 }
 
 .bio-lbl {
-  font-size: 0.68rem;
-  color: var(--text-muted);
-  font-weight: 500;
+  font-size: 0.65rem;
+  color: var(--text-secondary);
+  font-weight: 600;
   white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .bio-val {
-  font-size: 1.05rem;
+  font-size: 1rem;
   font-weight: 700;
-  color: var(--text-primary);
+  color: #fff;
 }
 
 /* ── Competitions ── */
@@ -516,8 +518,7 @@ section {
   position: relative;
 }
 .athlete-period::before {
-  content: '📅';
-  font-size: 0.75rem;
+  content: '';
 }
 
 .athlete-stats-grid {
@@ -558,105 +559,88 @@ section {
   letter-spacing: 0.06em;
 }
 
-/* ===== COMPARISON TABLE ===== */
-.comparison-table {
-  width: 100%;
-  border-collapse: collapse;
-  overflow: hidden;
-  border-radius: 16px;
+/* ===== COMPACT COMPARISON ===== */
+.cmp-header {
+  margin-top: 2rem;
+  margin-bottom: 0.75rem;
 }
-
-.comparison-table thead th {
-  padding: 1rem 1.5rem;
-  font-size: 0.85rem;
-  font-weight: 700;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  color: var(--text-secondary);
-  background: rgba(0, 212, 255, 0.05);
-  border-bottom: 1px solid var(--border-color);
-}
-
-.comparison-table thead th:first-child { text-align: right; }
-.comparison-table thead th:last-child { text-align: left; }
-.comparison-table thead th:nth-child(2) { text-align: center; color: var(--text-muted); }
-
-.comparison-table tbody tr {
-  transition: var(--transition);
-}
-
-.comparison-table tbody tr:hover {
-  background: rgba(0, 212, 255, 0.04);
-}
-
-.comparison-table tbody tr:not(:last-child) {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-}
-
-.comparison-table td {
-  padding: 1.1rem 1.5rem;
-  font-size: 0.95rem;
-}
-
-.comp-value {
-  font-size: 1.15rem;
-  font-weight: 700;
-}
-
-.comp-value.winner { color: var(--accent-green); }
-.comp-value.loser { color: var(--text-secondary); }
-
-.comp-category {
-  text-align: center;
-  color: var(--text-secondary);
-  font-size: 0.82rem;
-  font-weight: 600;
-  letter-spacing: 0.5px;
-  vertical-align: middle;
-}
-
-.comp-cat-badge {
-  display: inline-block;
-  padding: 0.35rem 1.1rem;
-  border-radius: 20px;
-  font-size: 0.82rem;
-  font-weight: 700;
-  letter-spacing: 0.6px;
-  color: #fff;
-  background: linear-gradient(135deg, rgba(0,212,255,0.15), rgba(0,153,187,0.1));
-  border: 1px solid rgba(0, 212, 255, 0.4);
-  white-space: nowrap;
-  box-shadow: 0 0 10px rgba(0,212,255,0.15), inset 0 1px 0 rgba(255,255,255,0.06);
-  transition: var(--transition);
-}
-
-.comparison-table tbody tr:hover .comp-cat-badge {
-  border-color: var(--accent-cyan);
-  background: linear-gradient(135deg, rgba(0,212,255,0.22), rgba(0,153,187,0.15));
-  box-shadow: 0 0 18px rgba(0,212,255,0.3), inset 0 1px 0 rgba(255,255,255,0.1);
-  transform: scale(1.05);
-}
-
-.last-workout-meta {
+.cmp-title-row {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 0.75rem;
-  margin-bottom: 1.2rem;
-  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-bottom: 0.5rem;
 }
+.cmp-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+}
+.cmp-names-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 0.25rem;
+}
+.cmp-name {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #fff;
+}
+.cmp-name-vs {
+  font-size: 0.65rem;
+  font-weight: 800;
+  color: var(--text-muted);
+  letter-spacing: 0.1em;
+}
+
+/* Compact metric grid */
+.cmp-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.cmp-row {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0.5rem;
+  border-radius: 8px;
+  transition: background 0.15s;
+}
+.cmp-row:hover { background: rgba(255,255,255,0.04); }
+.cmp-v1 { text-align: right; font-size: 0.92rem; font-weight: 700; }
+.cmp-v2 { text-align: left;  font-size: 0.92rem; font-weight: 700; }
+.cmp-lbl {
+  text-align: center;
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  white-space: nowrap;
+  min-width: 56px;
+}
+.cmp-win { color: var(--accent-green); }
+.cmp-lose { color: var(--text-secondary); }
+.cmp-tie { color: #fff; }
 
 .lw-type-badge {
   display: inline-block;
-  font-size: 0.78rem;
+  font-size: 0.72rem;
   font-weight: 700;
-  letter-spacing: 0.08em;
-  padding: 0.3rem 0.9rem;
+  letter-spacing: 0.06em;
+  padding: 0.18rem 0.7rem;
   border-radius: 20px;
-  background: linear-gradient(135deg, rgba(0,212,255,0.18), rgba(0,212,255,0.06));
   border: 1px solid rgba(0,212,255,0.35);
   color: var(--accent-cyan);
   text-transform: uppercase;
+}
+.lw-date {
+  font-size: 0.72rem;
+  color: var(--text-muted);
 }
 
 .lw-date {

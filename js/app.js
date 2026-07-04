@@ -231,7 +231,7 @@ function renderAthleteCards() {
 
   // Update period label (month + year) above stats
   const now = new Date();
-  const periodLabel = `${getMonthName()} ${now.getFullYear()}`;
+  const periodLabel = `סיכום חודש ${getMonthName()} ${now.getFullYear()}`;
   const p1 = document.getElementById('a1-period');
   const p2 = document.getElementById('a2-period');
   if (p1) p1.textContent = periodLabel;
@@ -266,7 +266,6 @@ function tryLoadAvatar(id, src, fallback) {
 
 // ===== LAST WORKOUT COMPARISON =====
 function renderComparisonTable() {
-  // Rule: take Maxim's most recent workout, show Victor's workout from the SAME day
   const lastDate = athlete1Data.workouts
     .filter(w => w.distance > 0)
     .sort((a, b) => parseDMY(b.date) - parseDMY(a.date))[0]?.date || '';
@@ -274,60 +273,42 @@ function renderComparisonTable() {
   const lw1 = athlete1Data.workouts.find(w => w.date === lastDate) || {};
   const lw2 = athlete2Data.workouts.find(w => w.date === lastDate && w.distance > 0) || {};
 
-  // Show type badge + date
   const typeEl = document.getElementById('last-workout-type');
   const dateEl = document.getElementById('last-workout-date');
-  const workoutType = lw1.type || '';
-  if (typeEl) typeEl.textContent = workoutType;
+  if (typeEl) typeEl.textContent = lw1.type || '';
   if (dateEl) dateEl.textContent = lastDate || '';
 
   const metrics = [
-    { label: 'מרחק', format: v => v ? v.toFixed(2) + ' ק"מ' : '—', fn: w => w.distance || 0 },
-    { label: 'זמן', format: v => v || '—', fn: w => w.duration || '' },
-    { label: 'מהירות', format: v => v ? v.toFixed(1) + ' קמ"ש' : '—', fn: w => w.avg_speed || 0 },
-    { label: 'דופק', format: v => v ? v + ' BPM' : '—', fn: w => w.avg_hr || 0, lowerBetter: true },
-    { label: 'SPM', format: v => v ? v : '—', fn: w => w.spm || 0 },
-    { label: 'DPS', format: v => v ? v.toFixed(2) + ' מ\'' : '—', fn: w => w.dps || 0 },
-    { label: 'זמן Z3', format: v => v && v !== '0:00' ? v : '—', fn: w => w.z3 || '' },
-    { label: 'זמן Z4', format: v => v && v !== '0:00' ? v : '—', fn: w => w.z4 || '' },
-    { label: 'זמן Z5', format: v => v && v !== '0:00' ? v : '—', fn: w => w.z5 || '' },
+    { label: 'מרחק', fmt: v => v ? v.toFixed(1) + ' ק"מ' : '—', num: w => w.distance || 0 },
+    { label: 'זמן',  fmt: v => v || '—', num: w => 0, raw: w => w.duration || '' },
+    { label: 'מהירות', fmt: v => v ? v.toFixed(1) : '—', num: w => w.avg_speed || 0 },
+    { label: 'דופק', fmt: v => v ? v + '' : '—', num: w => w.avg_hr || 0, lower: true },
+    { label: 'SPM',  fmt: v => v ? v + '' : '—', num: w => w.spm || 0 },
+    { label: 'DPS',  fmt: v => v ? v.toFixed(2) : '—', num: w => w.dps || 0 },
+    { label: 'Z4',   fmt: v => v && v !== '0:00' ? v : '—', num: w => 0, raw: w => w.z4 || '' },
+    { label: 'Z5',   fmt: v => v && v !== '0:00' ? v : '—', num: w => 0, raw: w => w.z5 || '' },
   ];
 
-  const tbody = document.getElementById('comparison-tbody');
-  tbody.innerHTML = '';
-
-  metrics.forEach(m => {
-    const v1 = m.fn(lw1);
-    const v2 = m.fn(lw2);
-    const numV1 = typeof v1 === 'number' ? v1 : 0;
-    const numV2 = typeof v2 === 'number' ? v2 : 0;
-    const hasNums = numV1 > 0 || numV2 > 0;
-    const win1 = hasNums ? (m.lowerBetter ? (numV1 > 0 && numV2 > 0 ? numV1 <= numV2 : numV1 > 0) : numV1 >= numV2) : true;
-    const win2 = !win1 && numV2 > 0;
-    const maxV = Math.max(numV1, numV2) || 1;
-    const bar1 = numV1 ? (numV1 / maxV * 100).toFixed(0) : 0;
-    const bar2 = numV2 ? (numV2 / maxV * 100).toFixed(0) : 0;
-
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>
-        <div class="comp-value ${win1 && numV1 > 0 ? 'winner' : 'loser'}">${m.format(v1)}</div>
-        ${hasNums ? `<div class="comp-bar-container"><div class="comp-bar" style="direction:ltr">
-          <div class="comp-bar-fill ${win1 ? 'winner' : 'loser'}" style="width:${bar1}%"></div>
-        </div></div>` : ''}
-      </td>
-      <td class="comp-category">
-        <span class="comp-cat-badge">${m.label}</span>
-        ${win1 && numV1 > 0 ? '<br><small style="color:var(--accent-green)">◀</small>' : win2 ? '<br><small style="color:var(--accent-green)">▶</small>' : ''}
-      </td>
-      <td>
-        <div class="comp-value ${win2 ? 'winner' : 'loser'}">${m.format(v2)}</div>
-        ${hasNums ? `<div class="comp-bar-container"><div class="comp-bar">
-          <div class="comp-bar-fill ${win2 ? 'winner' : 'loser'}" style="width:${bar2}%"></div>
-        </div></div>` : ''}
-      </td>`;
-    tbody.appendChild(tr);
-  });
+  const grid = document.getElementById('comparison-tbody');
+  grid.innerHTML = metrics.map(m => {
+    const n1 = m.num(lw1), n2 = m.num(lw2);
+    const t1 = m.raw ? m.raw(lw1) : null;
+    const t2 = m.raw ? m.raw(lw2) : null;
+    const hasNum = n1 > 0 || n2 > 0;
+    let cls1 = 'cmp-tie', cls2 = 'cmp-tie';
+    if (hasNum && n1 !== n2) {
+      const w1 = m.lower ? n1 < n2 : n1 > n2;
+      cls1 = w1 ? 'cmp-win' : 'cmp-lose';
+      cls2 = w1 ? 'cmp-lose' : 'cmp-win';
+    }
+    const disp1 = m.raw ? m.fmt(t1) : m.fmt(n1);
+    const disp2 = m.raw ? m.fmt(t2) : m.fmt(n2);
+    return `<div class="cmp-row">
+      <span class="cmp-v1 ${cls1}">${disp1}</span>
+      <span class="cmp-lbl">${m.label}</span>
+      <span class="cmp-v2 ${cls2}">${disp2}</span>
+    </div>`;
+  }).join('');
 }
 
 // ===== CHARTS =====

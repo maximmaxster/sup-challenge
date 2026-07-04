@@ -119,9 +119,9 @@
           </div>
         </div>
         <div class="athlete-bio-row">
-          <div class="bio-chip"><span class="bio-lbl">🎂 ת. לידה</span><span class="bio-val" id="a1-dob">—</span></div>
-          <div class="bio-chip"><span class="bio-lbl">👤 גיל</span><span class="bio-val" id="a1-age">—</span></div>
-          <div class="bio-chip"><span class="bio-lbl">🏄 SUP מאז</span><span class="bio-val" id="a1-sup-start">—</span></div>
+          <div class="bio-chip"><span class="bio-lbl">ת. לידה</span><span class="bio-val" id="a1-dob">—</span></div>
+          <div class="bio-chip"><span class="bio-lbl">גיל</span><span class="bio-val" id="a1-age">—</span></div>
+          <div class="bio-chip"><span class="bio-lbl">SUP מאז</span><span class="bio-val" id="a1-sup-start">—</span></div>
         </div>
         <div class="athlete-period" id="a1-period">טוען...</div>
         <div class="athlete-stats-grid">
@@ -182,25 +182,19 @@
     </div>
 
     <!-- Last Workout Comparison — embedded in ראשי -->
-    <h2 class="section-title" style="margin-top:2rem">השוואת האימון האחרון</h2>
-    <div class="last-workout-meta">
-      <span class="lw-type-badge" id="last-workout-type"></span>
-      <span class="lw-date" id="last-workout-date"></span>
+    <div class="cmp-header">
+      <div class="cmp-title-row">
+        <span class="cmp-title">אימון אחרון</span>
+        <span class="lw-type-badge" id="last-workout-type"></span>
+        <span class="lw-date" id="last-workout-date"></span>
+      </div>
+      <div class="cmp-names-row">
+        <span id="athlete1-name-table" class="cmp-name cmp-name-1">—</span>
+        <span class="cmp-name-vs">VS</span>
+        <span id="athlete2-name-table" class="cmp-name cmp-name-2">—</span>
+      </div>
     </div>
-    <div class="glass-card" style="overflow:hidden">
-      <table class="comparison-table">
-        <thead>
-          <tr>
-            <th id="athlete1-name-table" scope="col" style="width:38%">חותר 1</th>
-            <th scope="col" style="width:24%">קטגוריה</th>
-            <th id="athlete2-name-table" scope="col" style="width:38%;text-align:left">חותר 2</th>
-          </tr>
-        </thead>
-        <tbody id="comparison-tbody">
-          <tr><td colspan="3" class="empty-state"><div class="empty-icon">⏳</div><p>טוען...</p></td></tr>
-        </tbody>
-      </table>
-    </div>
+    <div id="comparison-tbody" class="cmp-grid"></div>
   </section>
 
   <!-- ========== SECTION 3: CHARTS ========== -->
