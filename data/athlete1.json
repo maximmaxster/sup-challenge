@@ -5052,6 +5052,24 @@
       "z4": null,
       "z5": null,
       "notes": ""
+    },
+    {
+      "category": "local",
+      "name": "ליגה סאפ ישראלי",
+      "location": "ירקון",
+      "discipline": "טכני",
+      "date": "27.06.2026",
+      "distance_km": 1000,
+      "duration": "00:07:58.71",
+      "place": 4,
+      "avg_speed": null,
+      "avg_hr": null,
+      "spm": null,
+      "dps": null,
+      "z3": null,
+      "z4": null,
+      "z5": null,
+      "notes": ""
     }
   ],
   "sup_start": "01.06.2021",
