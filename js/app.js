@@ -34,35 +34,6 @@ function renderAthleteBio(prefix, data) {
   if (el('dob')) el('dob').textContent = bday || '—';
   if (el('age')) el('age').textContent = bday ? calcAge(bday) : '—';
   if (el('sup-start')) el('sup-start').textContent = data.sup_start || '—';
-
-  const compEl = document.getElementById(`${prefix}-competitions`);
-  if (!compEl) return;
-
-  // Use races array (full data); fallback to legacy competitions
-  const races = data.races || [];
-  if (!races.length) { compEl.innerHTML = ''; return; }
-
-  const sorted = [...races].sort((a, b) => parseDMY(b.date) - parseDMY(a.date));
-  const catIcon  = { world: '🌍', local: '🏅' };
-  const catLabel = { world: 'עולמי', local: 'בארץ' };
-
-  // build HTML as string (all values from trusted JSON, not user input)
-  const rows = sorted.map(r => {
-    const [d, m, y] = (r.date || '').split('.');
-    const dateLbl = m && y ? `${m}/${y}` : (r.date || '');
-    const distLbl = r.distance_km ? `${r.distance_km} ק"מ` : '';
-    const icon    = catIcon[r.category]  || '🏆';
-    const badge   = catLabel[r.category] || r.category || '';
-    const loc     = r.location || '';
-    const details = loc + (distLbl ? ' · ' + distLbl : '');
-    return `<div class="comp-entry">` +
-      `<span class="comp-name">${r.name}</span>` +
-      `<span class="comp-date">${dateLbl}</span>` +
-      `<span class="comp-details">${details}</span>` +
-      `<span class="comp-cat ${r.category}">${icon} ${badge}</span>` +
-      `</div>`;
-  }).join('');
-  compEl.innerHTML = `<div class="comp-list-title">🏆 תחרויות</div>` + rows;
 }
 
 // ===== DATE HELPERS (DD.MM.YYYY format) =====
@@ -1472,6 +1443,7 @@ function showSection(id) {
   // After section is visible: resize existing charts + re-render section-specific ones
   requestAnimationFrame(() => {
     window.dispatchEvent(new Event('resize'));
+    if (id === 'athletes')  { renderComparisonTable(); }
     if (id === 'progress')  { renderTrendCharts(); renderProgress(); }
     if (id === 'charts')    { renderSpeedChart(currentRange.speed); renderDistanceChart(currentRange.distance); renderHrChart(currentRange.hr); renderDpsChart(currentRange.dps); }
     if (id === 'races')     { renderRaces(currentRacesAthlete || 1); }
