@@ -232,7 +232,7 @@ section {
 }
 
 .section-title {
-  font-family: 'David Libre', 'David', serif;
+  font-family: Arial, 'Arial Hebrew', sans-serif;
   font-size: 1.25rem;
   font-weight: 700;
   color: #fff;
@@ -555,7 +555,7 @@ section {
 
 /* ===== COMPACT COMPARISON ===== */
 .cmp-header {
-  margin-top: 2rem;
+  margin-top: 3.5rem;
   margin-bottom: 0.6rem;
   text-align: center;
 }
@@ -573,53 +573,26 @@ section {
   letter-spacing: 0.1em;
   color: var(--text-muted);
 }
-.cmp-names-row {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.4rem 0.5rem;
-  border-bottom: 1px solid rgba(255,255,255,0.08);
-  margin: 0 auto 0.25rem;
-  max-width: 420px;
-}
-.cmp-name {
-  font-size: 0.88rem;
-  font-weight: 700;
-  color: #fff;
-}
-.cmp-name-1 { text-align: right; }
-.cmp-name-2 { text-align: left; }
-.cmp-name-vs {
-  font-size: 0.6rem;
-  font-weight: 800;
-  color: var(--text-muted);
-  letter-spacing: 0.1em;
-  text-align: center;
-}
-
 /* Comparison — shared column layout */
 .cmp-table-wrap {
-  max-width: 420px;
+  max-width: 520px;
   margin: 0 auto;
 }
 .cmp-names-row {
   display: grid;
-  grid-template-columns: 1fr 72px 1fr;
+  grid-template-columns: 1fr 80px 1fr;
   align-items: center;
-  padding: 0.4rem 0.5rem 0.8rem;
-  max-width: none;
-  margin: 0;
+  padding: 0.5rem 0.5rem 1rem;
 }
 .cmp-name {
-  font-size: 1.05rem;
+  font-size: 1.2rem;
   font-weight: 700;
   color: #fff;
 }
 .cmp-name-1 { text-align: right; }
 .cmp-name-2 { text-align: left; }
 .cmp-name-vs {
-  font-size: 0.62rem;
+  font-size: 0.65rem;
   font-weight: 800;
   color: var(--text-muted);
   text-align: center;
@@ -629,32 +602,32 @@ section {
 .cmp-grid {
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: 2px;
 }
 .cmp-row {
   display: grid;
-  grid-template-columns: 1fr 72px 1fr;
+  grid-template-columns: 1fr 80px 1fr;
   align-items: center;
-  padding: 0.38rem 0.5rem;
+  padding: 0.55rem 0.5rem;
   border-radius: 6px;
   transition: background 0.15s;
 }
 .cmp-row:hover { background: rgba(255,255,255,0.04); }
 .cmp-v1 {
   text-align: right;
-  font-size: 0.95rem;
+  font-size: 1.15rem;
   font-weight: 700;
 }
 .cmp-v2 {
   text-align: left;
-  font-size: 0.95rem;
+  font-size: 1.15rem;
   font-weight: 700;
 }
 .cmp-lbl {
   text-align: center;
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   font-weight: 600;
-  color: rgba(255,255,255,0.65);
+  color: rgba(255,255,255,0.7);
   white-space: nowrap;
 }
 .cmp-win  { color: var(--accent-green); }
