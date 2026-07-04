@@ -562,13 +562,15 @@ section {
 /* ===== COMPACT COMPARISON ===== */
 .cmp-header {
   margin-top: 2rem;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.6rem;
+  text-align: center;
 }
 .cmp-title-row {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 0.6rem;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.6rem;
 }
 .cmp-title {
   font-size: 0.72rem;
@@ -578,54 +580,58 @@ section {
   color: var(--text-muted);
 }
 .cmp-names-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 0.25rem;
-}
-.cmp-name {
-  font-size: 0.9rem;
-  font-weight: 700;
-  color: #fff;
-}
-.cmp-name-vs {
-  font-size: 0.65rem;
-  font-weight: 800;
-  color: var(--text-muted);
-  letter-spacing: 0.1em;
-}
-
-/* Compact metric grid */
-.cmp-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-.cmp-row {
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.45rem 0.5rem;
-  border-radius: 8px;
+  padding: 0.4rem 0.5rem;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  margin-bottom: 0.25rem;
+}
+.cmp-name {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #fff;
+}
+.cmp-name-1 { text-align: right; }
+.cmp-name-2 { text-align: left; }
+.cmp-name-vs {
+  font-size: 0.6rem;
+  font-weight: 800;
+  color: var(--text-muted);
+  letter-spacing: 0.1em;
+  text-align: center;
+}
+
+/* 3-column metric grid */
+.cmp-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.cmp-row {
+  display: grid;
+  grid-template-columns: 1fr 90px 1fr;
+  align-items: center;
+  padding: 0.42rem 0.5rem;
+  border-radius: 6px;
   transition: background 0.15s;
 }
 .cmp-row:hover { background: rgba(255,255,255,0.04); }
-.cmp-v1 { text-align: right; font-size: 0.92rem; font-weight: 700; }
-.cmp-v2 { text-align: left;  font-size: 0.92rem; font-weight: 700; }
+.cmp-v1 { text-align: right; font-size: 0.9rem; font-weight: 700; }
+.cmp-v2 { text-align: left;  font-size: 0.9rem; font-weight: 700; }
 .cmp-lbl {
   text-align: center;
-  font-size: 0.65rem;
+  font-size: 0.63rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--text-muted);
   white-space: nowrap;
-  min-width: 56px;
 }
-.cmp-win { color: var(--accent-green); }
-.cmp-lose { color: var(--text-secondary); }
-.cmp-tie { color: #fff; }
+.cmp-win  { color: var(--accent-green); }
+.cmp-lose { color: rgba(255,255,255,0.35); }
+.cmp-tie  { color: #fff; }
 
 .lw-type-badge {
   display: inline-block;
