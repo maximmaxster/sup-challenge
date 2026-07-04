@@ -586,7 +586,8 @@ section {
   gap: 0.5rem;
   padding: 0.4rem 0.5rem;
   border-bottom: 1px solid rgba(255,255,255,0.08);
-  margin-bottom: 0.25rem;
+  margin: 0 auto 0.25rem;
+  max-width: 420px;
 }
 .cmp-name {
   font-size: 0.88rem;
@@ -608,6 +609,8 @@ section {
   display: flex;
   flex-direction: column;
   gap: 1px;
+  max-width: 420px;
+  margin: 0 auto;
 }
 .cmp-row {
   display: grid;
@@ -618,8 +621,8 @@ section {
   transition: background 0.15s;
 }
 .cmp-row:hover { background: rgba(255,255,255,0.04); }
-.cmp-v1 { text-align: right; font-size: 0.9rem; font-weight: 700; }
-.cmp-v2 { text-align: left;  font-size: 0.9rem; font-weight: 700; }
+.cmp-v1 { text-align: center; font-size: 0.9rem; font-weight: 700; }
+.cmp-v2 { text-align: center; font-size: 0.9rem; font-weight: 700; }
 .cmp-lbl {
   text-align: center;
   font-size: 0.63rem;
