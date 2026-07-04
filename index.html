@@ -26,7 +26,7 @@
   <!-- ═══ Fonts ═══ -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&family=Barlow+Condensed:wght@600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&family=Barlow+Condensed:wght@600;700;800&family=David+Libre:wght@400;700&display=swap" rel="stylesheet">
 
   <!-- ═══ Assets ═══ -->
   <link rel="stylesheet" href="css/style.css">
@@ -183,19 +183,21 @@
     </div>
 
     <!-- Last Workout Comparison — embedded in ראשי -->
+    <h2 class="section-title">השוואת אימון אחרון</h2>
     <div class="cmp-header">
       <div class="cmp-title-row">
-        <span class="cmp-title">אימון אחרון</span>
         <span class="lw-type-badge" id="last-workout-type"></span>
         <span class="lw-date" id="last-workout-date"></span>
       </div>
+    </div>
+    <div class="cmp-table-wrap">
       <div class="cmp-names-row">
         <span id="athlete1-name-table" class="cmp-name cmp-name-1">—</span>
         <span class="cmp-name-vs">VS</span>
         <span id="athlete2-name-table" class="cmp-name cmp-name-2">—</span>
       </div>
+      <div id="comparison-tbody" class="cmp-grid"></div>
     </div>
-    <div id="comparison-tbody" class="cmp-grid"></div>
   </section>
 
   <!-- ========== SECTION 3: CHARTS ========== -->
@@ -293,7 +295,7 @@
 
   <!-- ========== SECTION 4: WORKOUTS TABLE ========== -->
   <section id="workouts" class="section-tab">
-    <h2 class="section-title">רשימת נתונים</h2>
+    <h2 class="section-title">רשימת אימונים</h2>
 
     <div class="filters-bar">
       <select id="filter-athlete" class="filter-select filter-athlete">
@@ -357,6 +359,8 @@
         <button class="prog-period-btn" data-period="q2">Q2</button>
         <button class="prog-period-btn" data-period="q3">Q3</button>
         <button class="prog-period-btn" data-period="q4">Q4</button>
+        <button class="prog-period-btn" data-period="h1">H1</button>
+        <button class="prog-period-btn" data-period="year">שנה</button>
       </div>
     </div>
 

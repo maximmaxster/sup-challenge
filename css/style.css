@@ -232,18 +232,16 @@ section {
 }
 
 .section-title {
-  font-family: var(--font-display);
-  font-size: 1rem;
+  font-family: 'David Libre', 'David', serif;
+  font-size: 1.25rem;
   font-weight: 700;
-  color: var(--accent-cyan);
-  text-transform: uppercase;
-  letter-spacing: 3px;
+  color: #fff;
+  letter-spacing: 1px;
   margin-bottom: 1.5rem;
   display: inline-block;
-  padding: 0.35rem 1.1rem;
-  border: 1px solid rgba(0,212,255,0.35);
+  padding: 0.4rem 1.4rem;
   border-radius: 6px;
-  background: rgba(0,212,255,0.06);
+  background: #d4610a;
 }
 
 .section-title::before { content: ''; }
@@ -600,45 +598,64 @@ section {
   text-align: center;
 }
 
-/* 3-column metric grid — compact, centered */
+/* Comparison — shared column layout */
+.cmp-table-wrap {
+  max-width: 420px;
+  margin: 0 auto;
+}
+.cmp-names-row {
+  display: grid;
+  grid-template-columns: 1fr 72px 1fr;
+  align-items: center;
+  padding: 0.4rem 0.5rem 0.8rem;
+  max-width: none;
+  margin: 0;
+}
+.cmp-name {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #fff;
+}
+.cmp-name-1 { text-align: right; }
+.cmp-name-2 { text-align: left; }
+.cmp-name-vs {
+  font-size: 0.62rem;
+  font-weight: 800;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+/* 3-column metric grid */
 .cmp-grid {
   display: flex;
   flex-direction: column;
   gap: 1px;
-  width: fit-content;
-  margin: 0 auto;
 }
 .cmp-row {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 72px 1fr;
   align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 0.38rem 0.75rem;
+  padding: 0.38rem 0.5rem;
   border-radius: 6px;
   transition: background 0.15s;
 }
 .cmp-row:hover { background: rgba(255,255,255,0.04); }
 .cmp-v1 {
   text-align: right;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   font-weight: 700;
-  min-width: 80px;
 }
 .cmp-v2 {
   text-align: left;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   font-weight: 700;
-  min-width: 80px;
 }
 .cmp-lbl {
   text-align: center;
-  font-size: 0.63rem;
+  font-size: 0.7rem;
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--text-muted);
+  color: rgba(255,255,255,0.65);
   white-space: nowrap;
-  min-width: 60px;
 }
 .cmp-win  { color: var(--accent-green); }
 .cmp-lose { color: rgba(255,255,255,0.35); }
