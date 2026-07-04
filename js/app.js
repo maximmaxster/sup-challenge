@@ -7,6 +7,68 @@ let athlete2Data = null;
 let charts = {};
 let currentRange = { speed: 'week', distance: 'week', hr: 'week', dps: 'week' };
 
+// ===== GITHUB API SAVE =====
+const GH_REPO  = 'maximmaxster/sup-challenge';
+const GH_FILES = { 1: 'data/athlete1.json', 2: 'data/athlete2.json' };
+
+function ghToken() { return localStorage.getItem('gh_token') || ''; }
+
+async function saveAthleteToGitHub(athleteNum) {
+  const token = ghToken();
+  if (!token) { promptGhToken(); return false; }
+
+  const path = GH_FILES[athleteNum];
+  const data = athleteNum === 1 ? athlete1Data : athlete2Data;
+  const content = JSON.stringify(data, null, 2);
+  const encoded = btoa(unescape(encodeURIComponent(content)));
+
+  try {
+    // 1. Get current SHA
+    const metaRes = await fetch(`https://api.github.com/repos/${GH_REPO}/contents/${path}`, {
+      headers: { Authorization: `token ${token}`, Accept: 'application/vnd.github.v3+json' }
+    });
+    if (!metaRes.ok) throw new Error(`GitHub auth failed (${metaRes.status})`);
+    const meta = await metaRes.json();
+
+    // 2. PUT updated file
+    const putRes = await fetch(`https://api.github.com/repos/${GH_REPO}/contents/${path}`, {
+      method: 'PUT',
+      headers: { Authorization: `token ${token}`, Accept: 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: `update races via UI`, content: encoded, sha: meta.sha })
+    });
+    if (!putRes.ok) throw new Error(`Save failed (${putRes.status})`);
+    return true;
+  } catch (err) {
+    console.error('GitHub save error:', err);
+    showSaveStatus('error', err.message);
+    return false;
+  }
+}
+
+function promptGhToken() {
+  const t = prompt('הזן GitHub Personal Access Token (נשמר רק בדפדפן שלך):');
+  if (t && t.trim()) {
+    localStorage.setItem('gh_token', t.trim());
+    showSaveStatus('info', 'Token נשמר. נסה שוב.');
+  }
+}
+
+function showSaveStatus(type, msg) {
+  let el = document.getElementById('gh-save-status');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'gh-save-status';
+    el.style.cssText = 'position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);padding:.6rem 1.4rem;border-radius:999px;font-size:.9rem;font-weight:600;z-index:9999;transition:opacity .4s';
+    document.body.appendChild(el);
+  }
+  const colors = { success: '#00D4FF', error: '#FF1744', info: '#FF8C00', saving: '#aaa' };
+  el.style.background = colors[type] || '#aaa';
+  el.style.color = type === 'success' || type === 'info' ? '#000' : '#fff';
+  el.style.opacity = '1';
+  el.textContent = msg;
+  if (type !== 'saving') setTimeout(() => { el.style.opacity = '0'; }, 3500);
+}
+
 const COLORS = {
   cyan: '#00D4FF',
   orange: '#FF6B35',
@@ -628,6 +690,10 @@ function setupRacesTableControls() {
       race.place       = parseInt(tr.querySelector('[name=place]').value) || null;
       const data = currentRacesAthlete === 2 ? athlete2Data : athlete1Data;
       renderRacesTable(data.races || []);
+      showSaveStatus('saving', 'שומר...');
+      saveAthleteToGitHub(currentRacesAthlete || 1).then(ok => {
+        if (ok) showSaveStatus('success', '✓ נשמר בהצלחה');
+      });
     });
   });
 }
@@ -709,18 +775,26 @@ function setupRacesButtons() {
     };
 
     const athleteVal = document.getElementById('race-athlete').value;
+    const toSave = [];
     if (athleteVal === '1' || athleteVal === 'both') {
       athlete1Data.races = athlete1Data.races || [];
       athlete1Data.races.push(newRace);
+      toSave.push(1);
     }
     if (athleteVal === '2' || athleteVal === 'both') {
       athlete2Data.races = athlete2Data.races || [];
       athlete2Data.races.push({...newRace});
+      toSave.push(2);
     }
 
     closeModal();
     document.getElementById('form-add-race').reset();
     renderRaces(currentRacesAthlete || 1);
+
+    showSaveStatus('saving', 'שומר...');
+    Promise.all(toSave.map(n => saveAthleteToGitHub(n))).then(results => {
+      if (results.every(Boolean)) showSaveStatus('success', '✓ נשמר בהצלחה');
+    });
   });
 }
 
