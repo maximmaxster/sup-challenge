@@ -5001,7 +5001,7 @@
     },
     {
       "category": "local",
-      "name": "תחרות 5 קמ ליגה ZAZIK",
+      "name": "תחרות  ליגה ZAZIK",
       "location": "שדות ים",
       "date": "30.05.2026",
       "distance_km": 5.73,
@@ -5013,7 +5013,7 @@
       "z3": "0:41",
       "z4": "4:07",
       "z5": "43:09",
-      "place": null,
+      "place": 4,
       "notes": "",
       "discipline": "לונג דיסטנס"
     },
