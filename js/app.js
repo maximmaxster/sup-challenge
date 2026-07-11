@@ -285,6 +285,7 @@ function renderComparisonTable() {
     { label: 'דופק', fmt: v => v ? v + '' : '—', num: w => w.avg_hr || 0, lower: true },
     { label: 'SPM',  fmt: v => v ? v + '' : '—', num: w => w.spm || 0 },
     { label: 'DPS',  fmt: v => v ? v.toFixed(2) : '—', num: w => w.dps || 0 },
+    { label: 'Z3',   fmt: v => v && v !== '0:00' ? v : '—', num: w => 0, raw: w => w.z3 || '' },
     { label: 'Z4',   fmt: v => v && v !== '0:00' ? v : '—', num: w => 0, raw: w => w.z4 || '' },
     { label: 'Z5',   fmt: v => v && v !== '0:00' ? v : '—', num: w => 0, raw: w => w.z5 || '' },
   ];
