@@ -221,11 +221,14 @@ def detect_type(z4_str: str, z5_str: str, avg_hr: int, dist_km: float, dur_sec: 
 
 
 # ===== PARSE ACTIVITY =====
-def parse_activity(act: dict, zones: list, cfg: dict = None, hr_values: list = None) -> dict:
+def parse_activity(act: dict, zones: list, cfg: dict = None, hr_values: list = None,
+                   shared_types: dict = None) -> dict:
     if cfg is None:
         cfg = {}
     if hr_values is None:
         hr_values = []
+    if shared_types is None:
+        shared_types = {}
     start_dt = datetime.fromisoformat(act["startTimeLocal"].replace("Z", ""))
     dist_km = round((act.get("distance") or 0) / 1000, 2)
     dur_sec = int(act.get("duration") or 0)
@@ -259,6 +262,9 @@ def parse_activity(act: dict, zones: list, cfg: dict = None, hr_values: list = N
     manual = cfg.get("manual_types", {})
     if date_str in manual:
         workout_type = manual[date_str]
+    elif date_str in shared_types:
+        # מתאמנים ביחד — ירש סיווג מספורטאי אחר באותו תאריך
+        workout_type = shared_types[date_str]
     else:
         workout_type = detect_type(z4, z5, avg_hr, dist_km, dur_sec,
                                    tempo_z4_sec=cfg.get("tempo_z4_sec", 900),
@@ -290,7 +296,7 @@ def parse_activity(act: dict, zones: list, cfg: dict = None, hr_values: list = N
 
 
 # ===== FETCH ATHLETE =====
-def fetch_athlete(cfg: dict) -> dict:
+def fetch_athlete(cfg: dict, shared_types: dict = None) -> dict:
     print(f"\n{'='*50}")
     print(f"שולף נתונים: {cfg['name']}")
     api = connect_garmin(cfg)
@@ -323,7 +329,7 @@ def fetch_athlete(cfg: dict) -> dict:
         hr_ts = get_hr_timeseries(api, act_id)
 
         try:
-            w = parse_activity(act, zones, cfg=cfg, hr_values=hr_ts)
+            w = parse_activity(act, zones, cfg=cfg, hr_values=hr_ts, shared_types=shared_types or {})
             workouts.append(w)
             print(f"    ✓ {w['date']}  {w['type']:10s}  {w['distance']}ק\"מ  {w['avg_speed']}קמ\"ש  Z4:{w['z4']}")
         except Exception as e:
@@ -688,14 +694,21 @@ def main():
         sys.exit(1)
 
     ok = True
-    for cfg in ATHLETES:
+    athlete1_types = {}  # תאריך → סוג, ממקסים — יועבר לויקטור
+    for i, cfg in enumerate(ATHLETES):
         to_email = ATHLETE_EMAILS.get(cfg["name"])
         try:
             # שמור תאריך אחרון לפני עדכון — לזיהוי אימונים חדשים
             last_date = get_latest_saved_date(cfg["output"])
 
-            data = fetch_athlete(cfg)
+            # ויקטור יורש סיווגים ממקסים לתאריכים משותפים
+            shared = athlete1_types if i > 0 else {}
+            data = fetch_athlete(cfg, shared_types=shared)
             save_json(data, cfg["output"])
+
+            # שמור מיפוי תאריך→סוג של מקסים לשימוש בויקטור
+            if i == 0:
+                athlete1_types = {w["date"]: w["type"] for w in data["workouts"]}
 
             # שלח מייל רק לספורטאים שמוגדרים ב-ATHLETE_EMAILS (ויקטור)
             # מקסים כבר מקבל מייל מ-garmin_sup_tracker.py
