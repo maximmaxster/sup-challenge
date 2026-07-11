@@ -112,26 +112,12 @@ def hms_to_sec(t: str) -> int:
 def connect_garmin(cfg: dict) -> garminconnect.Garmin:
     email = cfg["email"]
     token_dir = cfg["token_dir"]
+    token_dir.mkdir(parents=True, exist_ok=True)
     print(f"  מתחבר: {email}")
 
-    # Try saved tokens first
-    if token_dir.exists():
-        try:
-            api = garminconnect.Garmin()
-            api.login(tokenstore=str(token_dir))
-            print("  חיבור מטוקן שמור ✓")
-            return api
-        except Exception:
-            pass
-
-    # Fresh login
+    # login(tokenstore) — uses saved token if exists, fresh login + saves if not
     api = garminconnect.Garmin(email, cfg["password"])
-    api.login()
-    token_dir.mkdir(parents=True, exist_ok=True)
-    try:
-        api.garth.dump(str(token_dir))
-    except Exception:
-        pass
+    api.login(tokenstore=str(token_dir))
     print("  חיבור הצליח ✓")
     return api
 
