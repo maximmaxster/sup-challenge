@@ -75,10 +75,7 @@ ATHLETES = [
             "01.07.2026": "ספרינטים",
             "22.06.2026": "ספרינטים",
         },
-        "tempo_z4_sec": 1200,  # >20 דקות = טמפו (ויקטור) — אך ראה גם long_z4_sec
-        "long_z4_sec":  1500,  # Z4<25 דק' + dist>11 + dur>1:40 → אירובי ארוך
-        "long_min_dist": 11,
-        "long_min_dur":  6000, # 100 דק' = 1:40:00
+        "tempo_z4_sec": 900,   # >15 דקות = טמפו (זהה למקסים)
         # IDs of race activities to exclude from workouts:
         "race_ids": [
             "23062800478",   # 30.05.2026 ZAZIK race
