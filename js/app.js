@@ -220,6 +220,7 @@ function renderAll() {
   renderCharts();
   populateYearFilter();
   renderWorkoutsTable();
+  renderAnnualLibrary([...(athlete1Data?.workouts||[]), ...(athlete2Data?.workouts||[])]);
   renderProgress();
   renderRaces(1);
 }
@@ -253,6 +254,52 @@ function setAthleteWeekStats(prefix, workouts, dist) {
   document.getElementById(`${prefix}-sessions`).textContent = realWorkouts.length;
   const topSpeed = maxVal(workouts, 'avg_speed');
   document.getElementById(`${prefix}-maxspeed`).textContent = topSpeed ? topSpeed.toFixed(1) + ' קמ"ש' : '—';
+
+  // קוביות סוגי אימון לחודש הנוכחי
+  const TYPE_IDS = { 'אירובי': 'aerobic', 'אירובי ארוך': 'long', 'טמפו': 'tempo', 'ספרינטים': 'sprint' };
+  const counts = { aerobic: 0, long: 0, tempo: 0, sprint: 0 };
+  realWorkouts.forEach(w => { const k = TYPE_IDS[w.type]; if (k) counts[k]++; });
+  Object.entries(counts).forEach(([k, v]) => {
+    const el = document.getElementById(`${prefix}-t-${k}`);
+    if (el) el.textContent = v;
+  });
+}
+
+const MONTHS_HEB = ['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'];
+const ANNUAL_TYPES = ['אירובי','אירובי ארוך','טמפו','ספרינטים'];
+
+function renderAnnualLibrary(allWorkouts) {
+  const el = document.getElementById('annual-library-table');
+  if (!el) return;
+  const year = new Date().getFullYear();
+  // count per type per month
+  const grid = {};
+  ANNUAL_TYPES.forEach(t => {
+    grid[t] = Array(12).fill(0);
+  });
+  allWorkouts.forEach(w => {
+    if (!w.distance || w.distance === 0) return;
+    const d = parseDMY(w.date);
+    if (!d || d.getFullYear() !== year) return;
+    if (grid[w.type]) grid[w.type][d.getMonth()]++;
+  });
+
+  const headerCols = MONTHS_HEB.map((m, i) => `<th>${m}<br><span style="font-size:0.6rem;opacity:.6">${String(year).slice(2)}</span></th>`).join('');
+  const rows = ANNUAL_TYPES.map(t => {
+    const total = grid[t].reduce((a, b) => a + b, 0);
+    const cells = grid[t].map(c => `<td class="${c === 0 ? 'al-zero' : 'al-val'}">${c}</td>`).join('');
+    return `<tr><td class="al-type">${t}</td>${cells}<td class="al-total">${total}</td></tr>`;
+  }).join('');
+
+  el.innerHTML = `
+    <table class="annual-library">
+      <thead><tr>
+        <th class="al-type-hdr">סוג אימון</th>
+        ${headerCols}
+        <th class="al-total-hdr">סה"כ</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>`;
 }
 
 function tryLoadAvatar(id, src, fallback) {
@@ -1517,6 +1564,7 @@ function showSection(id) {
     if (id === 'progress')  { renderTrendCharts(); renderProgress(); }
     if (id === 'charts')    { renderSpeedChart(currentRange.speed); renderDistanceChart(currentRange.distance); renderHrChart(currentRange.hr); renderDpsChart(currentRange.dps); }
     if (id === 'races')     { renderRaces(currentRacesAthlete || 1); }
+    if (id === 'workouts')  { renderAnnualLibrary([...(athlete1Data?.workouts||[]), ...(athlete2Data?.workouts||[])]); }
   });
 }
 

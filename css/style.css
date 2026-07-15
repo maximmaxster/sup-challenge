@@ -879,6 +879,74 @@ section {
 .type-long { background: rgba(124, 77, 255, 0.12); color: #B39DDB; }
 .type-tempo { background: rgba(255, 107, 53, 0.12); color: var(--accent-orange); }
 .type-sprints { background: rgba(255, 214, 0, 0.12); color: #FFD600; }
+.type-sprint  { background: rgba(255, 214, 0, 0.12); color: #FFD600; }
+
+/* ===== TYPE COUNT BOXES ===== */
+.type-counts-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+.type-count-box {
+  border-radius: 8px;
+  padding: 0.5rem 0.25rem;
+  text-align: center;
+  border: 1px solid rgba(255,255,255,0.08);
+}
+.tc-val {
+  font-size: 1.4rem;
+  font-weight: 700;
+  line-height: 1;
+}
+.tc-lbl {
+  font-size: 0.62rem;
+  opacity: 0.75;
+  margin-top: 0.2rem;
+}
+
+/* ===== ANNUAL LIBRARY TABLE ===== */
+.annual-table-wrap {
+  overflow-x: auto;
+  margin-top: 1.5rem;
+  margin-bottom: 1rem;
+}
+.annual-library {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.78rem;
+  direction: rtl;
+}
+.annual-library th,
+.annual-library td {
+  padding: 0.45rem 0.5rem;
+  text-align: center;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+.annual-library thead tr {
+  background: rgba(255,255,255,0.07);
+}
+.al-type-hdr,
+.al-total-hdr {
+  font-weight: 700;
+  white-space: nowrap;
+  color: rgba(255,255,255,0.9);
+}
+.al-type {
+  text-align: right;
+  font-weight: 600;
+  white-space: nowrap;
+  padding-right: 0.75rem;
+}
+.al-val { color: rgba(255,255,255,0.85); }
+.al-zero { color: rgba(255,255,255,0.25); }
+.al-total {
+  font-weight: 700;
+  color: var(--accent-cyan);
+}
+.annual-library tbody tr:nth-child(odd) {
+  background: rgba(255,255,255,0.03);
+}
 
 .location-icon { margin-left: 0.3rem; }
 
