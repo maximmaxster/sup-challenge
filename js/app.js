@@ -554,12 +554,18 @@ function renderWorkoutsTable(filterAthlete = 'all', filterType = 'all', filterLo
   tbody.innerHTML = '';
 
   if (!filtered.length) {
-    tbody.innerHTML = '<tr><td colspan="13" class="empty-state"><div class="empty-icon">🌊</div><p>אין אימונים תואמים לפילטר</p></td></tr>';
+    tbody.innerHTML = '<tr><td colspan="14" class="empty-state"><div class="empty-icon">🌊</div><p>אין אימונים תואמים לפילטר</p></td></tr>';
     return;
   }
 
   const typeClass = { 'אירובי': 'row-aerobic', 'אירובי ארוך': 'row-long-aerobic', 'טמפו': 'row-tempo', 'ספרינטים': 'row-sprints' };
   const typeBadge = { 'אירובי': 'type-aerobic', 'אירובי ארוך': 'type-long', 'טמפו': 'type-tempo', 'ספרינטים': 'type-sprints' };
+
+  // session number = unique date rank (descending), same number for both athletes on same date
+  const uniqueDates = [...new Set(filtered.map(w => w.date))];
+  const dateToNum = {};
+  uniqueDates.forEach((d, i) => { dateToNum[d] = i + 1; });
+  const seenDates = new Set();
 
   filtered.forEach(w => {
     const tr = document.createElement('tr');
@@ -571,7 +577,12 @@ function renderWorkoutsTable(filterAthlete = 'all', filterType = 'all', filterLo
 
     tr.style.opacity = isZero ? '0.45' : '1';
 
+    const num = dateToNum[w.date];
+    const showNum = !seenDates.has(w.date);
+    if (showNum) seenDates.add(w.date);
+
     tr.innerHTML = `
+      <td class="workout-num">${showNum ? num : ''}</td>
       <td>${w.date}</td>
       <td><span class="${badgeClass}">${w.athleteName}</span></td>
       <td><span class="type-badge ${typeBadge[w.type] || ''}">${w.type}</span></td>

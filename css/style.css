@@ -970,6 +970,14 @@ section {
   font-weight: 700;
 }
 
+.workout-num {
+  color: rgba(255,255,255,0.35);
+  font-size: 0.75rem;
+  text-align: center;
+  width: 28px;
+  min-width: 28px;
+}
+
 .location-icon { margin-left: 0.3rem; }
 
 /* ===== HERO SECTION ===== */
