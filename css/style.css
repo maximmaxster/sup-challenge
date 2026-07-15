@@ -882,6 +882,10 @@ section {
 .type-sprint  { background: rgba(255, 214, 0, 0.12); color: #FFD600; }
 
 /* ===== TYPE COUNT BOXES ===== */
+.type-counts-label {
+  margin-top: 1rem !important;
+  margin-bottom: 0.4rem !important;
+}
 .type-counts-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -916,36 +920,54 @@ section {
   border-collapse: collapse;
   font-size: 0.78rem;
   direction: rtl;
+  table-layout: fixed;
 }
 .annual-library th,
 .annual-library td {
-  padding: 0.45rem 0.5rem;
+  padding: 0.45rem 0.25rem;
   text-align: center;
-  border: 1px solid rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.25);
+  width: calc(100% / 14);
+  overflow: hidden;
 }
 .annual-library thead tr {
-  background: rgba(255,255,255,0.07);
+  background: linear-gradient(135deg, rgba(212,97,10,0.55), rgba(180,70,0,0.4));
+  border-bottom: 2px solid rgba(255,255,255,0.35);
+}
+.annual-library thead th {
+  color: #fff;
+  font-weight: 700;
 }
 .al-type-hdr,
 .al-total-hdr {
-  font-weight: 700;
   white-space: nowrap;
-  color: rgba(255,255,255,0.9);
 }
+.al-month-hdr { white-space: nowrap; }
 .al-type {
   text-align: right;
   font-weight: 600;
   white-space: nowrap;
-  padding-right: 0.75rem;
+  padding-right: 0.5rem;
 }
 .al-val { color: rgba(255,255,255,0.85); }
-.al-zero { color: rgba(255,255,255,0.25); }
+.al-zero { color: rgba(255,255,255,0.22); }
 .al-total {
   font-weight: 700;
   color: var(--accent-cyan);
 }
 .annual-library tbody tr:nth-child(odd) {
   background: rgba(255,255,255,0.03);
+}
+.al-total-row {
+  background: rgba(0,212,255,0.08) !important;
+  border-top: 2px solid rgba(0,212,255,0.4);
+}
+.al-sum-lbl {
+  color: var(--accent-cyan);
+  font-weight: 700;
+}
+.al-sum-cell {
+  font-weight: 700;
 }
 
 .location-icon { margin-left: 0.3rem; }

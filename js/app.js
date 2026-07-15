@@ -284,12 +284,19 @@ function renderAnnualLibrary(allWorkouts) {
     if (grid[w.type]) grid[w.type][d.getMonth()]++;
   });
 
-  const headerCols = MONTHS_HEB.map((m, i) => `<th>${m}<br><span style="font-size:0.6rem;opacity:.6">${String(year).slice(2)}</span></th>`).join('');
+  const headerCols = MONTHS_HEB.map(m => `<th class="al-month-hdr">${m}<br><span style="font-size:0.6rem;opacity:.7">${String(year).slice(2)}</span></th>`).join('');
   const rows = ANNUAL_TYPES.map(t => {
     const total = grid[t].reduce((a, b) => a + b, 0);
     const cells = grid[t].map(c => `<td class="${c === 0 ? 'al-zero' : 'al-val'}">${c}</td>`).join('');
     return `<tr><td class="al-type">${t}</td>${cells}<td class="al-total">${total}</td></tr>`;
   }).join('');
+
+  // total row (sum across all types per month)
+  const monthTotals = Array(12).fill(0);
+  ANNUAL_TYPES.forEach(t => grid[t].forEach((c, i) => { monthTotals[i] += c; }));
+  const grandTotal = monthTotals.reduce((a, b) => a + b, 0);
+  const totalCells = monthTotals.map(c => `<td class="${c === 0 ? 'al-zero' : 'al-val'} al-sum-cell">${c}</td>`).join('');
+  const totalRow = `<tr class="al-total-row"><td class="al-type al-sum-lbl">סיכום</td>${totalCells}<td class="al-total al-sum-cell">${grandTotal}</td></tr>`;
 
   el.innerHTML = `
     <table class="annual-library">
@@ -298,7 +305,7 @@ function renderAnnualLibrary(allWorkouts) {
         ${headerCols}
         <th class="al-total-hdr">סה"כ</th>
       </tr></thead>
-      <tbody>${rows}</tbody>
+      <tbody>${rows}${totalRow}</tbody>
     </table>`;
 }
 
