@@ -657,25 +657,48 @@ def get_latest_saved_date(path: Path) -> str | None:
     return None
 
 
-# ===== GIT PUSH =====
+# ===== GIT PUSH via GitHub API =====
+GITHUB_REPO = "maximmaxster/sup-challenge"
+
+def _github_push_file(filepath: Path, commit_msg: str) -> bool:
+    """Push a single file to GitHub via API (works without local git repo)."""
+    import base64
+    import urllib.request
+    url = f"https://api.github.com/repos/{GITHUB_REPO}/contents/{filepath}"
+    headers = {
+        "Authorization": f"token {GITHUB_TOKEN}",
+        "Content-Type": "application/json",
+        "User-Agent": "SUP-Sync/1.0",
+    }
+    # Get current SHA
+    req = urllib.request.Request(url, headers=headers)
+    try:
+        with urllib.request.urlopen(req) as resp:
+            sha = json.loads(resp.read())["sha"]
+    except Exception:
+        sha = None
+
+    content = base64.b64encode(filepath.read_bytes()).decode()
+    body = json.dumps({"message": commit_msg, "content": content, **({"sha": sha} if sha else {})}).encode()
+    req = urllib.request.Request(url, data=body, headers=headers, method="PUT")
+    try:
+        with urllib.request.urlopen(req):
+            return True
+    except Exception as e:
+        print(f"  GitHub API error ({filepath}): {e}")
+        return False
+
 def git_push():
     if not GITHUB_TOKEN:
         print("\nGITHUB_TOKEN לא מוגדר — דולג על push")
         return
     timestamp = datetime.now().strftime("%d/%m/%Y %H:%M")
-    cmds = [
-        ["git", "add", "data/"],
-        ["git", "commit", "-m", f"sync: עדכון SUP — {timestamp}"],
-        ["git", "push"],
-    ]
-    for cmd in cmds:
-        r = subprocess.run(cmd, capture_output=True, text=True)
-        if r.returncode != 0:
-            if "nothing to commit" in (r.stdout + r.stderr):
-                print("  אין שינויים"); break
-            print(f"  שגיאת git: {r.stderr.strip()}")
-        else:
-            print(f"  {cmd[1]}: OK")
+    msg = f"sync: עדכון SUP — {timestamp}"
+    files = [Path("data/athlete1.json"), Path("data/athlete2.json")]
+    for f in files:
+        if f.exists():
+            ok = _github_push_file(f, msg)
+            print(f"  push {f.name}: {'OK' if ok else 'FAILED'}")
 
 
 # ===== MAIN =====
