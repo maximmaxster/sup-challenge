@@ -1,7 +1,7 @@
 {
   "name": "ויקטור מורטוב",
   "profile_image": "images/athlete2_profile.jpg",
-  "last_sync": "2026-07-18T08:00:09Z",
+  "last_sync": "2026-07-18T09:29:46Z",
   "workouts": [
     {
       "id": "23602245273",
@@ -4525,94 +4525,5 @@
       "z4": "17:37",
       "z5": "2:42"
     }
-  ],
-  "races": [
-    {
-      "category": "world",
-      "name": "SUP CITY 11 CHALLENGE 220 KM",
-      "location": "HOLLAND",
-      "date": "01.09.2024",
-      "distance_km": null,
-      "duration": null,
-      "avg_speed": null,
-      "avg_hr": null,
-      "spm": null,
-      "dps": null,
-      "z3": null,
-      "z4": null,
-      "z5": null,
-      "place": null,
-      "notes": ""
-    },
-    {
-      "category": "world",
-      "name": "ICF SUP WORLD CHAMPIONSHIP",
-      "location": "ABU DHABI",
-      "date": "02.11.2025",
-      "distance_km": 9.67,
-      "duration": "1:19:01",
-      "avg_speed": 7.3,
-      "avg_hr": 95,
-      "spm": 42,
-      "dps": 2.98,
-      "z3": "2:46",
-      "z4": "1:01",
-      "z5": "0:00",
-      "place": null,
-      "notes": ""
-    },
-    {
-      "category": "local",
-      "name": "חיפה-עכו",
-      "location": "ים",
-      "date": "10.05.2025",
-      "distance_km": 18.65,
-      "duration": "2:45:13",
-      "avg_speed": 6.8,
-      "avg_hr": 174,
-      "spm": 43,
-      "dps": 2.64,
-      "z3": "0:08",
-      "z4": "0:31",
-      "z5": "2:44:08",
-      "place": null,
-      "notes": ""
-    },
-    {
-      "category": "local",
-      "name": "תחרות 5 קמ ליגה ZAZIK",
-      "location": "שדות ים",
-      "date": "30.05.2026",
-      "distance_km": 5.73,
-      "duration": "49:36",
-      "avg_speed": 6.9,
-      "avg_hr": 174,
-      "spm": 48,
-      "dps": 2.45,
-      "z3": "0:07",
-      "z4": "0:10",
-      "z5": "48:55",
-      "place": null,
-      "notes": ""
-    },
-    {
-      "category": "local",
-      "name": "חיפה-עכו 2026",
-      "location": "ים",
-      "date": "06.06.2026",
-      "distance_km": 9.58,
-      "duration": "2:04:57",
-      "avg_speed": 4.6,
-      "avg_hr": 168,
-      "spm": 43,
-      "dps": 5.0,
-      "z3": "0:37",
-      "z4": "20:32",
-      "z5": "1:43:07",
-      "place": null,
-      "notes": ""
-    }
-  ],
-  "sup_start": "01.06.2021",
-  "birthdate": "17.07.1981"
+  ]
 }
