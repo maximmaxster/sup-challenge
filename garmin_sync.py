@@ -35,8 +35,8 @@ load_dotenv()
 GMAIL_USER     = os.getenv("GMAIL_USER", "maxim.maxster@gmail.com")
 GMAIL_PASSWORD = os.getenv("GMAIL_PASSWORD", "")
 
-# מייל לכל ספורטאי — מקסים כבר מקבל מה-tracker, כאן רק ויקטור
 ATHLETE_EMAILS = {
+    "מקסים רפופורט": "maxim.maxster@gmail.com",
     "ויקטור מורטוב": "Victormuratov@gmail.com",
 }
 
@@ -636,7 +636,8 @@ def send_workout_email(to_email: str, athlete_name: str, workout: dict,
         msg["From"]    = GMAIL_USER
         msg["To"]      = to_email
         msg.attach(MIMEText(html, "html", "utf-8"))
-        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as s:
+        with smtplib.SMTP("smtp.gmail.com", 587) as s:
+            s.starttls()
             s.login(GMAIL_USER, GMAIL_PASSWORD)
             s.sendmail(GMAIL_USER, to_email, msg.as_string())
         print(f"  [Email] נשלח ל-{to_email} ✓")
