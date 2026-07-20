@@ -363,7 +363,7 @@ def save_json(data: dict, path: Path):
         try:
             with open(path, "r", encoding="utf-8-sig") as f:
                 existing = json.load(f)
-            for key in ("races", "dob", "sup_start", "competitions", "birthdate", "age"):
+            for key in ("races", "dob", "sup_start", "competitions", "birthdate", "age", "name", "profile_image"):
                 if existing.get(key):
                     data[key] = existing[key]
         except Exception:
