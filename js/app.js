@@ -1441,6 +1441,11 @@ function renderTrendCharts() {
   const gridEl = document.getElementById('prog-trend-grid');
   if (!gridEl) return;
 
+  PROG_TYPES.forEach(t => {
+    const id = `trend-chart-${t.key}`;
+    if (trendCharts[id]) { trendCharts[id].destroy(); delete trendCharts[id]; }
+  });
+
   gridEl.innerHTML = PROG_TYPES.map(t => {
     const res = trendResolution[t.key] || 'month';
     const chartId = `trend-chart-${t.key}`;
