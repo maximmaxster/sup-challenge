@@ -1,8 +1,27 @@
 {
   "name": "ויקטור מורטוב",
   "profile_image": "images/athlete2_profile.jpg",
-  "last_sync": "2026-07-28T08:32:45Z",
+  "last_sync": "2026-07-29T07:02:52Z",
   "workouts": [
+    {
+      "id": "23771242678",
+      "date": "29.07.2026",
+      "type": "טמפו",
+      "location": "ים",
+      "lat": 32.1573555842042,
+      "distance": 9.5,
+      "duration": "1:20:05",
+      "dur_sec": 4805,
+      "avg_speed": 7.1,
+      "max_speed": 9.8,
+      "avg_hr": 144,
+      "spm": 38,
+      "spm_max": 59,
+      "dps": 3.11,
+      "z3": "39:39",
+      "z4": "38:55",
+      "z5": "0:02"
+    },
     {
       "id": "23711614431",
       "date": "24.07.2026",
