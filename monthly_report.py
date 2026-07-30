@@ -94,7 +94,7 @@ def research_sup_tips(curr, prev_month, ytd_curr, ytd_prev, month_name):
             fc = FirecrawlApp(api_key=FIRECRAWL_API_KEY)
             for url in SUP_SOURCES:
                 try:
-                    result = fc.scrape_url(url, formats=["markdown"])
+                    result = fc.scrape(url, formats=["markdown"])
                     md = result.markdown if hasattr(result, "markdown") else str(result)
                     research_text += f"\n\n=== {url} ===\n{md[:2500]}"
                 except Exception as e:
