@@ -81,9 +81,35 @@ def analyze(ws):
 
     return {"total": stats(ws), "by_type": {t: stats(lst) for t, lst in by_type.items()}}
 
+def monthly_avg(ytd_analysis, n_months):
+    """מחשב ממוצע חודשי מתוך נתוני YTD."""
+    if not ytd_analysis or not ytd_analysis.get("total") or n_months == 0:
+        return None
+    t = ytd_analysis["total"]
+    avg_total = {
+        "n":         round(t["n"] / n_months, 1),
+        "dist":      round(t["dist"] / n_months, 1),
+        "avg_speed": t["avg_speed"],   # ממוצע משוקלל כבר
+        "avg_hr":    t["avg_hr"],
+        "dps":       t["dps"],
+        "eff":       t["eff"],
+    }
+    avg_by_type = {}
+    for tp, s in ytd_analysis["by_type"].items():
+        if not s: continue
+        avg_by_type[tp] = {
+            "n":         round(s["n"] / n_months, 1),
+            "dist":      round(s["dist"] / n_months, 1),
+            "avg_speed": s["avg_speed"],
+            "avg_hr":    s["avg_hr"],
+            "dps":       s["dps"],
+            "eff":       s["eff"],
+        }
+    return {"total": avg_total, "by_type": avg_by_type}
+
 # ===== RESEARCH + AI =====
 
-def research_sup_tips(curr, prev_month, ytd_curr, ytd_prev, month_name):
+def research_sup_tips(curr, ytd_avg, ytd_curr, ytd_prev, month_name):
     if not ANTHROPIC_API_KEY:
         return "חסר ANTHROPIC_API_KEY."
 
@@ -117,10 +143,10 @@ def research_sup_tips(curr, prev_month, ytd_curr, ytd_prev, month_name):
 === {month_name} ===
 {fmt(curr)}
 
-=== חודש קודם ===
-{fmt(prev_month)}
+=== ממוצע חודשי YTD (ינואר–חודש קודם) ===
+{fmt(ytd_avg)}
 
-=== שנה נוכחית (YTD) ===
+=== שנה נוכחית מצטבר (YTD) ===
 {fmt(ytd_curr)}
 
 === שנה קודמת (2025 מלא) ===
@@ -131,7 +157,7 @@ def research_sup_tips(curr, prev_month, ytd_curr, ytd_prev, month_name):
 
 כתוב ניתוח בעברית, קצר ומעשי, בגוף שני:
 1. **סיכום {month_name}** — 2-3 משפטים על החודש
-2. **השוואה לחודש קודם** — מה השתנה (טוב/פחות טוב)
+2. **השוואה לממוצע השנה** — האם החודש הזה היה מעל/מתחת לממוצע 2026?
 3. **מגמה שנתית** — האם 2026 טוב יותר מ-2025? מה הכיוון?
 4. **3-4 המלצות ספציפיות לחודש הבא** — על בסיס הנתונים + המחקר
 5. **יעד מספרי אחד** לחודש הבא
@@ -211,11 +237,12 @@ def year_compare_row(label, curr_val, prev_val, unit="", higher_is_better=True):
       <td style="padding:8px 12px;border-bottom:1px solid rgba(255,255,255,0.06);text-align:center;font-weight:600">{cv} {arrow}</td>
     </tr>"""
 
-def build_html(month_name, curr, prev_month, ytd_curr, ytd_prev, recommendations):
-    t  = (curr  or {}).get("total") or {}
-    pt = (prev_month or {}).get("total") or {}
+def build_html(month_name, curr, ytd_avg, ytd_curr, ytd_prev, recommendations, ytd_months):
+    t  = (curr    or {}).get("total") or {}
+    pt = (ytd_avg or {}).get("total") or {}
     yt = (ytd_curr or {}).get("total") or {}
     yp = (ytd_prev or {}).get("total") or {}
+    avg_label = f"ממוצע חודשי {ytd_months}M"
 
     recs_html = ""
     for line in recommendations.split("\n"):
@@ -239,17 +266,17 @@ def build_html(month_name, curr, prev_month, ytd_curr, ytd_prev, recommendations
 
   <!-- KPIs -->
   <div style="display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap">
-    {kpi_card(t.get('n','—'), 'אימונים', f'לעומת {pt.get("n","—")} חודש קודם')}
-    {kpi_card(f"{t.get('dist','—')}ק\"מ", 'מרחק', f'לעומת {pt.get("dist","—")}ק"מ')}
-    {kpi_card(f"{t.get('avg_speed','—')}קמ\"ש", 'מהירות ממוצעת', f'לעומת {pt.get("avg_speed","—")}')}
-    {kpi_card(t.get('eff','—'), 'יעילות', f'לעומת {pt.get("eff","—")}')}
+    {kpi_card(t.get('n','—'), 'אימונים', f'ממוצע שנה: {pt.get("n","—")}')}
+    {kpi_card(f"{t.get('dist','—')}ק\"מ", 'מרחק', f'ממוצע שנה: {pt.get("dist","—")}ק"מ')}
+    {kpi_card(f"{t.get('avg_speed','—')}קמ\"ש", 'מהירות ממוצעת', f'ממוצע שנה: {pt.get("avg_speed","—")}')}
+    {kpi_card(t.get('eff','—'), 'יעילות', f'ממוצע שנה: {pt.get("eff","—")}')}
   </div>
 
-  <!-- פירוט חודש + השוואה לחודש קודם -->
+  <!-- פירוט חודש + השוואה לממוצע YTD -->
   <div style="background:rgba(255,255,255,0.03);border-radius:12px;margin-bottom:18px;
   overflow:hidden;border:1px solid rgba(255,255,255,0.07)">
-    {section_header(f'📊 {month_name} — פירוט לפי סוג (מול חודש קודם)')}
-    {type_table(curr, prev_month, month_name, 'חודש קודם')}
+    {section_header(f'📊 {month_name} — פירוט לפי סוג (מול {avg_label} 2026)')}
+    {type_table(curr, ytd_avg, month_name, avg_label)}
   </div>
 
   <!-- השוואה שנתית -->
@@ -315,34 +342,39 @@ def main():
     if not ws_curr:
         print(f"⚠ אין אימונים ל-{month_name}"); return
 
-    # חודש קודם
-    pm_y, pm_m = (ry-1, 12) if rm == 1 else (ry, rm-1)
-    ws_prev  = workouts_for_month(workouts, pm_y, pm_m)
-
-    # שנה נוכחית YTD (עד סוף חודש הדיווח)
+    # YTD עד חודש הדיווח (כולל)
     ws_ytd_curr = [w for w in workouts
                    if w.get("distance", 0) > 0
                    and parse_dmy(w["date"])
                    and parse_dmy(w["date"]).year == ry
                    and parse_dmy(w["date"]).month <= rm]
 
+    # YTD עד חודש לפני הדיווח — לחישוב ממוצע השוואה
+    ws_ytd_before = [w for w in workouts
+                     if w.get("distance", 0) > 0
+                     and parse_dmy(w["date"])
+                     and parse_dmy(w["date"]).year == ry
+                     and parse_dmy(w["date"]).month < rm]
+    ytd_months = rm - 1  # מספר החודשים לפני חודש הדיווח
+
     # שנה קודמת — כל 2025
     prev_full_year = ry - 1
     ws_ytd_prev = workouts_for_year(workouts, prev_full_year)
 
-    curr      = analyze(ws_curr)
-    prev_month = analyze(ws_prev)
-    ytd_curr  = analyze(ws_ytd_curr)
-    ytd_prev  = analyze(ws_ytd_prev)
+    curr       = analyze(ws_curr)
+    ytd_before = analyze(ws_ytd_before)
+    ytd_avg    = monthly_avg(ytd_before, ytd_months) if ytd_months > 0 else None
+    ytd_curr   = analyze(ws_ytd_curr)
+    ytd_prev   = analyze(ws_ytd_prev)
 
     print(f"  חודש נוכחי: {len(ws_curr)} אימונים, {curr['total']['dist']}ק\"מ")
-    print(f"  YTD {ry}: {len(ws_ytd_curr)} אימונים")
+    print(f"  YTD {ry} ({ytd_months} חודשים קודמים): {len(ws_ytd_before)} אימונים — ממוצע חודשי לשם השוואה")
     print(f"  {prev_full_year} מלא: {len(ws_ytd_prev)} אימונים")
     print(f"  מחקר + המלצות מ-Claude...")
 
-    recommendations = research_sup_tips(curr, prev_month, ytd_curr, ytd_prev, month_name)
+    recommendations = research_sup_tips(curr, ytd_avg, ytd_curr, ytd_prev, month_name)
 
-    html = build_html(month_name, curr, prev_month, ytd_curr, ytd_prev, recommendations)
+    html = build_html(month_name, curr, ytd_avg, ytd_curr, ytd_prev, recommendations, ytd_months)
     send_report(html, month_name)
     print(f"\n✓ דו\"ח חודשי הושלם!")
 
