@@ -66,9 +66,11 @@ def analyze(ws):
         spd_lst = [w["avg_speed"] for w in lst if w.get("avg_speed", 0) > 0]
         hr_lst  = [w["avg_hr"]    for w in lst if w.get("avg_hr",    0) > 0]
         dps_lst = [w["dps"]       for w in lst if w.get("dps",       0) > 0]
+        spm_lst = [w["spm"]       for w in lst if w.get("spm",       0) > 0]
         spd = sum(spd_lst)/len(spd_lst) if spd_lst else 0
         hr  = sum(hr_lst) /len(hr_lst)  if hr_lst  else 0
         dps = sum(dps_lst)/len(dps_lst) if dps_lst else 0
+        spm = sum(spm_lst)/len(spm_lst) if spm_lst else 0
         eff = round(spd/hr*100, 2) if hr > 0 else None
         return {
             "n":         len(lst),
@@ -76,6 +78,7 @@ def analyze(ws):
             "avg_speed": round(spd, 1),
             "avg_hr":    round(hr),
             "dps":       round(dps, 2),
+            "spm":       round(spm, 1),
             "eff":       eff,
         }
 
@@ -89,9 +92,10 @@ def monthly_avg(ytd_analysis, n_months):
     avg_total = {
         "n":         round(t["n"] / n_months, 1),
         "dist":      round(t["dist"] / n_months, 1),
-        "avg_speed": t["avg_speed"],   # ממוצע משוקלל כבר
+        "avg_speed": t["avg_speed"],
         "avg_hr":    t["avg_hr"],
         "dps":       t["dps"],
+        "spm":       t.get("spm", 0),
         "eff":       t["eff"],
     }
     avg_by_type = {}
@@ -103,6 +107,7 @@ def monthly_avg(ytd_analysis, n_months):
             "avg_speed": s["avg_speed"],
             "avg_hr":    s["avg_hr"],
             "dps":       s["dps"],
+            "spm":       s.get("spm", 0),
             "eff":       s["eff"],
         }
     return {"total": avg_total, "by_type": avg_by_type}
@@ -131,11 +136,15 @@ def research_sup_tips(curr, ytd_avg, ytd_curr, ytd_prev, month_name):
     def fmt(a):
         if not a or not a.get("total"): return "אין נתונים"
         t = a["total"]
-        lines = [f"סה\"כ: {t['n']} אימונים, {t['dist']} ק\"מ, מהירות {t['avg_speed']} קמ\"ש, דופק {t['avg_hr']} BPM, יעילות {t['eff']}"]
+        lines = [f"כולל: מהירות {t['avg_speed']}קמ\"ש | דופק {t['avg_hr']}BPM | DPS {t['dps']}מ' | SPM {t['spm']} | יעילות {t['eff']}"]
         for tp in TYPE_ORDER:
             s = a["by_type"].get(tp)
             if s:
-                lines.append(f"  {tp}: {s['n']} × {s['dist']}ק\"מ | מהירות {s['avg_speed']} | דופק {s['avg_hr']} | יעילות {s['eff']}")
+                lines.append(
+                    f"  {tp}: מהירות {s['avg_speed']}קמ\"ש | "
+                    f"דופק {s['avg_hr']}BPM | DPS {s['dps']}מ' | "
+                    f"SPM {s['spm']} | יעילות {s['eff']}"
+                )
         return "\n".join(lines)
 
     prompt = f"""אתה מאמן SUP מקצועי. לפניך נתוני אימוני SUP של ספורטאי חובב מנוסה.
@@ -155,14 +164,24 @@ def research_sup_tips(curr, ytd_avg, ytd_curr, ytd_prev, month_name):
 === מחקר מאתרי SUP ===
 {research_text[:4000] if research_text else "לא זמין"}
 
-כתוב ניתוח בעברית, קצר ומעשי, בגוף שני:
-1. **סיכום {month_name}** — 2-3 משפטים על החודש
-2. **השוואה לממוצע השנה** — האם החודש הזה היה מעל/מתחת לממוצע 2026?
-3. **מגמה שנתית** — האם 2026 טוב יותר מ-2025? מה הכיוון?
-4. **3-4 המלצות ספציפיות לחודש הבא** — על בסיס הנתונים + המחקר
-5. **יעד מספרי אחד** לחודש הבא
+כתוב ניתוח בעברית, קצר ומעשי, בגוף שני. **אל תדון בכמות אימונים — התמקד אך ורק בביצועים טכניים.**
 
-אל תחזור על הנתונים — נתח אותם."""
+1. **ביצועים {month_name}** — מה קורה עם המהירות, DPS, SPM ויעילות? מה הכיוון מאז 2025?
+
+2. **ניתוח טכני מעמיק לפי סוג אימון:**
+   - האם ה-DPS (מרחק למשיכה) גדל/קטן? מה זה אומר על טכניקת החתירה?
+   - האם ה-SPM (קצב משיכות) מתאים לסוג האימון?
+   - מה היחס בין מהירות לדופק — האם הלב עובד ביעילות?
+   - מה מקורות המחקר אומרים על ערכים אופטימליים ל-SUP תחרותי בסוגי אימונים אלה?
+
+3. **3-4 המלצות ספציפיות לשיפור טכני לחודש הבא:**
+   - כל המלצה עם יעד מספרי ברור (למשל: "שאף ל-DPS מעל 3.2 בטמפו", "SPM 46-50 בספרינט")
+   - מבוסס על הנתונים שלך + מה שמחקר SUP אומר על שיפור טכני
+   - לא להזכיר כמות אימונים — רק איך לשפר את הביצועים
+
+4. **יעד אחד מדיד לחודש הבא** — מספר ספציפי (DPS / SPM / יעילות / מהירות)
+
+אל תחזור על הנתונים הגולמיים — נתח, השווה לסטנדרטים מקצועיים, והמלץ."""
 
     try:
         import anthropic
