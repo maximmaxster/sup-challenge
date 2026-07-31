@@ -1701,7 +1701,29 @@ function startCountdown() {
 }
 
 // ===== INIT =====
+// ===== THEME TOGGLE =====
+(function() {
+  const saved = localStorage.getItem('sup_theme');
+  if (saved === 'light') document.documentElement.setAttribute('data-theme', 'light');
+})();
+
+function setupThemeToggle() {
+  const btn = document.getElementById('btn-theme-toggle');
+  if (!btn) return;
+  btn.addEventListener('click', () => {
+    const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+    if (isLight) {
+      document.documentElement.removeAttribute('data-theme');
+      localStorage.setItem('sup_theme', 'dark');
+    } else {
+      document.documentElement.setAttribute('data-theme', 'light');
+      localStorage.setItem('sup_theme', 'light');
+    }
+  });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
+  setupThemeToggle();
   setupToggleButtons();
   setupFilters();
   setupProgress();

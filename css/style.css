@@ -58,6 +58,116 @@
   --transition-fast: all 0.15s ease;
 }
 
+/* ===== LIGHT MODE ===== */
+[data-theme="light"] {
+  --bg-primary:      #EEF3FC;
+  --bg-secondary:    #E4ECF8;
+  --bg-card:         #FFFFFF;
+  --bg-card-hover:   #F5F9FF;
+  --bg-surface:      #DDE7F5;
+
+  --text-primary:    #0A1628;
+  --text-secondary:  #3A5272;
+  --text-muted:      #7A90B0;
+  --text-accent:     var(--accent-cyan-dim);
+
+  --border-color:    rgba(0, 140, 180, 0.18);
+  --border-hover:    rgba(0, 140, 180, 0.38);
+
+  --glow-cyan:       0 0 20px rgba(0, 140, 180, 0.18);
+  --glow-orange:     0 0 20px rgba(232, 75, 26, 0.2);
+  --card-shadow:     0 4px 24px rgba(10, 22, 40, 0.08);
+  --card-shadow-lg:  0 8px 40px rgba(10, 22, 40, 0.12);
+}
+
+[data-theme="light"] body {
+  background-color: var(--bg-primary);
+}
+
+[data-theme="light"] body::before {
+  background:
+    radial-gradient(ellipse at 15% 10%, rgba(0, 140, 200, 0.06) 0%, transparent 45%),
+    radial-gradient(ellipse at 85% 85%, rgba(232, 75, 26, 0.04) 0%, transparent 45%),
+    radial-gradient(ellipse at 50% 50%, rgba(0, 140, 200, 0.02) 0%, transparent 70%);
+}
+
+[data-theme="light"] header {
+  background: rgba(238, 243, 252, 0.92);
+}
+
+[data-theme="light"] ::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+
+/* Light mode card overrides — hardcoded rgba values */
+[data-theme="light"] .athlete-card {
+  background: linear-gradient(145deg, #ffffff, #f4f8ff);
+  box-shadow: var(--card-shadow-lg), 0 0 0 1px rgba(0, 140, 180, 0.1);
+}
+
+[data-theme="light"] .athlete-card::before {
+  background: linear-gradient(135deg, rgba(0,200,240,0.04) 0%, transparent 60%);
+}
+
+[data-theme="light"] .nav-section,
+[data-theme="light"] .section-card,
+[data-theme="light"] .chart-card,
+[data-theme="light"] .stat-card,
+[data-theme="light"] .race-card,
+[data-theme="light"] .workout-card {
+  background: var(--bg-card);
+}
+
+/* ── Theme toggle button ── */
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid var(--border-color);
+  background: var(--bg-surface);
+  cursor: pointer;
+  padding: 0;
+  color: var(--text-secondary);
+  transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease, transform 0.15s ease;
+  flex-shrink: 0;
+}
+
+.theme-toggle:hover {
+  border-color: var(--accent-cyan);
+  color: var(--accent-cyan);
+  transform: scale(1.08);
+}
+
+.theme-toggle svg {
+  width: 16px;
+  height: 16px;
+  display: block;
+  transition: opacity 0.15s ease;
+}
+
+.theme-toggle .icon-sun  { display: none; }
+.theme-toggle .icon-moon { display: block; }
+
+[data-theme="light"] .theme-toggle .icon-sun  { display: block; }
+[data-theme="light"] .theme-toggle .icon-moon { display: none; }
+
+/* Smooth theme transition */
+body,
+header,
+.athlete-card,
+.stat-card,
+.chart-card,
+.race-card,
+.nav-section,
+.workouts-table,
+.workouts-table td,
+.workouts-table th {
+  transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
 * {
   margin: 0;
   padding: 0;
