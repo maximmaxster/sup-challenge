@@ -356,18 +356,42 @@ def fetch_athlete(cfg: dict, shared_types: dict = None) -> dict:
 
 
 # ===== SAVE =====
+REQUIRED_STATIC_FIELDS = ("races", "dob", "sup_start", "competitions", "birthdate", "age", "name", "profile_image")
+
 def save_json(data: dict, path: Path):
     path.parent.mkdir(parents=True, exist_ok=True)
+    existing = None
     # Preserve fields that sync doesn't touch (e.g. races, dob, sup_start)
     if path.exists():
         try:
             with open(path, "r", encoding="utf-8-sig") as f:
                 existing = json.load(f)
-            for key in ("races", "dob", "sup_start", "competitions", "birthdate", "age", "name", "profile_image"):
-                if existing.get(key):
-                    data[key] = existing[key]
-        except Exception:
-            pass
+        except Exception as e:
+            # קובץ קיים אבל לא ניתן לקריאה — אסור לדרוס בלי הנתונים הסטטיים שבו
+            raise RuntimeError(f"{path}: לא הצליח לקרוא את הקובץ הקיים ({e}) — עוצר לפני דריסה") from e
+
+        for key in REQUIRED_STATIC_FIELDS:
+            if existing.get(key):
+                data[key] = existing[key]
+
+        # GitHub is the source of truth for races (edited via website UI).
+        # If GitHub has more races than local disk, use GitHub's version.
+        gh_races = _github_fetch_races(path)
+        local_races = data.get("races") or []
+        if gh_races and len(gh_races) > len(local_races):
+            data["races"] = gh_races
+            print(f"  races: GitHub ({len(gh_races)}) > מקומי ({len(local_races)}) — משתמש ב-GitHub")
+
+        # שדה סטטי היה קיים בעבר ונעלם עכשיו → משהו נשבר ב-merge, לא דורסים
+        missing = [k for k in REQUIRED_STATIC_FIELDS if existing.get(k) and not data.get(k)]
+        if missing:
+            raise RuntimeError(f"{path}: שדות קריטיים נעלמו {missing} — עוצר לפני דריסה")
+
+        # פחות אימונים מהריצה הקודמת (למשל תקלת Garmin/רשת) → כנראה נתונים חלקיים
+        old_count, new_count = len(existing.get("workouts", [])), len(data.get("workouts", []))
+        if old_count > 0 and new_count < old_count:
+            raise RuntimeError(f"{path}: {new_count} אימונים < {old_count} קיימים — עוצר לפני דריסה")
+
     with open(path, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
     print(f"  שמור: {path}  ({len(data['workouts'])} אימונים)")
@@ -660,6 +684,22 @@ def get_latest_saved_date(path: Path) -> str | None:
 
 # ===== GIT PUSH via GitHub API =====
 GITHUB_REPO = "maximmaxster/sup-challenge"
+
+def _github_fetch_races(filepath: Path) -> list | None:
+    """Fetch races array from GitHub — source of truth when edited via website UI."""
+    import base64, urllib.request
+    if not GITHUB_TOKEN:
+        return None
+    url = f"https://api.github.com/repos/{GITHUB_REPO}/contents/{filepath}"
+    try:
+        req = urllib.request.Request(url, headers={"Authorization": f"token {GITHUB_TOKEN}", "User-Agent": "SUP-Sync/1.0"})
+        with urllib.request.urlopen(req) as resp:
+            info = json.loads(resp.read())
+            remote_data = json.loads(base64.b64decode(info["content"]))
+            return remote_data.get("races")
+    except Exception as e:
+        print(f"  GitHub fetch races ({filepath}): {e}")
+        return None
 
 def _github_push_file(filepath: Path, commit_msg: str) -> bool:
     """Push a single file to GitHub via API (works without local git repo)."""
