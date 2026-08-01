@@ -220,7 +220,7 @@ function renderAll() {
   renderCharts();
   populateYearFilter();
   renderWorkoutsTable();
-  renderAnnualLibrary([...(athlete1Data?.workouts||[]), ...(athlete2Data?.workouts||[])]);
+  renderAnnualLibrary(athlete1Data?.workouts || []);
   renderProgress();
   renderRaces(1);
 }
@@ -526,18 +526,27 @@ function renderDpsChart(range) {
 }
 
 // ===== WORKOUTS TABLE =====
-function renderWorkoutsTable(filterAthlete = '1', filterType = 'all', filterLoc = 'all', filterYear = 'all') {
-  const srcData = filterAthlete === '2' ? athlete2Data : athlete1Data;
+function renderWorkoutsTable(filterAthlete = 'all', filterType = 'all', filterLoc = 'all', filterYear = 'all') {
+  // Union of all dates from both athletes
+  const allDates = [...new Set([
+    ...athlete1Data.workouts.filter(w => w.distance > 0).map(w => w.date),
+    ...athlete2Data.workouts.filter(w => w.distance > 0).map(w => w.date)
+  ])].sort((a, b) => parseDMY(b) - parseDMY(a));
 
-  const rows = srcData.workouts
-    .filter(w => w.distance > 0)
-    .sort((a, b) => parseDMY(b.date) - parseDMY(a.date))
-    .map(w => ({ ...w, athlete: filterAthlete === '2' ? 2 : 1, athleteName: srcData.name }));
+  const rows = [];
+  allDates.forEach(date => {
+    const w1 = athlete1Data.workouts.find(w => w.date === date && w.distance > 0);
+    const w2 = athlete2Data.workouts.find(w => w.date === date && w.distance > 0);
+    if (w1) rows.push({ ...w1, athlete: 1, athleteName: athlete1Data.name });
+    if (w2) rows.push({ ...w2, athlete: 2, athleteName: athlete2Data.name });
+  });
 
   const filtered = rows.filter(w => {
+    if (filterAthlete !== 'all' && String(w.athlete) !== filterAthlete) return false;
     if (filterType !== 'all' && w.type !== filterType) return false;
     if (filterLoc !== 'all' && w.location !== filterLoc) return false;
     if (filterYear !== 'all' && !w.date.endsWith('.' + filterYear)) return false;
+    if (w.distance === 0) return false;
     return true;
   });
 
@@ -573,8 +582,9 @@ function renderWorkoutsTable(filterAthlete = '1', filterType = 'all', filterLoc 
     if (showNum) seenDates.add(w.date);
 
     tr.innerHTML = `
-      <td class="workout-num">${num}</td>
+      <td class="workout-num">${showNum ? num : ''}</td>
       <td>${w.date}</td>
+      <td><span class="${badgeClass}">${w.athleteName}</span></td>
       <td><span class="type-badge ${typeBadge[w.type] || ''}">${w.type}</span></td>
       <td>${locIcon} ${w.location || '—'}</td>
       <td>${isZero ? '—' : w.distance.toFixed(2)}</td>
@@ -901,28 +911,25 @@ function setupToggleButtons() {
 }
 
 // ===== FILTERS =====
-let currentWorkoutsAthlete = '1';
-
 function setupWorkoutsAthleteSelector() {
   document.querySelectorAll('.workouts-athlete-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.workouts-athlete-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
-      currentWorkoutsAthlete = btn.dataset.athlete;
-      // reset filters
-      document.getElementById('filter-type').value = 'all';
-      document.getElementById('filter-location').value = 'all';
-      document.getElementById('filter-year').value = 'all';
-      renderWorkoutsTable(currentWorkoutsAthlete);
+      const athleteNum = parseInt(btn.dataset.athlete);
+      const workouts = athleteNum === 2 ? athlete2Data.workouts : athlete1Data.workouts;
+      renderAnnualLibrary(workouts);
     });
   });
 }
 
 function setupFilters() {
-  const selType = document.getElementById('filter-type');
-  const selLoc  = document.getElementById('filter-location');
-  const selYear = document.getElementById('filter-year');
-  const update = () => renderWorkoutsTable(currentWorkoutsAthlete, selType.value, selLoc.value, selYear.value);
+  const selAthlete = document.getElementById('filter-athlete');
+  const selType    = document.getElementById('filter-type');
+  const selLoc     = document.getElementById('filter-location');
+  const selYear    = document.getElementById('filter-year');
+  const update = () => renderWorkoutsTable(selAthlete.value, selType.value, selLoc.value, selYear.value);
+  selAthlete.addEventListener('change', update);
   selType.addEventListener('change', update);
   selLoc.addEventListener('change', update);
   if (selYear) selYear.addEventListener('change', update);
@@ -1593,7 +1600,7 @@ function showSection(id) {
     if (id === 'progress')  { renderTrendCharts(); renderProgress(); }
     if (id === 'charts')    { renderSpeedChart(currentRange.speed); renderDistanceChart(currentRange.distance); renderHrChart(currentRange.hr); renderDpsChart(currentRange.dps); }
     if (id === 'races')     { renderRaces(currentRacesAthlete || 1); }
-    if (id === 'workouts')  { renderAnnualLibrary([...(athlete1Data?.workouts||[]), ...(athlete2Data?.workouts||[])]); }
+    if (id === 'workouts')  { const activeBtn = document.querySelector('.workouts-athlete-btn.active'); const aN = activeBtn ? parseInt(activeBtn.dataset.athlete) : 1; renderAnnualLibrary(aN === 2 ? athlete2Data?.workouts||[] : athlete1Data?.workouts||[]); }
   });
 }
 
