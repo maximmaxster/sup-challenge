@@ -328,10 +328,13 @@
       <div id="annual-library-table"></div>
     </div>
 
+    <!-- בחירת חותר -->
+    <div class="workouts-athlete-selector">
+      <button class="workouts-athlete-btn active" data-athlete="1" id="workouts-btn-1">מקסים</button>
+      <button class="workouts-athlete-btn" data-athlete="2" id="workouts-btn-2">ויקטור</button>
+    </div>
+
     <div class="filters-bar">
-      <select id="filter-athlete" class="filter-select filter-athlete">
-        <option value="all">כל החותרים</option>
-      </select>
       <select id="filter-type" class="filter-select">
         <option value="all">כל הסוגים</option>
         <option value="אירובי">אירובי</option>
@@ -355,7 +358,6 @@
           <tr>
             <th scope="col">#</th>
             <th scope="col">תאריך</th>
-            <th scope="col">חותר</th>
             <th scope="col">סוג אימון</th>
             <th scope="col">מיקום</th>
             <th scope="col">מרחק (ק"מ)</th>

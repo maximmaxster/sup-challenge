@@ -149,11 +149,11 @@ async function loadData() {
     if (el2) el2.textContent = athlete2Data.name;
   });
 
-  document.querySelectorAll('.filter-athlete').forEach(sel => {
-    sel.innerHTML = `<option value="all">כל החותרים</option>
-      <option value="1">${athlete1Data.name}</option>
-      <option value="2">${athlete2Data.name}</option>`;
-  });
+  // Update workouts athlete button labels with real names
+  const wb1 = document.getElementById('workouts-btn-1');
+  const wb2 = document.getElementById('workouts-btn-2');
+  if (wb1) wb1.textContent = athlete1Data.name.split(' ')[0];
+  if (wb2) wb2.textContent = athlete2Data.name.split(' ')[0];
 
   renderAll();
   hideLoading();
@@ -526,27 +526,18 @@ function renderDpsChart(range) {
 }
 
 // ===== WORKOUTS TABLE =====
-function renderWorkoutsTable(filterAthlete = 'all', filterType = 'all', filterLoc = 'all', filterYear = 'all') {
-  // Union of all dates from both athletes
-  const allDates = [...new Set([
-    ...athlete1Data.workouts.filter(w => w.distance > 0).map(w => w.date),
-    ...athlete2Data.workouts.filter(w => w.distance > 0).map(w => w.date)
-  ])].sort((a, b) => parseDMY(b) - parseDMY(a));
+function renderWorkoutsTable(filterAthlete = '1', filterType = 'all', filterLoc = 'all', filterYear = 'all') {
+  const srcData = filterAthlete === '2' ? athlete2Data : athlete1Data;
 
-  const rows = [];
-  allDates.forEach(date => {
-    const w1 = athlete1Data.workouts.find(w => w.date === date && w.distance > 0);
-    const w2 = athlete2Data.workouts.find(w => w.date === date && w.distance > 0);
-    if (w1) rows.push({ ...w1, athlete: 1, athleteName: athlete1Data.name });
-    if (w2) rows.push({ ...w2, athlete: 2, athleteName: athlete2Data.name });
-  });
+  const rows = srcData.workouts
+    .filter(w => w.distance > 0)
+    .sort((a, b) => parseDMY(b.date) - parseDMY(a.date))
+    .map(w => ({ ...w, athlete: filterAthlete === '2' ? 2 : 1, athleteName: srcData.name }));
 
   const filtered = rows.filter(w => {
-    if (filterAthlete !== 'all' && String(w.athlete) !== filterAthlete) return false;
     if (filterType !== 'all' && w.type !== filterType) return false;
     if (filterLoc !== 'all' && w.location !== filterLoc) return false;
     if (filterYear !== 'all' && !w.date.endsWith('.' + filterYear)) return false;
-    if (w.distance === 0) return false;
     return true;
   });
 
@@ -582,9 +573,8 @@ function renderWorkoutsTable(filterAthlete = 'all', filterType = 'all', filterLo
     if (showNum) seenDates.add(w.date);
 
     tr.innerHTML = `
-      <td class="workout-num">${showNum ? num : ''}</td>
+      <td class="workout-num">${num}</td>
       <td>${w.date}</td>
-      <td><span class="${badgeClass}">${w.athleteName}</span></td>
       <td><span class="type-badge ${typeBadge[w.type] || ''}">${w.type}</span></td>
       <td>${locIcon} ${w.location || '—'}</td>
       <td>${isZero ? '—' : w.distance.toFixed(2)}</td>
@@ -911,13 +901,28 @@ function setupToggleButtons() {
 }
 
 // ===== FILTERS =====
+let currentWorkoutsAthlete = '1';
+
+function setupWorkoutsAthleteSelector() {
+  document.querySelectorAll('.workouts-athlete-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.workouts-athlete-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentWorkoutsAthlete = btn.dataset.athlete;
+      // reset filters
+      document.getElementById('filter-type').value = 'all';
+      document.getElementById('filter-location').value = 'all';
+      document.getElementById('filter-year').value = 'all';
+      renderWorkoutsTable(currentWorkoutsAthlete);
+    });
+  });
+}
+
 function setupFilters() {
-  const selAthlete = document.getElementById('filter-athlete');
-  const selType    = document.getElementById('filter-type');
-  const selLoc     = document.getElementById('filter-location');
-  const selYear    = document.getElementById('filter-year');
-  const update = () => renderWorkoutsTable(selAthlete.value, selType.value, selLoc.value, selYear.value);
-  selAthlete.addEventListener('change', update);
+  const selType = document.getElementById('filter-type');
+  const selLoc  = document.getElementById('filter-location');
+  const selYear = document.getElementById('filter-year');
+  const update = () => renderWorkoutsTable(currentWorkoutsAthlete, selType.value, selLoc.value, selYear.value);
   selType.addEventListener('change', update);
   selLoc.addEventListener('change', update);
   if (selYear) selYear.addEventListener('change', update);
@@ -1725,6 +1730,7 @@ function setupThemeToggle() {
 document.addEventListener('DOMContentLoaded', () => {
   setupThemeToggle();
   setupToggleButtons();
+  setupWorkoutsAthleteSelector();
   setupFilters();
   setupProgress();
   setupRacesButtons();

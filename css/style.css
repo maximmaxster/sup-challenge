@@ -1211,6 +1211,30 @@ section {
 }
 
 /* ===== RACES ===== */
+.workouts-athlete-selector {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+  margin-bottom: 1rem;
+}
+.workouts-athlete-btn {
+  padding: 0.5rem 1.5rem;
+  border-radius: 999px;
+  border: 2px solid var(--border-color);
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: 'Heebo', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.workouts-athlete-btn.active {
+  background: var(--accent-cyan);
+  border-color: var(--accent-cyan);
+  color: #000;
+}
+.workouts-athlete-btn:hover { opacity: 1; filter: brightness(1.15); }
 .races-athlete-selector {
   display: flex;
   gap: 0.75rem;
