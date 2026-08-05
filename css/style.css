@@ -1222,6 +1222,12 @@ section {
   font-weight: 700;
 }
 
+/* extra states for annual library using acmp-tbl classes */
+.acmp-zero { color: var(--text-secondary); opacity: 0.35; }
+.acmp-grand-total { font-weight: 700; color: var(--accent-cyan); }
+.acmp-sum-row td { background: rgba(0,212,255,0.08) !important; border-top: 2px solid rgba(0,212,255,0.3); font-weight: 700; color: var(--accent-cyan); }
+.acmp-sum-row td.acmp-row-label { color: var(--accent-cyan); }
+
 .workout-num {
   color: rgba(255,255,255,0.35);
   font-size: 0.75rem;

@@ -307,11 +307,9 @@ function renderAnnualLibrary(allWorkouts) {
   const el = document.getElementById('annual-library-table');
   if (!el) return;
   const year = new Date().getFullYear();
-  // count per type per month
+
   const grid = {};
-  ANNUAL_TYPES.forEach(t => {
-    grid[t] = Array(12).fill(0);
-  });
+  ANNUAL_TYPES.forEach(t => { grid[t] = Array(12).fill(0); });
   allWorkouts.forEach(w => {
     if (!w.distance || w.distance === 0) return;
     const d = parseDMY(w.date);
@@ -319,29 +317,37 @@ function renderAnnualLibrary(allWorkouts) {
     if (grid[w.type]) grid[w.type][d.getMonth()]++;
   });
 
-  const headerCols = MONTHS_HEB.map(m => `<th class="al-month-hdr">${m}<br><span style="font-size:0.6rem;opacity:.7">${String(year).slice(2)}</span></th>`).join('');
-  const rows = ANNUAL_TYPES.map(t => {
-    const total = grid[t].reduce((a, b) => a + b, 0);
-    const cells = grid[t].map(c => `<td class="${c === 0 ? 'al-zero' : 'al-val'}">${c}</td>`).join('');
-    return `<tr><td class="al-type">${t}</td>${cells}<td class="al-total">${total}</td></tr>`;
-  }).join('');
+  // show only months that have any activity
+  const activeMons = Array.from({length: 12}, (_, i) => i)
+    .filter(i => ANNUAL_TYPES.some(t => grid[t][i] > 0));
 
-  // total row (sum across all types per month)
   const monthTotals = Array(12).fill(0);
   ANNUAL_TYPES.forEach(t => grid[t].forEach((c, i) => { monthTotals[i] += c; }));
   const grandTotal = monthTotals.reduce((a, b) => a + b, 0);
-  const totalCells = monthTotals.map(c => `<td class="${c === 0 ? 'al-zero' : 'al-val'} al-sum-cell">${c}</td>`).join('');
-  const totalRow = `<tr class="al-total-row"><td class="al-type al-sum-lbl">סיכום</td>${totalCells}<td class="al-total al-sum-cell">${grandTotal}</td></tr>`;
 
-  el.innerHTML = `
-    <table class="annual-library">
-      <thead><tr>
-        <th class="al-type-hdr">סוג אימון</th>
-        ${headerCols}
-        <th class="al-total-hdr">סה"כ</th>
-      </tr></thead>
-      <tbody>${rows}${totalRow}</tbody>
-    </table>`;
+  let html = `<table class="annual-cmp-tbl"><thead><tr>
+    <th class="acmp-row-label">סוג אימון</th>`;
+  activeMons.forEach(m => { html += `<th class="acmp-month">${MONTHS_HE[m]}</th>`; });
+  html += `<th class="acmp-month">סה"כ</th></tr></thead><tbody>`;
+
+  ANNUAL_TYPES.forEach((t, ri) => {
+    const total = grid[t].reduce((a, b) => a + b, 0);
+    html += `<tr class="${ri % 2 === 0 ? 'acmp-row-even' : ''}">
+      <td class="acmp-row-label">${t}</td>`;
+    activeMons.forEach(m => {
+      const c = grid[t][m];
+      html += `<td class="acmp-cell${c === 0 ? ' acmp-zero' : ''}">${c > 0 ? c : '—'}</td>`;
+    });
+    html += `<td class="acmp-cell acmp-grand-total">${total > 0 ? total : '—'}</td></tr>`;
+  });
+
+  // totals row
+  html += `<tr class="acmp-sum-row"><td class="acmp-row-label">סיכום</td>`;
+  activeMons.forEach(m => { html += `<td class="acmp-cell acmp-sum-cell">${monthTotals[m] > 0 ? monthTotals[m] : '—'}</td>`; });
+  html += `<td class="acmp-cell acmp-sum-cell acmp-grand-total">${grandTotal}</td></tr>`;
+
+  html += '</tbody></table>';
+  el.innerHTML = html;
 }
 
 function tryLoadAvatar(id, src, fallback) {
