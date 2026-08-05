@@ -250,10 +250,10 @@ function renderAthleteCards() {
 
 function setAthleteWeekStats(prefix, workouts, dist, allWorkouts) {
   const realWorkouts = workouts.filter(w => w.distance > 0);
-  document.getElementById(`${prefix}-distance`).textContent = dist.toFixed(1) + ' ק"מ';
+  document.getElementById(`${prefix}-distance`).innerHTML = `${dist.toFixed(1)}<span class="stat-unit"> ק"מ</span>`;
   document.getElementById(`${prefix}-sessions`).textContent = realWorkouts.length;
   const topSpeed = maxVal(workouts, 'avg_speed');
-  document.getElementById(`${prefix}-maxspeed`).textContent = topSpeed ? topSpeed.toFixed(1) + ' קמ"ש' : '—';
+  document.getElementById(`${prefix}-maxspeed`).innerHTML = topSpeed ? `${topSpeed.toFixed(1)}<span class="stat-unit"> קמ"ש</span>` : '—';
 
   // קוביית YTD
   const curYear = new Date().getFullYear();
@@ -263,7 +263,7 @@ function setAthleteWeekStats(prefix, workouts, dist, allWorkouts) {
     return d && d.getFullYear() === curYear;
   }).reduce((s, w) => s + w.distance, 0);
   const ytdEl = document.getElementById(`${prefix}-ytd-dist`);
-  if (ytdEl) ytdEl.textContent = ytdDist.toFixed(0) + ' ק"מ';
+  if (ytdEl) ytdEl.innerHTML = `${ytdDist.toFixed(0)}<span class="stat-unit"> ק"מ</span>`;
 
   // קוביות סוגי אימון לחודש הנוכחי
   const TYPE_IDS = { 'אירובי': 'aerobic', 'אירובי ארוך': 'long', 'טמפו': 'tempo', 'ספרינטים': 'sprint' };
