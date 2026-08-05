@@ -29,11 +29,11 @@
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&family=Barlow+Condensed:wght@600;700;800&display=swap" rel="stylesheet">
 
   <!-- ═══ Assets ═══ -->
-  <link rel="stylesheet" href="css/style.css?v=20260805c">
+  <link rel="stylesheet" href="css/style.css?v=20260805d">
   <link rel="icon" type="image/png" href="images/logo.png">
   <link rel="apple-touch-icon" href="images/logo-full.png">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" defer></script>
-  <script src="js/app.js?v=20260805c" defer></script>
+  <script src="js/app.js?v=20260805d" defer></script>
 </head>
 <body>
 
@@ -53,6 +53,7 @@
 
     <nav>
       <a href="#athletes" class="active">ראשי</a>
+      <a href="#comparison">השוואה</a>
       <a href="#workouts">אימונים</a>
       <a href="#progress">התקדמות</a>
       <a href="#races">תחרויות</a>
@@ -220,8 +221,14 @@
 
     </div>
 
-    <!-- Last Workout Comparison — embedded in ראשי -->
-    <h2 class="section-title">השוואת אימון אחרון</h2>
+  </section>
+
+  <!-- ========== SECTION 2: COMPARISON ========== -->
+  <section id="comparison" class="section-tab">
+    <h2 class="section-title">השוואת אימונים</h2>
+
+    <!-- השוואת אימון אחרון -->
+    <h3 class="subsection-title">השוואת אימון אחרון</h3>
     <div class="cmp-header">
       <div class="cmp-title-row">
         <span class="lw-type-badge" id="last-workout-type"></span>
@@ -235,6 +242,19 @@
         <span id="athlete2-name-table" class="cmp-name cmp-name-2">—</span>
       </div>
       <div id="comparison-tbody" class="cmp-grid"></div>
+    </div>
+
+    <!-- השוואה שנתית -->
+    <h3 class="subsection-title" id="annual-cmp-title">השוואת אימונים שנתי 2026</h3>
+    <div class="annual-cmp-controls">
+      <div class="annual-cmp-athlete-btns">
+        <button class="annual-cmp-athlete-btn active" data-athlete="1" id="annual-cmp-btn-1">מקסים</button>
+        <button class="annual-cmp-athlete-btn" data-athlete="2" id="annual-cmp-btn-2">ויקטור</button>
+      </div>
+      <div class="annual-cmp-year-btns" id="annual-cmp-year-btns"></div>
+    </div>
+    <div class="annual-cmp-table-wrap">
+      <div id="annual-cmp-table"></div>
     </div>
   </section>
 

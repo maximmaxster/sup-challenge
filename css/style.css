@@ -1028,6 +1028,106 @@ section {
 }
 
 /* ===== YEARLY DISTANCE BOXES ===== */
+/* ===== ANNUAL COMPARISON TABLE ===== */
+.subsection-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 2rem 0 0.75rem;
+  opacity: 0.85;
+}
+.annual-cmp-controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.25rem;
+}
+.annual-cmp-athlete-btns,
+.annual-cmp-year-btns {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.annual-cmp-athlete-btn,
+.annual-cmp-year-btn {
+  padding: 0.4rem 1.1rem;
+  border-radius: 999px;
+  border: 2px solid var(--border-color);
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: 'Heebo', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.annual-cmp-athlete-btn.active {
+  background: var(--accent-cyan);
+  border-color: var(--accent-cyan);
+  color: #000;
+}
+.annual-cmp-year-btn.active {
+  background: var(--accent-orange);
+  border-color: var(--accent-orange);
+  color: #000;
+}
+.annual-cmp-athlete-btn:hover,
+.annual-cmp-year-btn:hover { filter: brightness(1.15); }
+
+.annual-cmp-table-wrap {
+  overflow-x: auto;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  margin-bottom: 2rem;
+}
+.annual-cmp-tbl {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 700px;
+  font-size: 0.88rem;
+}
+.annual-cmp-tbl thead tr {
+  background: rgba(0, 212, 255, 0.07);
+}
+.annual-cmp-tbl th {
+  padding: 0.65rem 0.75rem;
+  font-weight: 700;
+  font-size: 0.8rem;
+  color: var(--accent-cyan);
+  text-align: center;
+  border-bottom: 1px solid var(--border-color);
+  white-space: nowrap;
+}
+.annual-cmp-tbl th.acmp-row-label {
+  text-align: right;
+  color: var(--text-secondary);
+}
+.annual-cmp-tbl td {
+  padding: 0.6rem 0.75rem;
+  text-align: center;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+.annual-cmp-tbl td.acmp-row-label {
+  text-align: right;
+  font-weight: 600;
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+  background: rgba(0,0,0,0.15);
+}
+.annual-cmp-tbl tr.acmp-row-even td { background: rgba(255,255,255,0.025); }
+.annual-cmp-tbl tr.acmp-row-even td.acmp-row-label { background: rgba(0,0,0,0.2); }
+.annual-cmp-tbl tbody tr:hover td { background: rgba(0,212,255,0.06); }
+.annual-cmp-empty {
+  text-align: center;
+  padding: 2rem;
+  color: var(--text-secondary);
+  opacity: 0.6;
+}
+
+/* ===== END ANNUAL COMPARISON ===== */
 .yearly-dist-grid {
   display: flex;
   gap: 0.5rem;

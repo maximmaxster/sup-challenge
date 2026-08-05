@@ -223,6 +223,8 @@ function renderAll() {
   renderAnnualLibrary(athlete1Data?.workouts || []);
   renderProgress();
   renderRaces(1);
+  buildAnnualCmpYearBtns();
+  renderAnnualCmpTable();
 }
 
 // ===== ATHLETE CARDS =====
@@ -1614,6 +1616,111 @@ function setupProgress() {
   });
 }
 
+// ===== ANNUAL COMPARISON TABLE =====
+const MONTHS_HE = ['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'];
+
+let annualCmpAthlete = 1;
+let annualCmpYear = new Date().getFullYear();
+
+function renderAnnualCmpTable() {
+  const workouts = annualCmpAthlete === 2 ? (athlete2Data?.workouts || []) : (athlete1Data?.workouts || []);
+  const year = annualCmpYear;
+
+  // bucket workouts by month for selected year
+  const byMonth = Array.from({length: 12}, () => []);
+  workouts.forEach(w => {
+    const d = parseDMY(w.date);
+    if (!d || d.getFullYear() !== year) return;
+    byMonth[d.getMonth()].push(w);
+  });
+
+  // find which months have any data (to show only relevant columns)
+  const activeMons = byMonth.map((ws, i) => ws.length > 0 ? i : -1).filter(i => i >= 0);
+
+  // title update
+  const titleEl = document.getElementById('annual-cmp-title');
+  if (titleEl) titleEl.textContent = `השוואת אימונים שנתי ${year}`;
+
+  const el = document.getElementById('annual-cmp-table');
+  if (!el) return;
+
+  if (activeMons.length === 0) {
+    el.innerHTML = '<div class="annual-cmp-empty">אין נתונים לשנה זו</div>';
+    return;
+  }
+
+  const rows = [
+    { key: 'sessions', label: 'כמות אימונים', fmt: v => v > 0 ? v : '—' },
+    { key: 'distance', label: 'סה"כ מרחק', fmt: v => v > 0 ? v.toFixed(1) + ' ק"מ' : '—' },
+    { key: 'maxspeed', label: 'שיא מהירות', fmt: v => v > 0 ? v.toFixed(1) + ' קמ"ש' : '—' },
+    { key: 'avgspeed', label: 'מהירות ממוצע', fmt: v => v > 0 ? v.toFixed(1) + ' קמ"ש' : '—' },
+    { key: 'avgdps',   label: 'DPS ממוצע', fmt: v => v > 0 ? v.toFixed(2) + ' מ\'': '—' },
+  ];
+
+  // compute per-month stats
+  const stats = byMonth.map(ws => {
+    const real = ws.filter(w => w.distance > 0);
+    return {
+      sessions: real.length,
+      distance: real.reduce((s, w) => s + (w.distance || 0), 0),
+      maxspeed: real.reduce((mx, w) => Math.max(mx, w.avg_speed || 0), 0),
+      avgspeed: real.length ? real.reduce((s, w) => s + (w.avg_speed || 0), 0) / real.length : 0,
+      avgdps:   real.length ? real.reduce((s, w) => s + (w.dps || 0), 0) / real.length : 0,
+    };
+  });
+
+  // header row
+  let html = '<table class="annual-cmp-tbl"><thead><tr><th class="acmp-row-label">מדד</th>';
+  activeMons.forEach(m => { html += `<th class="acmp-month">${MONTHS_HE[m]}</th>`; });
+  html += '</tr></thead><tbody>';
+
+  rows.forEach((row, ri) => {
+    html += `<tr class="${ri % 2 === 0 ? 'acmp-row-even' : ''}"><td class="acmp-row-label">${row.label}</td>`;
+    activeMons.forEach(m => {
+      const val = stats[m][row.key];
+      html += `<td class="acmp-cell">${row.fmt(val)}</td>`;
+    });
+    html += '</tr>';
+  });
+
+  html += '</tbody></table>';
+  el.innerHTML = html;
+}
+
+function setupAnnualCmp() {
+  // athlete buttons
+  document.querySelectorAll('.annual-cmp-athlete-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.annual-cmp-athlete-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      annualCmpAthlete = parseInt(btn.dataset.athlete);
+      renderAnnualCmpTable();
+    });
+  });
+}
+
+function buildAnnualCmpYearBtns() {
+  const years1 = [...new Set((athlete1Data?.workouts || []).map(w => { const d = parseDMY(w.date); return d ? d.getFullYear() : null; }).filter(Boolean))];
+  const years2 = [...new Set((athlete2Data?.workouts || []).map(w => { const d = parseDMY(w.date); return d ? d.getFullYear() : null; }).filter(Boolean))];
+  const years = [...new Set([...years1, ...years2])].sort((a, b) => b - a);
+
+  const container = document.getElementById('annual-cmp-year-btns');
+  if (!container) return;
+
+  container.innerHTML = years.map(y =>
+    `<button class="annual-cmp-year-btn${y === annualCmpYear ? ' active' : ''}" data-year="${y}">${y}</button>`
+  ).join('');
+
+  container.querySelectorAll('.annual-cmp-year-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      container.querySelectorAll('.annual-cmp-year-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      annualCmpYear = parseInt(btn.dataset.year);
+      renderAnnualCmpTable();
+    });
+  });
+}
+
 // ===== NAV =====
 function showSection(id) {
   document.querySelectorAll('.section-tab').forEach(s => s.classList.remove('section-active'));
@@ -1630,6 +1737,7 @@ function showSection(id) {
   requestAnimationFrame(() => {
     window.dispatchEvent(new Event('resize'));
     if (id === 'athletes')  { renderComparisonTable(); }
+    if (id === 'comparison') { renderComparisonTable(); renderAnnualCmpTable(); }
     if (id === 'progress')  { renderTrendCharts(); renderProgress(); }
     if (id === 'charts')    { renderSpeedChart(currentRange.speed); renderDistanceChart(currentRange.distance); renderHrChart(currentRange.hr); renderDpsChart(currentRange.dps); }
     if (id === 'races')     { renderRaces(currentRacesAthlete || 1); }
@@ -1775,6 +1883,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setupProgress();
   setupRacesButtons();
   setupRacesTableControls();
+  setupAnnualCmp();
   setupNav();
   startCountdown();
   loadData();
