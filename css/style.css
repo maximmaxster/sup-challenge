@@ -628,8 +628,8 @@ section {
 
 .athlete-stats-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1rem;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
 }
 
 .stat-box {
@@ -1017,6 +1017,40 @@ section {
   font-size: 0.62rem;
   opacity: 0.75;
   margin-top: 0.2rem;
+}
+
+/* ===== YEARLY DISTANCE BOXES ===== */
+.yearly-dist-grid {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  flex-wrap: wrap;
+}
+.yearly-dist-box {
+  flex: 1;
+  min-width: 64px;
+  background: rgba(0, 230, 118, 0.06);
+  border: 1px solid rgba(0, 230, 118, 0.18);
+  border-radius: 8px;
+  padding: 0.55rem 0.25rem;
+  text-align: center;
+}
+.yd-val {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--accent-green);
+  line-height: 1;
+}
+.yd-unit {
+  font-size: 0.65rem;
+  font-weight: 400;
+  opacity: 0.75;
+  margin-right: 2px;
+}
+.yd-lbl {
+  font-size: 0.62rem;
+  opacity: 0.6;
+  margin-top: 0.25rem;
 }
 
 /* ===== ANNUAL LIBRARY TABLE ===== */
@@ -1776,7 +1810,7 @@ footer span {
     gap: 1rem;
   }
   .vs-badge { flex-direction: row; }
-  .athlete-stats-grid { grid-template-columns: repeat(3, 1fr); }
+  .athlete-stats-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
 @media (max-width: 768px) {

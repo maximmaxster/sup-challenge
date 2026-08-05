@@ -238,8 +238,8 @@ function renderAthleteCards() {
   if (p1) p1.textContent = periodLabel;
   if (p2) p2.textContent = periodLabel;
 
-  setAthleteWeekStats('a1', w1, sum(w1, 'distance'));
-  setAthleteWeekStats('a2', w2, sum(w2, 'distance'));
+  setAthleteWeekStats('a1', w1, sum(w1, 'distance'), athlete1Data.workouts);
+  setAthleteWeekStats('a2', w2, sum(w2, 'distance'), athlete2Data.workouts);
 
   renderAthleteBio('a1', athlete1Data);
   renderAthleteBio('a2', athlete2Data);
@@ -248,12 +248,22 @@ function renderAthleteCards() {
   tryLoadAvatar('athlete2-avatar', athlete2Data.profile_image, '🏄');
 }
 
-function setAthleteWeekStats(prefix, workouts, dist) {
+function setAthleteWeekStats(prefix, workouts, dist, allWorkouts) {
   const realWorkouts = workouts.filter(w => w.distance > 0);
   document.getElementById(`${prefix}-distance`).textContent = dist.toFixed(1) + ' ק"מ';
   document.getElementById(`${prefix}-sessions`).textContent = realWorkouts.length;
   const topSpeed = maxVal(workouts, 'avg_speed');
   document.getElementById(`${prefix}-maxspeed`).textContent = topSpeed ? topSpeed.toFixed(1) + ' קמ"ש' : '—';
+
+  // קוביית YTD
+  const curYear = new Date().getFullYear();
+  const ytdDist = (allWorkouts || []).filter(w => {
+    if (!w.distance || w.distance === 0) return false;
+    const d = parseDMY(w.date);
+    return d && d.getFullYear() === curYear;
+  }).reduce((s, w) => s + w.distance, 0);
+  const ytdEl = document.getElementById(`${prefix}-ytd-dist`);
+  if (ytdEl) ytdEl.textContent = ytdDist.toFixed(0) + ' ק"מ';
 
   // קוביות סוגי אימון לחודש הנוכחי
   const TYPE_IDS = { 'אירובי': 'aerobic', 'אירובי ארוך': 'long', 'טמפו': 'tempo', 'ספרינטים': 'sprint' };
@@ -263,6 +273,29 @@ function setAthleteWeekStats(prefix, workouts, dist) {
     const el = document.getElementById(`${prefix}-t-${k}`);
     if (el) el.textContent = v;
   });
+
+  // קוביות מרחק שנתי
+  renderYearlyDist(prefix, allWorkouts || []);
+}
+
+function renderYearlyDist(prefix, allWorkouts) {
+  const el = document.getElementById(`${prefix}-yearly-dist`);
+  if (!el) return;
+  const byYear = {};
+  allWorkouts.forEach(w => {
+    if (!w.distance || w.distance === 0) return;
+    const d = parseDMY(w.date);
+    if (!d) return;
+    const y = d.getFullYear();
+    byYear[y] = (byYear[y] || 0) + w.distance;
+  });
+  const years = Object.keys(byYear).map(Number).sort((a, b) => a - b);
+  el.innerHTML = years.map(y =>
+    `<div class="yearly-dist-box">
+      <div class="yd-val">${byYear[y].toFixed(0)}<span class="yd-unit">ק"מ</span></div>
+      <div class="yd-lbl">${y}</div>
+    </div>`
+  ).join('');
 }
 
 const MONTHS_HEB = ['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'];
