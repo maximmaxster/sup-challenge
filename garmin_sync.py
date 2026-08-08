@@ -56,6 +56,7 @@ ATHLETES = [
         "manual_types": {
             "01.07.2026": "ספרינטים",
             "22.06.2026": "ספרינטים",
+            "08.08.2026": "ספרינטים",
         },
         # IDs of race activities to exclude from workouts (added to races array manually):
         "race_ids": [
@@ -74,6 +75,7 @@ ATHLETES = [
         "manual_types": {
             "01.07.2026": "ספרינטים",
             "22.06.2026": "ספרינטים",
+            "08.08.2026": "ספרינטים",
         },
         "tempo_z4_sec": 900,   # >15 דקות = טמפו (זהה למקסים)
         # IDs of race activities to exclude from workouts:
@@ -669,14 +671,21 @@ def send_workout_email(to_email: str, athlete_name: str, workout: dict,
         print(f"  [Email] שגיאה: {e}")
 
 
+def date_to_iso(d: str) -> str:
+    """DD.MM.YYYY → YYYY-MM-DD לצורך השוואה נכונה"""
+    parts = d.split(".")
+    if len(parts) == 3:
+        return f"{parts[2]}-{parts[1]}-{parts[0]}"
+    return d
+
 def get_latest_saved_date(path: Path) -> str | None:
-    """קרא את תאריך האימון האחרון מהקובץ הקיים"""
+    """קרא את תאריך האימון האחרון מהקובץ הקיים (מחזיר ISO להשוואה)"""
     try:
         with open(path, "r", encoding="utf-8") as f:
             existing = json.load(f)
         ws = existing.get("workouts", [])
         if ws:
-            return ws[0].get("date")  # ממוין newest-first
+            return date_to_iso(ws[0].get("date", ""))  # ממוין newest-first
     except Exception:
         pass
     return None
@@ -779,7 +788,7 @@ def main():
             if to_email and data.get("workouts"):
                 new_ws = []
                 for w in data["workouts"]:
-                    if last_date is None or w["date"] > last_date:
+                    if last_date is None or date_to_iso(w["date"]) > last_date:
                         new_ws.append(w)
                     else:
                         break  # ממוין newest-first
