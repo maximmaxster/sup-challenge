@@ -1,12 +1,12 @@
 {
   "name": "ויקטור מורטוב",
   "profile_image": "images/athlete2_profile.jpg",
-  "last_sync": "2026-08-08T08:13:00Z",
+  "last_sync": "2026-08-08T08:16:52Z",
   "workouts": [
     {
       "id": "23894391032",
       "date": "08.08.2026",
-      "type": "אירובי",
+      "type": "ספרינטים",
       "location": "ים",
       "lat": 32.489225724712014,
       "distance": 4.37,
