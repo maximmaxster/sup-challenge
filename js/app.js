@@ -1768,10 +1768,282 @@ function setupNav() {
 // ⚠️ הוסיפו כאן כל תחרות עתידית לפני שהיא מתקיימת — הספירה לאחור תמצא אותה אוטומטית,
 // ולאחר שהאירוע יסתיים תוצג הודעת סיום + קישור לתוצאות בלשונית "תחרויות"
 // (יש להוסיף את התחרות גם למערך races בקובצי ה-JSON עם הנתונים בסיום)
-const RACE_SCHEDULE = [
-  { name: 'חיפה–עכו 2026', date: '2026-06-06T08:00:00+03:00', location: 'ים' },
-  // { name: 'שם התחרות הבאה', date: '2026-09-01T09:00:00+03:00', location: '...' },
-];
+// ===== UPCOMING RACES — localStorage storage =====
+function loadUpcomingRaces() {
+  try { return JSON.parse(localStorage.getItem('sup_upcoming_races') || '[]'); }
+  catch { return []; }
+}
+function saveUpcomingRaces(arr) {
+  localStorage.setItem('sup_upcoming_races', JSON.stringify(arr));
+}
+function deleteUpcomingRace(id) {
+  saveUpcomingRaces(loadUpcomingRaces().filter(r => r.id !== id));
+  renderCountdownBanner();
+}
+
+// ===== COUNTDOWN BANNER (new 3-col design) =====
+let _bannerTimers = [];
+
+function renderCountdownBanner() {
+  _bannerTimers.forEach(clearInterval);
+  _bannerTimers = [];
+
+  const races = loadUpcomingRaces();
+  const now = Date.now();
+  const pad = n => String(n).padStart(2, '0');
+
+  ['world', 'local'].forEach(cat => {
+    const container = document.getElementById(`cdb-${cat}-races`);
+    if (!container) return;
+
+    const catRaces = races
+      .filter(r => r.category === cat)
+      .map(r => ({ ...r, targetMs: new Date(r.category === 'local' ? `${r.startDate}T${r.startTime || '06:00'}:00` : r.startDate).getTime() }))
+      .filter(r => r.targetMs > now)
+      .sort((a, b) => a.targetMs - b.targetMs);
+
+    if (!catRaces.length) {
+      container.innerHTML = '<div class="cdb-empty">אין תחרויות מתוכננות</div>';
+      return;
+    }
+
+    container.innerHTML = catRaces.map(r => {
+      const d = new Date(r.targetMs);
+      const dateStr = r.category === 'world'
+        ? `${pad(new Date(r.startDate).getDate())}.${pad(new Date(r.startDate).getMonth()+1)} – ${pad(new Date(r.endDate).getDate())}.${pad(new Date(r.endDate).getMonth()+1)}.${new Date(r.endDate).getFullYear()}`
+        : `${pad(d.getDate())}.${pad(d.getMonth()+1)}.${d.getFullYear()} | ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+      const discs = (r.disciplines || []).join(' · ');
+      const athletes = r.athletes === '1' ? 'מקסים' : r.athletes === '2' ? 'ויקטור' : 'שניהם';
+      return `
+        <div class="cdb-race-card" id="cdbc-${r.id}">
+          <div class="cdb-race-name">${r.name}</div>
+          <div class="cdb-race-meta">${dateStr}${r.location ? ' · ' + r.location : ''}${discs ? ' · ' + discs : ''} · ${athletes}</div>
+          <div class="cdb-boxes">
+            <div class="cdb-box"><div class="cdb-num" id="cdn-d-${r.id}">--</div><div class="cdb-lbl">ימים</div></div>
+            <div class="cdb-sep">:</div>
+            <div class="cdb-box"><div class="cdb-num" id="cdn-h-${r.id}">--</div><div class="cdb-lbl">שעות</div></div>
+            <div class="cdb-sep">:</div>
+            <div class="cdb-box"><div class="cdb-num" id="cdn-m-${r.id}">--</div><div class="cdb-lbl">דקות</div></div>
+            <div class="cdb-sep">:</div>
+            <div class="cdb-box"><div class="cdb-num" id="cdn-s-${r.id}">--</div><div class="cdb-lbl">שניות</div></div>
+          </div>
+          <button class="cdb-delete-btn" onclick="deleteUpcomingRace('${r.id}')" title="הסר תחרות">✕</button>
+        </div>`;
+    }).join('');
+
+    catRaces.forEach(r => {
+      function tick() {
+        const diff = r.targetMs - Date.now();
+        if (diff <= 0) { clearInterval(timer); renderCountdownBanner(); return; }
+        const days  = Math.floor(diff / 86400000);
+        const hours = Math.floor((diff % 86400000) / 3600000);
+        const mins  = Math.floor((diff % 3600000) / 60000);
+        const secs  = Math.floor((diff % 60000) / 1000);
+        const el = id => document.getElementById(id);
+        if (el(`cdn-d-${r.id}`)) el(`cdn-d-${r.id}`).textContent = pad(days);
+        if (el(`cdn-h-${r.id}`)) el(`cdn-h-${r.id}`).textContent = pad(hours);
+        if (el(`cdn-m-${r.id}`)) el(`cdn-m-${r.id}`).textContent = pad(mins);
+        if (el(`cdn-s-${r.id}`)) el(`cdn-s-${r.id}`).textContent = pad(secs);
+      }
+      tick();
+      const timer = setInterval(tick, 1000);
+      _bannerTimers.push(timer);
+    });
+  });
+}
+
+function setupUpcomingRaceModal() {
+  const modal = document.getElementById('modal-upcoming-race');
+  const form  = document.getElementById('form-upcoming-race');
+  if (!modal || !form) return;
+
+  let selectedCat = 'local';
+  let selectedAthletes = 'both';
+  const selectedDiscs = new Set();
+
+  function toggleDateRows() {
+    document.getElementById('up-row-local-date').style.display  = selectedCat === 'local'  ? '' : 'none';
+    document.getElementById('up-row-world-dates').style.display = selectedCat === 'world' ? '' : 'none';
+  }
+
+  // category buttons
+  document.querySelectorAll('[data-cat]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      selectedCat = btn.dataset.cat;
+      document.querySelectorAll('[data-cat]').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll(`[data-cat="${selectedCat}"]`).forEach(b => b.classList.add('active'));
+      toggleDateRows();
+    });
+  });
+
+  // athlete buttons
+  document.querySelectorAll('[data-athletes]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      selectedAthletes = btn.dataset.athletes;
+      document.querySelectorAll('[data-athletes]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    });
+  });
+
+  // discipline buttons
+  document.querySelectorAll('.upcoming-disc-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const disc = btn.dataset.disc;
+      if (disc === '__other__') {
+        const inp = document.getElementById('up-disc-other');
+        inp.style.display = inp.style.display === 'none' ? '' : 'none';
+        return;
+      }
+      if (selectedDiscs.has(disc)) { selectedDiscs.delete(disc); btn.classList.remove('active'); }
+      else { selectedDiscs.add(disc); btn.classList.add('active'); }
+    });
+  });
+
+  // open
+  document.getElementById('btn-add-upcoming').addEventListener('click', () => {
+    form.reset();
+    selectedCat = 'local';
+    selectedAthletes = 'both';
+    selectedDiscs.clear();
+    document.querySelectorAll('[data-cat]').forEach(b => b.classList.toggle('active', b.dataset.cat === 'local'));
+    document.querySelectorAll('[data-athletes]').forEach(b => b.classList.toggle('active', b.dataset.athletes === 'both'));
+    document.querySelectorAll('.upcoming-disc-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('up-disc-other').style.display = 'none';
+    toggleDateRows();
+    modal.style.display = 'flex';
+  });
+
+  // close
+  ['upcoming-modal-close','upcoming-modal-cancel'].forEach(id => {
+    document.getElementById(id)?.addEventListener('click', () => { modal.style.display = 'none'; });
+  });
+  modal.addEventListener('click', e => { if (e.target === modal) modal.style.display = 'none'; });
+
+  // submit
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    const otherInp = document.getElementById('up-disc-other');
+    const discs = [...selectedDiscs];
+    if (otherInp.style.display !== 'none' && otherInp.value.trim()) discs.push(otherInp.value.trim());
+
+    const race = {
+      id: Date.now().toString(36) + Math.random().toString(36).slice(2),
+      category: selectedCat,
+      name: document.getElementById('up-name').value.trim(),
+      location: document.getElementById('up-location').value.trim(),
+      disciplines: discs,
+      athletes: selectedAthletes,
+      startDate: selectedCat === 'local' ? document.getElementById('up-date-local').value : document.getElementById('up-date-start').value,
+      startTime: selectedCat === 'local' ? document.getElementById('up-time-local').value : null,
+      endDate:   selectedCat === 'world' ? document.getElementById('up-date-end').value : null,
+    };
+    if (!race.name || !race.startDate) return;
+
+    const arr = loadUpcomingRaces();
+    arr.push(race);
+    saveUpcomingRaces(arr);
+    modal.style.display = 'none';
+    renderCountdownBanner();
+  });
+}
+
+let _upcomingTimers = [];
+
+function renderUpcomingRaces() {
+  const grid = document.getElementById('upcoming-races-grid');
+  const section = document.getElementById('upcoming-races-section');
+  if (!grid || !section) return;
+
+  // clear old timers
+  _upcomingTimers.forEach(clearInterval);
+  _upcomingTimers = [];
+
+  const now = Date.now();
+  const upcoming = RACE_SCHEDULE
+    .map(r => ({ ...r, ms: new Date(r.date).getTime() }))
+    .filter(r => r.ms > now)
+    .sort((a, b) => a.ms - b.ms);
+
+  if (upcoming.length === 0) {
+    section.style.display = 'none';
+    return;
+  }
+  section.style.display = '';
+
+  const pad = n => String(n).padStart(2, '0');
+
+  grid.innerHTML = upcoming.map((r, i) => {
+    const d = new Date(r.ms);
+    const dateStr = `${pad(d.getDate())}.${pad(d.getMonth()+1)}.${d.getFullYear()} | ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    return `
+      <div class="upcoming-race-card glass-card" id="urc-${i}">
+        <div class="urc-name">${r.name}</div>
+        <div class="urc-meta">${dateStr}${r.discipline ? ' · ' + r.discipline : ''}${r.location ? ' · ' + r.location : ''}</div>
+        <div class="urc-countdown">
+          <div class="urc-box"><div class="urc-num" id="urc-d-${i}">--</div><div class="urc-lbl">ימים</div></div>
+          <div class="urc-sep">:</div>
+          <div class="urc-box"><div class="urc-num" id="urc-h-${i}">--</div><div class="urc-lbl">שעות</div></div>
+          <div class="urc-sep">:</div>
+          <div class="urc-box"><div class="urc-num" id="urc-m-${i}">--</div><div class="urc-lbl">דקות</div></div>
+          <div class="urc-sep">:</div>
+          <div class="urc-box"><div class="urc-num" id="urc-s-${i}">--</div><div class="urc-lbl">שניות</div></div>
+        </div>
+      </div>`;
+  }).join('');
+
+  upcoming.forEach((r, i) => {
+    function tick() {
+      const diff = r.ms - Date.now();
+      if (diff <= 0) {
+        clearInterval(timer);
+        renderUpcomingRaces();   // הסר כרטיסייה + הוסף שורה לטבלה
+        renderRaces(currentRacesAthlete || 1);
+        return;
+      }
+      const days  = Math.floor(diff / 86400000);
+      const hours = Math.floor((diff % 86400000) / 3600000);
+      const mins  = Math.floor((diff % 3600000) / 60000);
+      const secs  = Math.floor((diff % 60000) / 1000);
+      const el = id => document.getElementById(id);
+      if (el(`urc-d-${i}`)) el(`urc-d-${i}`).textContent = pad(days);
+      if (el(`urc-h-${i}`)) el(`urc-h-${i}`).textContent = pad(hours);
+      if (el(`urc-m-${i}`)) el(`urc-m-${i}`).textContent = pad(mins);
+      if (el(`urc-s-${i}`)) el(`urc-s-${i}`).textContent = pad(secs);
+    }
+    tick();
+    const timer = setInterval(tick, 1000);
+    _upcomingTimers.push(timer);
+  });
+}
+
+// מחזיר שורות placeholder לתחרויות שעבר תאריכן אך אין להן תוצאות ב-JSON
+function getPastScheduledWithoutResults(races) {
+  const now = Date.now();
+  const past = RACE_SCHEDULE
+    .map(r => ({ ...r, ms: new Date(r.date).getTime() }))
+    .filter(r => r.ms <= now);
+
+  return past.filter(r => {
+    const rDate = new Date(r.ms);
+    const pad = n => String(n).padStart(2, '0');
+    const dateStr = `${pad(rDate.getDate())}.${pad(rDate.getMonth()+1)}.${rDate.getFullYear()}`;
+    return !races.some(j => j.name === r.name || j.date === dateStr);
+  }).map(r => {
+    const d = new Date(r.ms);
+    const pad = n => String(n).padStart(2, '0');
+    return {
+      date: `${pad(d.getDate())}.${pad(d.getMonth()+1)}.${d.getFullYear()}`,
+      name: r.name,
+      location: r.location || '',
+      discipline: r.discipline || '',
+      distance_km: null,
+      duration: null,
+      place: null,
+      category: 'local',
+      _pending: true,
+    };
+  });
+}
 
 function startCountdown() {
   const banner = document.querySelector('.countdown-banner');
@@ -1890,8 +2162,9 @@ document.addEventListener('DOMContentLoaded', () => {
   setupRacesButtons();
   setupRacesTableControls();
   setupAnnualCmp();
+  setupUpcomingRaceModal();
   setupNav();
-  startCountdown();
+  renderCountdownBanner();
   loadData();
 
   document.getElementById('lightbox').addEventListener('click', e => {

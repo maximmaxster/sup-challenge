@@ -1264,6 +1264,246 @@ section {
 }
 
 /* ===== COUNTDOWN ===== */
+/* ===== NEW COUNTDOWN BANNER V2 ===== */
+.countdown-banner-v2 {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 1rem;
+  background: linear-gradient(135deg, #0d1e3a 0%, #1a2e50 50%, #0d1e3a 100%);
+  border: 1px solid rgba(0, 212, 255, 0.2);
+  border-radius: 20px;
+  padding: 1.25rem 1.5rem;
+  margin: 0 0 2rem 0;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 0 40px rgba(0, 212, 255, 0.07);
+  min-height: 120px;
+}
+.countdown-banner-v2::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 0%, rgba(0,212,255,0.06) 0%, transparent 65%);
+  pointer-events: none;
+}
+
+/* עמודות ימין/שמאל */
+.cdb-col {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+.cdb-col-header {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  opacity: 0.55;
+  margin-bottom: 0.15rem;
+}
+.cdb-world .cdb-col-header { color: #7ecfff; }
+.cdb-local .cdb-col-header { color: #7cffb2; text-align: left; }
+.cdb-local { text-align: left; }
+
+/* כרטיסיית תחרות */
+.cdb-race-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 0.6rem 0.75rem;
+  position: relative;
+}
+.cdb-race-name {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 0.2rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cdb-race-meta {
+  font-size: 0.68rem;
+  opacity: 0.5;
+  margin-bottom: 0.45rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cdb-boxes {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+.cdb-box {
+  background: rgba(0,212,255,0.07);
+  border: 1px solid rgba(0,212,255,0.18);
+  border-radius: 8px;
+  padding: 0.3rem 0.45rem;
+  text-align: center;
+  min-width: 38px;
+}
+.cdb-num {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #00D4FF;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.cdb-lbl {
+  font-size: 0.55rem;
+  opacity: 0.45;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-top: 0.15rem;
+}
+.cdb-sep {
+  font-size: 1rem;
+  font-weight: 700;
+  color: rgba(0,212,255,0.35);
+  padding-bottom: 0.8rem;
+}
+.cdb-delete-btn {
+  position: absolute;
+  top: 0.35rem;
+  left: 0.4rem;
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.25);
+  cursor: pointer;
+  font-size: 0.75rem;
+  line-height: 1;
+  padding: 0.1rem 0.3rem;
+  border-radius: 4px;
+  transition: color 0.2s;
+}
+.cdb-delete-btn:hover { color: #ff5555; }
+.cdb-empty {
+  font-size: 0.75rem;
+  opacity: 0.3;
+  padding: 0.5rem 0;
+  font-style: italic;
+}
+
+/* מרכז */
+.cdb-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 0 0.5rem;
+  border-right: 1px solid rgba(255,255,255,0.07);
+  border-left:  1px solid rgba(255,255,255,0.07);
+  min-width: 100px;
+}
+.cdb-logo-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+}
+.cdb-logo-img {
+  height: 36px;
+  border-radius: 8px;
+  opacity: 0.85;
+}
+.cdb-logo-text {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: 0.12em;
+  text-align: center;
+  line-height: 1.1;
+}
+.cdb-logo-text span {
+  display: block;
+  color: var(--accent-cyan);
+  font-size: 0.6rem;
+  letter-spacing: 0.18em;
+}
+.btn-add-upcoming {
+  background: rgba(0,212,255,0.1);
+  border: 1px solid rgba(0,212,255,0.3);
+  color: var(--accent-cyan);
+  border-radius: 20px;
+  padding: 0.3rem 0.9rem;
+  font-family: 'Heebo', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.btn-add-upcoming:hover {
+  background: rgba(0,212,255,0.2);
+  border-color: var(--accent-cyan);
+}
+
+/* כפתורי מקצה/קטגוריה במודל */
+.upcoming-category-btns {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.upcoming-cat-btn {
+  padding: 0.4rem 1rem;
+  border-radius: 999px;
+  border: 2px solid var(--border-color);
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: 'Heebo', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.upcoming-cat-btn.active {
+  background: var(--accent-cyan);
+  border-color: var(--accent-cyan);
+  color: #000;
+}
+.upcoming-disc-btns {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+.upcoming-disc-btn {
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  border: 2px solid var(--border-color);
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: 'Heebo', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.upcoming-disc-btn.active {
+  background: var(--accent-orange);
+  border-color: var(--accent-orange);
+  color: #000;
+}
+
+/* responsive */
+@media (max-width: 640px) {
+  .countdown-banner-v2 {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto;
+  }
+  .cdb-center {
+    border: none;
+    border-top: 1px solid rgba(255,255,255,0.07);
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+    padding: 0.5rem 0;
+    flex-direction: row;
+    justify-content: space-between;
+  }
+  .cdb-local { text-align: right; }
+}
+/* ===== END NEW COUNTDOWN BANNER V2 ===== */
+
 .countdown-banner {
   background: linear-gradient(135deg, #0d1e3a 0%, #1a2e50 50%, #0d1e3a 100%);
   border: 1px solid rgba(0, 212, 255, 0.25);

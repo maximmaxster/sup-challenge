@@ -29,11 +29,11 @@
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&family=Barlow+Condensed:wght@600;700;800&display=swap" rel="stylesheet">
 
   <!-- ═══ Assets ═══ -->
-  <link rel="stylesheet" href="css/style.css?v=20260805e">
+  <link rel="stylesheet" href="css/style.css?v=20260809a">
   <link rel="icon" type="image/png" href="images/logo.png">
   <link rel="apple-touch-icon" href="images/logo-full.png">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" defer></script>
-  <script src="js/app.js?v=20260805e" defer></script>
+  <script src="js/app.js?v=20260809a" defer></script>
 </head>
 <body>
 
@@ -82,30 +82,104 @@
 <!-- ===== MAIN ===== -->
 <main>
 
-  <!-- ========== COUNTDOWN ========== -->
-  <div class="countdown-banner">
-    <div class="countdown-event-name">🏄 חיפה–עכו 2026</div>
-    <div class="countdown-date-label">06.06.2026 &nbsp;|&nbsp; 08:00</div>
-    <div class="countdown-boxes">
-      <div class="countdown-box">
-        <div class="countdown-num" id="cd-days">--</div>
-        <div class="countdown-lbl">ימים</div>
+  <!-- ========== COUNTDOWN BANNER ========== -->
+  <div class="countdown-banner-v2" id="countdown-banner">
+    <!-- ימין: חו"ל -->
+    <div class="cdb-col cdb-world" id="cdb-world">
+      <div class="cdb-col-header">🌍 חו"ל</div>
+      <div class="cdb-races" id="cdb-world-races"><div class="cdb-empty">אין תחרויות מתוכננות</div></div>
+    </div>
+    <!-- מרכז: לוגו + כפתור -->
+    <div class="cdb-center">
+      <div class="cdb-logo-wrap">
+        <img src="images/logo.png" alt="SUP" class="cdb-logo-img">
+        <div class="cdb-logo-text">SUP<span>CHALLENGE</span></div>
       </div>
-      <div class="countdown-sep">:</div>
-      <div class="countdown-box">
-        <div class="countdown-num" id="cd-hours">--</div>
-        <div class="countdown-lbl">שעות</div>
+      <button class="btn-add-upcoming" id="btn-add-upcoming" title="הוסף תחרות קרובה">+ תחרות</button>
+    </div>
+    <!-- שמאל: ארץ -->
+    <div class="cdb-col cdb-local" id="cdb-local">
+      <div class="cdb-col-header">🇮🇱 ארץ</div>
+      <div class="cdb-races" id="cdb-local-races"><div class="cdb-empty">אין תחרויות מתוכננות</div></div>
+    </div>
+  </div>
+
+  <!-- ========== MODAL: ADD UPCOMING RACE ========== -->
+  <div id="modal-upcoming-race" class="modal-overlay" style="display:none">
+    <div class="modal-box" dir="rtl">
+      <div class="modal-header">
+        <span class="modal-title">הוספת תחרות קרובה</span>
+        <button class="modal-close" id="upcoming-modal-close">✕</button>
       </div>
-      <div class="countdown-sep">:</div>
-      <div class="countdown-box">
-        <div class="countdown-num" id="cd-mins">--</div>
-        <div class="countdown-lbl">דקות</div>
-      </div>
-      <div class="countdown-sep">:</div>
-      <div class="countdown-box">
-        <div class="countdown-num" id="cd-secs">--</div>
-        <div class="countdown-lbl">שניות</div>
-      </div>
+      <form id="form-upcoming-race" class="modal-form">
+
+        <!-- ארץ / חו"ל -->
+        <div class="form-row">
+          <label>סוג תחרות</label>
+          <div class="upcoming-category-btns">
+            <button type="button" class="upcoming-cat-btn active" data-cat="local">🇮🇱 ארץ</button>
+            <button type="button" class="upcoming-cat-btn" data-cat="world">🌍 חו"ל</button>
+          </div>
+        </div>
+
+        <!-- שם -->
+        <div class="form-row">
+          <label>שם תחרות</label>
+          <input type="text" id="up-name" placeholder="שם התחרות" required>
+        </div>
+
+        <!-- מיקום -->
+        <div class="form-row">
+          <label>מיקום</label>
+          <input type="text" id="up-location" placeholder="עיר / מדינה">
+        </div>
+
+        <!-- תאריך + שעה (ארץ) -->
+        <div class="form-row" id="up-row-local-date">
+          <label>תאריך ושעה</label>
+          <div style="display:flex;gap:0.5rem">
+            <input type="date" id="up-date-local" style="flex:1">
+            <input type="time" id="up-time-local" style="width:110px" placeholder="06:00">
+          </div>
+        </div>
+
+        <!-- תאריכי התחלה/סיום (חו"ל) -->
+        <div class="form-row" id="up-row-world-dates" style="display:none">
+          <label>תאריכים</label>
+          <div style="display:flex;gap:0.5rem;align-items:center">
+            <input type="date" id="up-date-start" style="flex:1">
+            <span style="opacity:0.5">עד</span>
+            <input type="date" id="up-date-end" style="flex:1">
+          </div>
+        </div>
+
+        <!-- מקצים -->
+        <div class="form-row">
+          <label>מקצים</label>
+          <div class="upcoming-disc-btns" id="up-disc-btns">
+            <button type="button" class="upcoming-disc-btn" data-disc="ספרינט">ספרינט</button>
+            <button type="button" class="upcoming-disc-btn" data-disc="טכני">טכני</button>
+            <button type="button" class="upcoming-disc-btn" data-disc="לונג דיסטנס">לונג דיסטנס</button>
+            <button type="button" class="upcoming-disc-btn" data-disc="__other__">אחר...</button>
+          </div>
+          <input type="text" id="up-disc-other" placeholder="שם מקצה" style="display:none;margin-top:0.5rem">
+        </div>
+
+        <!-- משתתפים -->
+        <div class="form-row">
+          <label>משתתפים</label>
+          <div class="upcoming-category-btns">
+            <button type="button" class="upcoming-cat-btn active" data-athletes="both">שניהם</button>
+            <button type="button" class="upcoming-cat-btn" data-athletes="1">מקסים</button>
+            <button type="button" class="upcoming-cat-btn" data-athletes="2">ויקטור</button>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn-cancel" id="upcoming-modal-cancel">ביטול</button>
+          <button type="submit" class="btn-save">שמור תחרות</button>
+        </div>
+      </form>
     </div>
   </div>
 
@@ -477,6 +551,13 @@
       <button class="races-filter-btn" data-filter="world">חו"ל</button>
     </div>
 
+    <!-- תחרויות קרובות עם ספירה לאחור -->
+    <div id="upcoming-races-section" style="display:none">
+      <h3 class="subsection-title">תחרויות קרובות</h3>
+      <div id="upcoming-races-grid" class="upcoming-races-grid"></div>
+    </div>
+
+    <h3 class="subsection-title" id="past-races-label">תוצאות</h3>
     <div id="races-table-container">
       <table class="races-table" id="races-table">
         <thead>
