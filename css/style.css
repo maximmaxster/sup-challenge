@@ -1292,6 +1292,8 @@ section {
   display: flex;
   flex-direction: column;
   gap: 0.6rem;
+  align-items: center;
+  text-align: center;
 }
 .cdb-col-header {
   font-size: 0.9rem;
@@ -1299,8 +1301,8 @@ section {
   letter-spacing: 0.05em;
   color: #fff;
   margin-bottom: 0.35rem;
+  text-align: center;
 }
-.cdb-local .cdb-col-header { text-align: left; }
 .cdb-local { text-align: left; }
 
 /* כרטיסיית תחרות */
@@ -1310,11 +1312,13 @@ section {
   border-radius: 12px;
   padding: 0.6rem 0.75rem;
   position: relative;
+  text-align: center;
+  width: 100%;
 }
 .cdb-race-name {
-  font-size: 0.88rem;
-  font-weight: 700;
-  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: #00D4FF;
   margin-bottom: 0.2rem;
   white-space: nowrap;
   overflow: hidden;
@@ -1331,6 +1335,7 @@ section {
 .cdb-boxes {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 0.25rem;
 }
 .cdb-box {
