@@ -1294,15 +1294,13 @@ section {
   gap: 0.6rem;
 }
 .cdb-col-header {
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  opacity: 0.55;
-  margin-bottom: 0.15rem;
+  font-size: 0.9rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  color: #fff;
+  margin-bottom: 0.35rem;
 }
-.cdb-world .cdb-col-header { color: #7ecfff; }
-.cdb-local .cdb-col-header { color: #7cffb2; text-align: left; }
+.cdb-local .cdb-col-header { text-align: left; }
 .cdb-local { text-align: left; }
 
 /* כרטיסיית תחרות */
