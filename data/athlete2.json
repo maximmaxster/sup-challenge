@@ -4541,8 +4541,9 @@
       "z3": null,
       "z4": null,
       "z5": null,
-      "place": null,
-      "notes": ""
+      "place": 8,
+      "notes": "",
+      "discipline": ""
     },
     {
       "category": "world",
