@@ -4532,7 +4532,7 @@
       "name": "SUP CITY 11 CHALLENGE 220 KM",
       "location": "HOLLAND",
       "date": "01.09.2024",
-      "distance_km": null,
+      "distance_km": 168,
       "duration": null,
       "avg_speed": null,
       "avg_hr": null,
@@ -4543,7 +4543,7 @@
       "z5": null,
       "place": 8,
       "notes": "",
-      "discipline": ""
+      "discipline": "לונג דיסטנס"
     },
     {
       "category": "world",
