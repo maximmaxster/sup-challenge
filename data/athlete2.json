@@ -4592,8 +4592,9 @@
       "z3": "0:07",
       "z4": "0:10",
       "z5": "48:55",
-      "place": null,
-      "notes": ""
+      "place": 4,
+      "notes": "",
+      "discipline": "טכני"
     },
     {
       "category": "local",
