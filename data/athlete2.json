@@ -4575,8 +4575,9 @@
       "z3": "0:08",
       "z4": "0:31",
       "z5": "2:44:08",
-      "place": null,
-      "notes": ""
+      "place": 6,
+      "notes": "",
+      "discipline": "לונג דיסטנס"
     },
     {
       "category": "local",
