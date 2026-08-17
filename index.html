@@ -182,28 +182,13 @@
   <!-- ========== SECTION 1: ATHLETE CARDS ========== -->
   <section id="athletes" class="section-tab">
     <div class="hero-section">
-      <svg class="hero-logo" viewBox="0 0 260 200" xmlns="http://www.w3.org/2000/svg" style="max-width:260px;width:100%">
-        <!-- paddler silhouette — same icon as original logo -->
-        <g transform="translate(130,15) scale(0.82)" fill="none">
-          <!-- board -->
-          <ellipse cx="0" cy="118" rx="72" ry="10" fill="#e8451a" opacity="0.9"/>
-          <!-- paddle -->
-          <line x1="30" y1="15" x2="-18" y2="100" stroke="#e8451a" stroke-width="4" stroke-linecap="round"/>
-          <rect x="23" y="8" width="14" height="22" rx="4" fill="#e8451a"/>
-          <!-- body -->
-          <circle cx="18" cy="28" r="11" fill="white"/>
-          <path d="M18 39 C18 39 -2 65 -8 88 C-12 102 8 110 22 108 C36 106 52 96 48 80 C44 65 30 55 18 39Z" fill="white"/>
-          <!-- arms -->
-          <path d="M18 55 C30 48 40 38 30 15" stroke="white" stroke-width="6" stroke-linecap="round" fill="none"/>
-          <path d="M10 70 C-2 68 -12 72 -18 100" stroke="white" stroke-width="5" stroke-linecap="round" fill="none"/>
-          <!-- legs -->
-          <path d="M-2 105 C-6 115 2 120 14 118" stroke="white" stroke-width="5" stroke-linecap="round" fill="none"/>
-          <path d="M22 105 C26 115 18 120 6 118" stroke="white" stroke-width="5" stroke-linecap="round" fill="none"/>
-        </g>
-        <!-- text -->
-        <text x="130" y="158" text-anchor="middle" font-family="'Segoe UI',Arial,sans-serif" font-size="28" font-weight="700" letter-spacing="6" fill="white">SUP</text>
-        <text x="130" y="185" text-anchor="middle" font-family="'Segoe UI',Arial,sans-serif" font-size="22" font-weight="800" letter-spacing="4" fill="#e8451a">TRAINING</text>
-      </svg>
+      <div style="position:relative;display:inline-block;max-width:280px;width:100%">
+        <img src="images/logo-full.png" alt="SUP Training" class="hero-logo" style="display:block;width:100%">
+        <!-- כיסוי CHALLENGE + כיתוב TRAINING -->
+        <div style="position:absolute;bottom:0;left:0;right:0;height:22%;background:#0d1b2e;display:flex;align-items:center;justify-content:center">
+          <span style="font-family:'Segoe UI',Arial,sans-serif;font-size:clamp(14px,5vw,22px);font-weight:800;letter-spacing:4px;color:white">TRAINING</span>
+        </div>
+      </div>
       <p class="hero-sub">מעקב אימוני SUP · ניתוח ביצועים · השוואה בין חותרים</p>
     </div>
     <h2 class="section-title">חותרים</h2>
