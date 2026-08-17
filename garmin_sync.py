@@ -1,5 +1,5 @@
 """
-garmin_sync.py — SUP Challenge Garmin Sync
+garmin_sync.py — SUP Training Garmin Sync
 מתחבר לשני חשבונות Garmin Connect, מסנן SUP, שומר JSON + git push.
 פורמט זהה לקובץ האקסל ניתוח_אימוני_SUP.
 """
@@ -57,6 +57,7 @@ ATHLETES = [
             "01.07.2026": "ספרינטים",
             "22.06.2026": "ספרינטים",
             "08.08.2026": "ספרינטים",
+            "12.08.2026": "ספרינטים",
         },
         # IDs of race activities to exclude from workouts (added to races array manually):
         "race_ids": [
@@ -76,6 +77,7 @@ ATHLETES = [
             "01.07.2026": "ספרינטים",
             "22.06.2026": "ספרינטים",
             "08.08.2026": "ספרינטים",
+            "12.08.2026": "ספרינטים",
         },
         "tempo_z4_sec": 900,   # >15 דקות = טמפו (זהה למקסים)
         # IDs of race activities to exclude from workouts:
@@ -354,7 +356,7 @@ def fetch_athlete(cfg: dict, shared_types: dict = None) -> dict:
         "profile_image": cfg["profile_image"],
         "last_sync": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "workouts": workouts,
-    }
+    }, api
 
 
 # ===== SAVE =====
@@ -452,7 +454,9 @@ def get_history_from_json(all_workouts: list, current_w: dict, n: int = 5) -> tu
 
 
 def build_email_html(w: dict, athlete_name: str,
-                     prev_stats: dict = None, history: list = None) -> str:
+                     prev_stats: dict = None, history: list = None,
+                     wellness: dict = None, lap_analysis: dict = None,
+                     research_html: str = "") -> str:
     """צור דוח HTML לאימון — פורמט זהה לדוח של מקסים"""
     try:
         d = datetime.strptime(w["date"], "%d.%m.%Y")
@@ -556,6 +560,71 @@ def build_email_html(w: dict, athlete_name: str,
     </table>
   </div>"""
 
+    # ── Wellness section ──
+    wellness_html = ""
+    if wellness:
+        bb    = wellness.get("body_battery")
+        slp   = wellness.get("sleep_hours")
+        deep  = wellness.get("deep_min")
+        deep_pct = wellness.get("deep_pct", 0)
+        rem   = wellness.get("rem_min")
+
+        # Body Battery color
+        bb_color = "#66bb6a" if (bb or 0) >= 70 else ("#ffa726" if (bb or 0) >= 45 else "#ef5350")
+        bb_label = "גבוה" if (bb or 0) >= 70 else ("בינוני" if (bb or 0) >= 45 else "נמוך")
+        bb_html  = (f'<span style="font-size:22px;font-weight:700;color:{bb_color}">{bb}</span>'
+                    f'<span style="font-size:11px;color:{bb_color};margin-right:4px"> {bb_label}</span>'
+                    if bb is not None else '<span style="color:#546e7a">—</span>')
+
+        # Sleep color
+        slp_color = "#66bb6a" if (slp or 0) >= 7 else ("#ffa726" if (slp or 0) >= 6 else "#ef5350")
+        slp_html  = (f'<span style="font-size:22px;font-weight:700;color:{slp_color}">{slp}</span>'
+                     f'<span style="font-size:11px;color:rgba(255,255,255,0.5)"> שעות</span>'
+                     if slp is not None else '<span style="color:#546e7a">—</span>')
+
+        # Deep sleep color
+        deep_color = "#66bb6a" if deep_pct >= 20 else ("#ffa726" if deep_pct >= 13 else "#ef5350")
+        deep_html  = (f'<span style="font-size:22px;font-weight:700;color:{deep_color}">{deep}</span>'
+                      f'<span style="font-size:11px;color:rgba(255,255,255,0.5)"> דק\' ({deep_pct}%)</span>'
+                      if deep is not None else '<span style="color:#546e7a">—</span>')
+
+        rem_html = (f'<span style="font-size:22px;font-weight:700;color:#90caf9">{rem}</span>'
+                    f'<span style="font-size:11px;color:rgba(255,255,255,0.5)"> דק\'</span>'
+                    if rem is not None else '<span style="color:#546e7a">—</span>')
+
+        # HRV card
+        hrv_val    = wellness.get("hrv_value")
+        hrv_status = wellness.get("hrv_status", "")
+        hrv_low    = wellness.get("hrv_balanced_low")
+        hrv_high   = wellness.get("hrv_balanced_high")
+        hrv_html   = '<span style="color:#546e7a">—</span>'
+        if hrv_val is not None:
+            if hrv_status == "BALANCED":
+                hrv_color = "#66bb6a"; hrv_label = "מאוזן"
+            elif hrv_status in ("UNBALANCED",):
+                hrv_color = "#ffa726"; hrv_label = "לא מאוזן"
+            elif hrv_status in ("LOW", "POOR"):
+                hrv_color = "#ef5350"; hrv_label = "נמוך"
+            else:
+                hrv_color = "#90caf9"; hrv_label = hrv_status or ""
+            baseline_txt = (f'<div style="font-size:10px;color:#546e7a;margin-top:2px">בסיס: {hrv_low}–{hrv_high}ms</div>'
+                            if hrv_low and hrv_high else "")
+            hrv_html = (f'<span style="font-size:22px;font-weight:700;color:{hrv_color}">{hrv_val}</span>'
+                        f'<span style="font-size:11px;color:{hrv_color};margin-right:4px">ms · {hrv_label}</span>'
+                        f'{baseline_txt}')
+
+        wellness_html = f"""
+  <div class="section">
+    <div class="section-title">🔋 מצב לפני האימון — הלילה שעבר</div>
+    <div class="cards">
+      <div class="card"><div class="lbl">Body Battery</div><div class="val">{bb_html}</div></div>
+      <div class="card"><div class="lbl">HRV</div><div class="val">{hrv_html}</div></div>
+      <div class="card"><div class="lbl">שינה כוללת</div><div class="val">{slp_html}</div></div>
+      <div class="card"><div class="lbl">שינה עמוקה</div><div class="val">{deep_html}</div></div>
+      <div class="card"><div class="lbl">REM</div><div class="val">{rem_html}</div></div>
+    </div>
+  </div>"""
+
     return f"""<!DOCTYPE html>
 <html dir="rtl" lang="he">
 <head><meta charset="UTF-8">
@@ -573,7 +642,7 @@ body{{font-family:'Segoe UI',Arial,sans-serif;background:#0f1923;color:#e0e0e0;p
 .banner .tn{{font-size:18px;font-weight:700;color:{tc}}}
 .banner .tl{{font-size:12px;color:{tc};opacity:.8;margin-top:3px}}
 .banner .ti{{font-size:30px}}
-.cards{{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}}
+.cards{{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;margin-bottom:14px}}
 .card{{background:#1a2a3a;border-radius:12px;padding:14px;text-align:center;border:1px solid #1e3a55}}
 .card .lbl{{font-size:10px;color:#78909c;margin-bottom:5px;text-transform:uppercase}}
 .card .val{{font-size:24px;font-weight:700;color:#4fc3f7}}
@@ -581,7 +650,8 @@ body{{font-family:'Segoe UI',Arial,sans-serif;background:#0f1923;color:#e0e0e0;p
 .chips{{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}}
 .chip{{display:inline-flex;align-items:center;gap:5px;background:#0d2137;border:1px solid #1e4d7a;border-radius:8px;padding:7px 12px;font-size:12px;color:#90caf9}}
 .section{{background:#1a2a3a;border-radius:12px;padding:18px;margin-bottom:14px;border:1px solid #1e3a55}}
-.section-title{{font-size:13px;color:#78909c;margin-bottom:12px;font-weight:600;text-transform:uppercase}}
+.section-title{{font-size:14px;color:#4fc3f7;margin-bottom:6px;font-weight:700;border-right:3px solid #1e4d7a;padding-right:10px}}
+.section-insight{{font-size:13px;font-weight:600;color:#e0e0e0;margin-bottom:12px;padding-right:13px}}
 .zone-row{{display:flex;align-items:center;margin-bottom:9px;gap:9px}}
 .zl{{width:28px;font-size:12px;color:#90a4ae;text-align:right;flex-shrink:0;font-weight:600}}
 .zbar-bg{{width:340px;background:#0d1e2e;border-radius:5px;height:18px;overflow:hidden;flex-shrink:0}}
@@ -632,14 +702,18 @@ tr.hl td{{color:#4fc3f7!important;font-weight:600}}
     <div class="zone-row"><div class="zl">Z4</div><div class="zbar-bg"><div class="zbar" style="width:{px(z4s)}px;background:#e65100">{pct(z4s)}</div></div><div class="zt">{w.get('z4','0:00')}</div></div>
     <div class="zone-row"><div class="zl">Z5</div><div class="zbar-bg"><div class="zbar" style="width:{px(z5s)}px;background:#b71c1c">{pct(z5s)}</div></div><div class="zt">{w.get('z5','0:00')}</div></div>
   </div>
+  {wellness_html}
   {compare_html}
   {hist_section}
+  {build_lap_analysis_html(lap_analysis or {}, prev_stats=prev_stats, history=history)}
+  {research_html}
   <div class="footer">נוצר אוטומטית על ידי SUP Tracker • Garmin Connect • {w.get('date','')}</div>
 </div></body></html>"""
 
 
 def send_workout_email(to_email: str, athlete_name: str, workout: dict,
-                       all_workouts: list = None):
+                       all_workouts: list = None, wellness: dict = None,
+                       lap_analysis: dict = None):
     """שלח דוח HTML לאימון ספציפי, עם השוואה והיסטוריה"""
     try:
         prev_stats, history = None, None
@@ -653,7 +727,8 @@ def send_workout_email(to_email: str, athlete_name: str, workout: dict,
             }
             history = [current_entry] + history_prev[:4]
 
-        html = build_email_html(workout, athlete_name, prev_stats, history)
+        research_html = build_research_html(workout.get('type', ''), workout, lap_analysis or {})
+        html = build_email_html(workout, athlete_name, prev_stats, history, wellness=wellness, lap_analysis=lap_analysis, research_html=research_html)
         subject = (f"🏄 SUP | {workout.get('date','')} — "
                    f"{workout.get('type','')} {workout.get('location','')} | "
                    f"{workout.get('distance','')} ק\"מ")
@@ -669,6 +744,924 @@ def send_workout_email(to_email: str, athlete_name: str, workout: dict,
         print(f"  [Email] נשלח ל-{to_email} ✓")
     except Exception as e:
         print(f"  [Email] שגיאה: {e}")
+
+
+# ===== LAP ANALYSIS (Pacing / Technical Fatigue / Efficiency) =====
+
+WARMUP_CUTOFF_SEC = 900  # 15 minutes
+
+
+def fetch_lap_analysis(api, act_id: str, workout_type: str = '') -> dict:
+    """
+    Fetch per-lap data, skip warmup (first 15 min + WARMUP intensity),
+    return pacing / fatigue / efficiency analysis.
+    """
+    try:
+        splits = api.get_activity_splits(int(act_id))
+        laps = splits.get('lapDTOs', [])
+    except Exception as e:
+        print(f"  [Laps] {e}")
+        return {}
+
+    if not laps:
+        return {}
+
+    def _spd(l): return round((l.get('averageSpeed', 0) or 0) * 3.6, 1)
+    def _dps(l): return round(l.get('averageStrokeDistance', 0) or 0, 2)
+    def _spm(l): return round(l.get('averageStrokeCadence', 0) or 0, 1)
+    def _hr(l):  return int(l.get('averageHR', 0) or 0)
+    def _dur(l): return l.get('duration', 0) or 0
+    def _dist(l): return (l.get('distance', 0) or 0)
+    def chg(a, b): return round((b - a) / a * 100, 1) if a and b else None
+
+    # HRmax: use per-lap maxHeartRate reported by Garmin
+    hrmax = max((l.get('maxHeartRate', 0) or 0 for l in laps), default=0)
+    if hrmax < 130:  # fallback if Garmin didn't report it
+        avg_hrs = [l.get('averageHR', 0) or 0 for l in laps if (l.get('averageHR') or 0) > 60]
+        hrmax = int(max(avg_hrs) * 1.12) if avg_hrs else 185
+
+    def _zone(hr):
+        """Garmin 5-zone model by %HRmax"""
+        if not hrmax or not hr: return 1
+        p = hr / hrmax * 100
+        return 5 if p >= 90 else (4 if p >= 80 else (3 if p >= 70 else (2 if p >= 60 else 1)))
+
+    def _zone_dist(lap_list):
+        """HR zone distribution (%) weighted by lap duration"""
+        secs = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0}
+        tot = 0
+        for l in lap_list:
+            d = _dur(l); secs[_zone(_hr(l))] += d; tot += d
+        if not tot: return {z: 0 for z in range(1, 6)}
+        return {z: round(secs[z] / tot * 100) for z in range(1, 6)}
+
+
+    # ── SPRINT WORKOUT: detect sprint/rest pairs by duration ──
+    if workout_type == 'ספרינטים':
+        # Skip warmup
+        cum_sec = 0
+        post_warmup = []
+        for lap in laps:
+            cum_sec += _dur(lap)
+            if lap.get('intensityType') == 'WARMUP' or cum_sec <= WARMUP_CUTOFF_SEC:
+                continue
+            post_warmup.append(lap)
+
+        # Sprint lap: duration 10-30s AND speed >= 7 km/h
+        # Rest lap: duration 55-90s OR speed < 5.5 km/h
+        # Between-sets laps: longer duration (>200s)
+        sprint_laps, rest_laps = [], []
+        for lap in post_warmup:
+            d, s = _dur(lap), _spd(lap)
+            if 8 <= d <= 35 and s >= 6.5:
+                sprint_laps.append(lap)
+            elif 50 <= d <= 100 and s < 6.5:
+                rest_laps.append(lap)
+
+        if not sprint_laps:
+            return {'workout_type': workout_type, 'laps': [], 'sprints': []}
+
+        def lavg(lst, k):
+            vals = [k(l) for l in lst]
+            return round(sum(vals) / len(vals), 2) if vals else None
+
+        sprints_data = [
+            {
+                'n':    i + 1,
+                'speed': _spd(l),
+                'spm':   _spm(l),
+                'dps':   _dps(l),
+                'hr':    _hr(l),
+                'dur':   round(_dur(l)),
+                'dist':  round(_dist(l)),
+            }
+            for i, l in enumerate(sprint_laps)
+        ]
+        rests_data = [
+            {'n': i+1, 'hr': _hr(l), 'dur': round(_dur(l)), 'speed': _spd(l)}
+            for i, l in enumerate(rest_laps)
+        ]
+
+        n = len(sprints_data)
+        first_half = sprints_data[:max(1, n//2)]
+        last_half  = sprints_data[n - max(1, n//2):]
+
+        def savg(lst, fn):
+            vals = [fn(x) for x in lst if fn(x)]
+            return round(sum(vals)/len(vals), 2) if vals else None
+
+        f_speed = savg(first_half, lambda x: x['speed'])
+        l_speed = savg(last_half,  lambda x: x['speed'])
+        f_dps   = savg(first_half, lambda x: x['dps'])
+        l_dps   = savg(last_half,  lambda x: x['dps'])
+        f_spm   = savg(first_half, lambda x: x['spm'])
+        l_spm   = savg(last_half,  lambda x: x['spm'])
+
+        # HR recovery: for each rest, how much HR dropped vs previous sprint
+        hr_recovery = []
+        for i, r in enumerate(rests_data):
+            if i < len(sprints_data):
+                sprint_hr = sprints_data[i]['hr']
+                drop = sprint_hr - r['hr']
+                hr_recovery.append(drop)
+        avg_recovery = round(sum(hr_recovery)/len(hr_recovery)) if hr_recovery else None
+
+        decay = chg(f_speed, l_speed)
+        decay_label = (
+            '✓ קצב ספרינטים יציב — כוח נשמר לאורך הסדרה' if (decay or 0) > -5
+            else f'⚠️ ספרינטים מאטים ({abs(decay):.0f}%) — עייפות או יותר מדי ספרינטים'
+        )
+
+        return {
+            'workout_type': workout_type,
+            'sprints': sprints_data,
+            'rests':   rests_data,
+            'hr_zones':      _zone_dist(post_warmup),
+            'sprint_zones':  _zone_dist(sprint_laps),
+            'rest_zones':    _zone_dist(rest_laps),
+            'summary': {
+                'count':        n,
+                'peak_speed':   max((s['speed'] for s in sprints_data), default=0),
+                'avg_speed':    savg(sprints_data, lambda x: x['speed']),
+                'avg_dps':      savg(sprints_data, lambda x: x['dps']),
+                'avg_spm':      savg(sprints_data, lambda x: x['spm']),
+                'first_speed':  f_speed,
+                'last_speed':   l_speed,
+                'speed_decay':  decay,
+                'decay_label':  decay_label,
+                'dps_chg':      chg(f_dps, l_dps),
+                'spm_chg':      chg(f_spm, l_spm),
+                'avg_recovery': avg_recovery,
+            },
+        }
+
+    # ── REGULAR WORKOUTS: aerobic / אירובי ארוך / טמפו ──
+    main_laps, cum_sec = [], 0
+    for lap in laps:
+        cum_sec += _dur(lap)
+        if lap.get('intensityType') == 'WARMUP' or cum_sec <= WARMUP_CUTOFF_SEC:
+            continue
+        if _dist(lap) < 200:
+            continue
+        main_laps.append(lap)
+
+    if len(main_laps) < 2:
+        return {}
+
+    laps_data = [
+        {
+            'n':     i + 1,
+            'dist':  round(_dist(lap) / 1000, 2),
+            'speed': _spd(lap),
+            'hr':    _hr(lap),
+            'spm':   _spm(lap),
+            'dps':   _dps(lap),
+            'eff':   round(_spd(lap) / _hr(lap) * 100, 2) if _hr(lap) > 0 and _spd(lap) > 0 else None,
+        }
+        for i, lap in enumerate(main_laps)
+    ]
+
+    n = len(laps_data)
+    third = max(1, n // 3)
+    first3, last3 = laps_data[:third], laps_data[n - third:]
+
+    def avg(lst, k):
+        vals = [x[k] for x in lst if x.get(k)]
+        return round(sum(vals) / len(vals), 2) if vals else None
+
+    f_speed, l_speed = avg(first3, 'speed'), avg(last3, 'speed')
+    f_hr,    l_hr    = avg(first3, 'hr'),    avg(last3, 'hr')
+    f_dps,   l_dps   = avg(first3, 'dps'),   avg(last3, 'dps')
+    f_spm,   l_spm   = avg(first3, 'spm'),   avg(last3, 'spm')
+    f_eff,   l_eff   = avg(first3, 'eff'),   avg(last3, 'eff')
+
+    spd_chg = chg(f_speed, l_speed)
+    hr_drift = chg(f_hr, l_hr)  # HR rising without speed gain = cardiac drift
+
+    # Pacing interpretation depends on workout type
+    if workout_type == 'טמפו':
+        if (spd_chg or 0) >= 2:
+            pattern = 'Negative Split ✓ — בנייה פרוגרסיבית כנדרש בטמפו'
+        elif (spd_chg or 0) <= -4:
+            pattern = '⚠️ ירידה בקצב — יצאת חזק מדי לאימון טמפו'
+        else:
+            pattern = 'קצב אחיד — שקול לבנות יותר בשליש האחרון'
+    elif workout_type in ('אירובי', 'אירובי ארוך'):
+        if (spd_chg or 0) >= 4:
+            pattern = 'Negative Split — אולי יצאת שמרני מדי בהתחלה'
+        elif (spd_chg or 0) <= -5:
+            pattern = '⚠️ Positive Split — יצאת חזק מדי, ירידה בסוף'
+        else:
+            pattern = '✓ Even Pace — חלוקת קצב מצוינת לאירובי'
+    else:
+        if (spd_chg or 0) >= 2:
+            pattern = 'Negative Split ✓'
+        elif (spd_chg or 0) <= -3:
+            pattern = '⚠️ Positive Split — ירידה בקצב'
+        else:
+            pattern = 'Even Pace ✓'
+
+    # DPS insight by workout type
+    dps_chg = chg(f_dps, l_dps)
+    if workout_type == 'טמפו':
+        dps_ok_threshold = -12  # טמפו — מותר קצת ירידה בלחץ
+        dps_insight = (
+            '✓ DPS יציב תחת עומס טמפו — טכניקה מצוינת' if (dps_chg or 0) > -8
+            else f'⚠️ DPS ירד {abs(dps_chg):.0f}% — משיכות קצרות יותר תחת עומס'
+        )
+    elif workout_type == 'אירובי ארוך':
+        dps_insight = (
+            '✓ DPS נשמר לאורך מרחק — עמידות טכנית מצוינת' if (dps_chg or 0) > -6
+            else f'⚠️ DPS ירד {abs(dps_chg):.0f}% — טכניקה נשברת בסוף המרחק'
+        )
+    else:  # אירובי
+        dps_insight = (
+            '✓ DPS יציב — שמירה על טכניקה באימון אירובי' if (dps_chg or 0) > -5
+            else f'⚠️ DPS ירד {abs(dps_chg):.0f}% — שקול להפחית מרחק'
+        )
+
+    # Cardiac drift: HR up while speed is flat/down
+    drift_insight = ""
+    if (hr_drift or 0) > 8 and (spd_chg or 0) < 2:
+        drift_insight = f'Cardiac Drift: דופק עלה {hr_drift:.0f}% בלי עלייה במהירות — עייפות קרדיו-וסקולרית'
+
+    # Efficiency insight by workout type
+    eff_chg = chg(f_eff, l_eff)
+    if workout_type == 'טמפו':
+        eff_insight = (
+            '✓ יעילות נשמרת תחת עומס — לב עובד ביחס נכון למהירות'
+            if (eff_chg or 0) > -6
+            else f'⚠️ יעילות ירדה {abs(eff_chg):.0f}% — הלב עובד קשה יותר לאותה מהירות בסוף'
+        )
+    elif workout_type in ('אירובי', 'אירובי ארוך'):
+        eff_insight = (
+            '✓ יעילות אירובית טובה — דופק נמוך ביחס למהירות'
+            if (eff_chg or 0) > -4
+            else f'⚠️ יעילות ירדה {abs(eff_chg):.0f}% — כדאי לבדוק שינה/התאוששות'
+        )
+    else:
+        eff_insight = ""
+
+    # ── Pa:HR Aerobic Decoupling (first half vs second half of main laps) ──
+    # Pa:HR = ((speed/HR)_first - (speed/HR)_second) / (speed/HR)_first × 100
+    # Source: TrainingPeaks methodology, adapted for SUP paddle sports
+    pa_hr_pct = None
+    if workout_type in ('אירובי', 'אירובי ארוך') and len(laps_data) >= 4:
+        mid = len(laps_data) // 2
+        h1_spd = avg(laps_data[:mid],  'speed')
+        h2_spd = avg(laps_data[mid:],  'speed')
+        h1_hr  = avg(laps_data[:mid],  'hr')
+        h2_hr  = avg(laps_data[mid:],  'hr')
+        if h1_spd and h2_spd and h1_hr and h2_hr:
+            pa1 = h1_spd / h1_hr
+            pa2 = h2_spd / h2_hr
+            if pa1: pa_hr_pct = round((pa1 - pa2) / pa1 * 100, 1)
+
+    # ── Pace & DPS Variability (CV = stddev / mean × 100) ──
+    pace_cv = dps_cv = None
+    speeds = [l['speed'] for l in laps_data if l.get('speed', 0) > 0]
+    dpss   = [l['dps']   for l in laps_data if l.get('dps',   0) > 0]
+    if len(speeds) >= 3:
+        mu = sum(speeds) / len(speeds)
+        sd = (sum((x - mu) ** 2 for x in speeds) / len(speeds)) ** 0.5
+        pace_cv = round(sd / mu * 100, 1) if mu else None
+    if len(dpss) >= 3:
+        mu = sum(dpss) / len(dpss)
+        sd = (sum((x - mu) ** 2 for x in dpss) / len(dpss)) ** 0.5
+        dps_cv = round(sd / mu * 100, 1) if mu else None
+
+    # ── HR Zone distribution (weighted by lap duration) ──
+    hr_zones = _zone_dist(main_laps)
+
+    return {
+        'workout_type': workout_type,
+        'laps':    laps_data,
+        'pacing':  {'first_speed': f_speed, 'last_speed': l_speed,
+                    'first_hr': f_hr,    'last_hr': l_hr,
+                    'spd_chg': spd_chg,  'pattern': pattern,
+                    'hr_drift': hr_drift, 'drift_insight': drift_insight},
+        'fatigue': {'first_dps': f_dps, 'last_dps': l_dps, 'dps_chg': dps_chg,
+                    'first_spm': f_spm, 'last_spm': l_spm, 'spm_chg': chg(f_spm, l_spm),
+                    'dps_insight': dps_insight},
+        'eff':     {'first': f_eff, 'last': l_eff, 'chg': eff_chg,
+                    'eff_insight': eff_insight,
+                    'per_lap': [{'n': l['n'], 'eff': l['eff']} for l in laps_data]},
+        'hr_zones': hr_zones,
+        'pa_hr':    pa_hr_pct,
+        'pace_cv':  pace_cv,
+        'dps_cv':   dps_cv,
+    }
+
+
+def build_lap_analysis_html(analysis: dict, prev_stats: dict = None, history: list = None) -> str:
+    if not analysis:
+        return ""
+
+    wtype = analysis.get('workout_type', '')
+
+    # ── shared helpers ──
+    def arrow(chg, good_positive=True):
+        if chg is None: return ""
+        good = (chg > 0) == good_positive
+        color = "#66bb6a" if good else "#ef5350"
+        sym = "↑" if chg > 0 else "↓"
+        return f'<span style="color:{color};font-weight:700">{sym}{abs(chg):.1f}%</span>'
+
+    def bar(val, max_val, color):
+        w = max(4, round(val / max_val * 200)) if max_val else 4
+        return (f'<div style="display:inline-block;height:10px;width:{w}px;'
+                f'background:{color};border-radius:3px;vertical-align:middle"></div>')
+
+    # ══════════════════════════════════════════
+    # SPRINT BRANCH
+    # ══════════════════════════════════════════
+    if wtype == 'ספרינטים':
+        sprints = analysis.get('sprints', [])
+        rests   = analysis.get('rests', [])
+        summary = analysis.get('summary', {})
+
+        if not sprints:
+            return ""
+
+        max_spd = max((s['speed'] for s in sprints), default=1)
+        sprint_rows = ""
+        for s in sprints:
+            spd_color = "#00D4FF" if s['speed'] >= max_spd * 0.95 else (
+                        "#66bb6a" if s['speed'] >= max_spd * 0.85 else "#ffa726")
+            sprint_rows += (
+                f'<tr style="border-bottom:1px solid rgba(255,255,255,0.05)">'
+                f'<td style="padding:6px 8px;color:#90a4ae;font-size:0.82em">#{s["n"]}</td>'
+                f'<td style="padding:6px 8px">'
+                f'  {bar(s["speed"], max_spd, spd_color)}&nbsp;'
+                f'  <span style="font-size:0.85em;color:{spd_color}">{s["speed"]} קמ"ש</span>'
+                f'</td>'
+                f'<td style="padding:6px 8px;font-size:0.82em;color:#e0e0e0">{s["spm"] or "—"}</td>'
+                f'<td style="padding:6px 8px;font-size:0.82em;color:#e0e0e0">{s["dps"] or "—"}מ</td>'
+                f'<td style="padding:6px 8px;font-size:0.82em;color:#78909c">{s["dur"]}ש</td>'
+                f'</tr>'
+            )
+
+        # Speed decay summary
+        decay_txt = ""
+        if summary.get('speed_decay') is not None:
+            d = summary['speed_decay']
+            if d < -10:
+                decay_txt = f"⚠️ מהירות ירדה {abs(d):.0f}% בין ספרינט ראשון לאחרון — עייפות אנאירובית"
+            elif d < -5:
+                decay_txt = f"⚡ ירידה קלה של {abs(d):.0f}% בין ספרינטים — ניהול מאמץ סביר"
+            else:
+                decay_txt = f"✓ מהירות יציבה לאורך כל הספרינטים — קיבולת אנאירובית טובה"
+
+        # HR recovery
+        hr_txt = ""
+        if rests and summary.get('avg_recovery') is not None:
+            drop = summary['avg_recovery']
+            if drop >= 20:
+                hr_txt = f"✓ התאוששות לב מצוינת — דופק יורד {drop:.0f} BPM בממוצע בין ספרינטים"
+            elif drop >= 10:
+                hr_txt = f"⚡ התאוששות לב בינונית — ירידה של {drop:.0f} BPM בין ספרינטים"
+            else:
+                hr_txt = f"⚠️ התאוששות לב איטית — רק {drop:.0f} BPM ירידה — שקול מנוחה ארוכה יותר"
+
+        dps_txt = ""
+        if summary.get('dps_chg') is not None:
+            d = summary['dps_chg']
+            if d < -8:
+                dps_txt = f"⚠️ DPS ירד {abs(d):.0f}% — משיכות קצרות יותר תחת עייפות"
+            elif d > 2:
+                dps_txt = f"✓ DPS עלה {d:.0f}% — שמירה טכנית תחת לחץ מרשימה"
+            else:
+                dps_txt = "✓ DPS יציב — טכניקת משיכה נשמרת גם תחת מאמץ"
+
+        insights = " &nbsp;|&nbsp; ".join(x for x in [decay_txt, hr_txt, dps_txt] if x)
+
+        # ── HR Zones for sprint workout ──
+        sz = analysis.get('sprint_zones', {})
+        rz = analysis.get('rest_zones',   {})
+        # In ספרינטים: sprint laps should be Z4-Z5, rest laps Z2-Z3
+        sprint_z45 = (sz.get(4, 0) + sz.get(5, 0))
+        rest_z23   = (rz.get(2, 0) + rz.get(3, 0))
+        zone_verdict = ""
+        if sz:
+            if sprint_z45 >= 60:
+                zone_verdict = f"✓ ספרינטים ב-Z4-Z5 ({sprint_z45}%) — עצימות אנאירובית נכונה"
+            else:
+                zone_verdict = f"⚡ ספרינטים ב-Z4-Z5 רק {sprint_z45}% — שקול להגביר עצימות"
+        if rz and rest_z23 >= 50:
+            zone_verdict += f"  |  ✓ מנוחות ב-Z2-Z3 ({rest_z23}%) — התאוששות פעילה תקינה"
+
+        z_colors = {1:'#37474f', 2:'#1565c0', 3:'#2e7d32', 4:'#e65100', 5:'#b71c1c'}
+        z_labels = {1:'Z1 מנוחה', 2:'Z2 אירובי', 3:'Z3 סף', 4:'Z4 סף עליון', 5:'Z5 אנאירובי'}
+        zone_rows_sprint = ""
+        for z in range(1, 6):
+            s_pct = sz.get(z, 0); r_pct = rz.get(z, 0)
+            zone_rows_sprint += (
+                f'<tr style="border-bottom:1px solid rgba(255,255,255,0.04)">'
+                f'<td style="padding:4px 8px;font-size:0.8em;color:#90a4ae">{z_labels[z]}</td>'
+                f'<td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px">'
+                f'<div style="width:{max(3,s_pct*1.4):.0f}px;height:10px;background:{z_colors[z]};border-radius:3px"></div>'
+                f'<span style="font-size:0.8em;color:#e0e0e0">{s_pct}%</span></div></td>'
+                f'<td style="padding:4px 8px"><div style="display:flex;align-items:center;gap:6px">'
+                f'<div style="width:{max(3,r_pct*1.4):.0f}px;height:10px;background:{z_colors[z]};border-radius:3px;opacity:0.6"></div>'
+                f'<span style="font-size:0.8em;color:#78909c">{r_pct}%</span></div></td>'
+                f'</tr>'
+            )
+
+        sprint_html = f"""
+  <div class="section">
+    <div class="section-title">⚡ ניתוח ספרינטים — {len(sprints)} חזרות</div>
+    <div class="section-insight">{summary.get('decay_label','') or insights or '—'}</div>
+    <table style="width:100%;border-collapse:collapse;margin-bottom:12px">
+      <thead><tr>
+        <th style="padding:5px 8px;text-align:right;font-size:0.78em;color:#546e7a;font-weight:400">#</th>
+        <th style="padding:5px 8px;font-size:0.78em;color:#546e7a;font-weight:400">מהירות שיא</th>
+        <th style="padding:5px 8px;font-size:0.78em;color:#546e7a;font-weight:400">SPM</th>
+        <th style="padding:5px 8px;font-size:0.78em;color:#546e7a;font-weight:400">DPS</th>
+        <th style="padding:5px 8px;font-size:0.78em;color:#546e7a;font-weight:400">משך</th>
+      </tr></thead>
+      <tbody>{sprint_rows}</tbody>
+    </table>
+    {f'<div style="font-size:0.82em;color:#90a4ae;padding:8px 12px;background:rgba(255,255,255,0.04);border-radius:8px;margin-bottom:8px">{insights}</div>' if insights else ''}
+  </div>
+  <div class="section">
+    <div class="section-title">💓 אזורי דופק — ספרינטים vs מנוחות</div>
+    <div class="section-insight">{zone_verdict}</div>
+    <table style="width:100%;border-collapse:collapse">
+      <thead><tr>
+        <th style="padding:4px 8px;font-size:0.75em;color:#546e7a;font-weight:400;text-align:right">אזור</th>
+        <th style="padding:4px 8px;font-size:0.75em;color:#546e7a;font-weight:400">ספרינטים</th>
+        <th style="padding:4px 8px;font-size:0.75em;color:#546e7a;font-weight:400">מנוחות</th>
+      </tr></thead>
+      <tbody>{zone_rows_sprint}</tbody>
+    </table>
+  </div>"""
+        return sprint_html
+
+    # ══════════════════════════════════════════
+    # REGULAR BRANCH (אירובי / טמפו / אירובי ארוך)
+    # ══════════════════════════════════════════
+    if not analysis.get('laps'):
+        return ""
+
+    laps   = analysis['laps']
+    pacing = analysis['pacing']
+    fat    = analysis['fatigue']
+    eff    = analysis['eff']
+
+    # ── helpers ──
+    def mini_card(title, first, last, chg_val, unit, good_positive=True):
+        if first is None: return ""
+        color = "#66bb6a" if (chg_val or 0) * (1 if good_positive else -1) > 0 else "#ef5350"
+        if chg_val is not None:
+            return (f'<div style="flex:1;background:rgba(255,255,255,0.05);border-radius:10px;padding:12px;text-align:center">'
+                    f'<div style="font-size:0.76em;color:#78909c;margin-bottom:6px">{title}</div>'
+                    f'<div style="display:flex;justify-content:space-around;align-items:center">'
+                    f'<div><div style="font-size:0.7em;color:#546e7a">התחלה</div>'
+                    f'<div style="font-size:1.2em;font-weight:700;color:#e0e0e0">{first}{unit}</div></div>'
+                    f'<div style="font-size:1.5em;color:{color}">{"→" if abs(chg_val) < 1 else ("↑" if chg_val > 0 else "↓")}</div>'
+                    f'<div><div style="font-size:0.7em;color:#546e7a">סוף</div>'
+                    f'<div style="font-size:1.2em;font-weight:700;color:{color}">{last}{unit}</div></div>'
+                    f'</div>'
+                    f'<div style="font-size:0.75em;margin-top:6px;color:{color}">'
+                    f'{arrow(chg_val, good_positive)} ({abs(chg_val):.1f}%)</div>'
+                    f'</div>')
+        return (f'<div style="flex:1;background:rgba(255,255,255,0.05);border-radius:10px;padding:12px;text-align:center">'
+                f'<div style="font-size:0.76em;color:#78909c;margin-bottom:6px">{title}</div>'
+                f'<div style="font-size:1.1em;font-weight:700;color:#e0e0e0">{first}{unit} → {last}{unit}</div></div>')
+
+    # ── 1. Pacing table ──
+    max_spd = max((l['speed'] for l in laps), default=1)
+    max_hr  = max((l['hr']    for l in laps), default=1)
+
+    pat_color = "#66bb6a" if "Negative" in pacing['pattern'] else (
+                "#ffa726" if "Even" in pacing['pattern'] else "#ef5350")
+
+    # prev avg speed comparison
+    hist_spd = (prev_stats or {}).get('speed')
+    hist_dps = (prev_stats or {}).get('dps')
+    hist_n   = (prev_stats or {}).get('count', 0)
+    hist_label = f"ממוצע {hist_n} אימונים" if hist_n else ""
+
+    def _cmp_line(curr, prev_val, unit, label, reverse=False):
+        if not prev_val or not curr: return ""
+        try:
+            diff_pct = (float(curr) - float(prev_val)) / float(prev_val) * 100
+        except Exception: return ""
+        good = (diff_pct > 0) != reverse
+        color = "#66bb6a" if good else "#ef5350"
+        sym = "↑" if diff_pct > 0 else "↓"
+        return (f'<span style="font-size:0.8em;color:{color};margin-right:12px">'
+                f'{sym} {abs(diff_pct):.1f}% vs {label} ({prev_val}{unit})</span>')
+
+    lap_rows = ""
+    for l in laps:
+        lap_rows += (
+            f'<tr style="border-bottom:1px solid rgba(255,255,255,0.05)">'
+            f'<td style="padding:6px 8px;color:#90a4ae;font-size:0.82em">ק"מ {l["n"]}</td>'
+            f'<td style="padding:6px 8px">'
+            f'  {bar(l["speed"], max_spd, "#00D4FF")}&nbsp;'
+            f'  <span style="font-size:0.85em;color:#e0e0e0">{l["speed"]}</span>'
+            f'</td>'
+            f'<td style="padding:6px 8px">'
+            f'  {bar(l["hr"], max_hr, "#ef5350")}&nbsp;'
+            f'  <span style="font-size:0.85em;color:#e0e0e0">{l["hr"]}</span>'
+            f'</td>'
+            f'<td style="padding:6px 8px;font-size:0.82em;color:#78909c">{l["spm"] or "—"}</td>'
+            f'<td style="padding:6px 8px;font-size:0.82em;color:#78909c">{l["dps"] or "—"}</td>'
+            f'</tr>'
+        )
+
+    pattern_label = pacing.get('pattern', '')
+    drift_insight = pacing.get('drift_insight', '')
+    avg_spd_curr  = round(sum(l['speed'] for l in laps) / len(laps), 2) if laps else None
+
+    # Pace variability
+    pace_cv = analysis.get('pace_cv')
+    dps_cv  = analysis.get('dps_cv')
+    cv_color  = "#66bb6a" if (pace_cv or 99) < 4 else ("#ffa726" if (pace_cv or 99) < 7 else "#ef5350")
+    dcv_color = "#66bb6a" if (dps_cv  or 99) < 5 else ("#ffa726" if (dps_cv  or 99) < 9 else "#ef5350")
+    if wtype == 'טמפו':
+        cv_note = ("✓ עקביות מרשימה לאימון טמפו" if (pace_cv or 99) < 4 else
+                   "✓ שונות סבירה — גיוון מכוון ניתן לשפר" if (pace_cv or 99) < 7 else
+                   "⚠️ שונות גבוהה — קצב לא אחיד לאימון טמפו")
+    else:
+        cv_note = ("✓ פייסינג מדויק — שליטה מצוינת בקצב" if (pace_cv or 99) < 4 else
+                   "✓ שונות נמוכה — פייסינג טוב" if (pace_cv or 99) < 7 else
+                   "⚡ שונות בינונית — תנאי מים או שינוי קצב" if (pace_cv or 99) < 10 else
+                   "⚠️ שונות גבוהה — חלוקת קצב לא אחידה")
+    dcv_note = ("✓ טכניקה עקבית לאורך האימון" if (dps_cv or 99) < 5 else
+                "⚡ שונות טכנית סבירה — DPS משתנה" if (dps_cv or 99) < 9 else
+                "⚠️ DPS לא עקבי — עקביות הטכניקה נפגמת")
+
+    cv_html = ""
+    if pace_cv is not None:
+        cv_html = (f'<div style="margin-top:10px;display:flex;gap:14px;flex-wrap:wrap">'
+                   f'<div style="background:rgba(255,255,255,0.04);border-radius:8px;padding:10px 14px;flex:1">'
+                   f'<div style="font-size:0.75em;color:#78909c;margin-bottom:4px">📐 עקביות קצב (CV)</div>'
+                   f'<div style="font-size:1.3em;font-weight:700;color:{cv_color}">{pace_cv}%</div>'
+                   f'<div style="font-size:0.78em;color:{cv_color};margin-top:3px">{cv_note}</div>'
+                   f'</div>'
+                   + (f'<div style="background:rgba(255,255,255,0.04);border-radius:8px;padding:10px 14px;flex:1">'
+                      f'<div style="font-size:0.75em;color:#78909c;margin-bottom:4px">📐 עקביות DPS (CV)</div>'
+                      f'<div style="font-size:1.3em;font-weight:700;color:{dcv_color}">{dps_cv}%</div>'
+                      f'<div style="font-size:0.78em;color:{dcv_color};margin-top:3px">{dcv_note}</div>'
+                      f'</div>' if dps_cv is not None else '')
+                   + '</div>')
+
+    pacing_html = f"""
+  <div class="section">
+    <div class="section-title">📈 פייסינג — חלק מרכזי (ללא חימום)</div>
+    <div class="section-insight" style="color:{pat_color}">{pattern_label}</div>
+    <div style="margin-bottom:10px;font-size:0.82em;color:#90a4ae">
+      קצב ראשון: <strong>{pacing['first_speed']}</strong> קמ"ש → אחרון: <strong>{pacing['last_speed']}</strong> קמ"ש
+      &nbsp;{arrow(pacing['spd_chg'])}
+      {_cmp_line(avg_spd_curr, hist_spd, ' קמ"ש', hist_label) if hist_label else ''}
+    </div>
+    {f'<div style="font-size:0.8em;color:#ffa726;padding:6px 10px;background:rgba(255,166,0,0.08);border-radius:6px;margin-bottom:10px">{drift_insight}</div>' if drift_insight else ''}
+    <table style="width:100%;border-collapse:collapse">
+      <thead><tr>
+        <th style="padding:5px 8px;text-align:right;font-size:0.78em;color:#546e7a;font-weight:400"></th>
+        <th style="padding:5px 8px;font-size:0.78em;color:#546e7a;font-weight:400">מהירות קמ"ש</th>
+        <th style="padding:5px 8px;font-size:0.78em;color:#546e7a;font-weight:400">דופק BPM</th>
+        <th style="padding:5px 8px;font-size:0.78em;color:#546e7a;font-weight:400">SPM</th>
+        <th style="padding:5px 8px;font-size:0.78em;color:#546e7a;font-weight:400">DPS</th>
+      </tr></thead>
+      <tbody>{lap_rows}</tbody>
+    </table>
+    {cv_html}
+  </div>"""
+
+    # ── 2. Technical Fatigue (DPS + SPM) ──
+    dps_insight = fat.get('dps_insight', '')
+    if not dps_insight and fat.get('dps_chg') is not None:
+        d = fat['dps_chg']
+        dps_insight = ("✓ DPS יציב — טכניקה נשמרת" if d > -5 else
+                       f"⚠️ DPS ירד {abs(d):.0f}% — עייפות טכנית")
+
+    fatigue_html = f"""
+  <div class="section">
+    <div class="section-title">🦾 עייפות טכנית (שליש ראשון vs שליש אחרון)</div>
+    <div class="section-insight">{dps_insight}</div>
+    {_cmp_line(fat.get('last_dps'), hist_dps, 'מ', hist_label) if hist_label and fat.get('last_dps') else ''}
+    <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap">
+      {mini_card('DPS — מ\' למשיכה', fat['first_dps'], fat['last_dps'], fat['dps_chg'], 'מ')}
+      {mini_card('SPM — משיכות/דקה', fat['first_spm'], fat['last_spm'], fat['spm_chg'], '', True)}
+    </div>
+  </div>"""
+
+    # ── 3. Cardiac Efficiency per lap ──
+    eff_insight = eff.get('eff_insight', '')
+    if not eff_insight and eff.get('chg') is not None:
+        eff_insight = ("✓ יעילות יציבה — לב עובד ביחס קבוע למהירות" if eff['chg'] > -5 else
+                       f"⚠️ יעילות ירדה {abs(eff['chg']):.0f}% — עומס קרדיו עולה בסוף")
+
+    effs = [l['eff'] for l in laps if l.get('eff')]
+    max_eff = max(effs, default=1)
+    eff_rows = ""
+    for l in laps:
+        e = l.get('eff')
+        if not e: continue
+        pct = e / max_eff
+        eff_color = "#00D4FF" if pct > 0.95 else ("#66bb6a" if pct > 0.85 else ("#ffa726" if pct > 0.75 else "#ef5350"))
+        eff_rows += (
+            f'<tr style="border-bottom:1px solid rgba(255,255,255,0.05)">'
+            f'<td style="padding:5px 8px;color:#90a4ae;font-size:0.82em">ק"מ {l["n"]}</td>'
+            f'<td style="padding:5px 8px">'
+            f'  <div style="display:inline-block;height:10px;width:{max(4,round(pct*180))}px;'
+            f'background:{eff_color};border-radius:3px;vertical-align:middle"></div>'
+            f'  &nbsp;<span style="font-size:0.84em;color:{eff_color}">{e}</span>'
+            f'</td>'
+            f'<td style="padding:5px 8px;font-size:0.8em;color:#78909c">{l["speed"]} ÷ {l["hr"]}bpm</td>'
+            f'</tr>'
+        )
+
+    eff_html = f"""
+  <div class="section">
+    <div class="section-title">⚡ יעילות לב (מהירות ÷ דופק × 100)</div>
+    <div class="section-insight">{eff_insight}</div>
+    <div style="font-size:0.81em;color:#78909c;margin-bottom:10px">
+      התחלה: <strong style="color:#e0e0e0">{eff['first']}</strong>
+      → סוף: <strong style="color:{'#66bb6a' if (eff.get('chg') or 0) >= 0 else '#ef5350'}">{eff['last']}</strong>
+      &nbsp;{arrow(eff.get('chg'))}
+    </div>
+    <table style="width:100%;border-collapse:collapse">
+      <thead><tr>
+        <th style="padding:5px 8px;text-align:right;font-size:0.78em;color:#546e7a;font-weight:400"></th>
+        <th style="padding:5px 8px;font-size:0.78em;color:#546e7a;font-weight:400">יעילות</th>
+        <th style="padding:5px 8px;font-size:0.78em;color:#546e7a;font-weight:400">פירוט</th>
+      </tr></thead>
+      <tbody>{eff_rows}</tbody>
+    </table>
+  </div>"""
+
+    # ── 4. HR Zone Distribution ──
+    hr_zones = analysis.get('hr_zones', {})
+    z_colors = {1:'#37474f', 2:'#1565c0', 3:'#2e7d32', 4:'#e65100', 5:'#b71c1c'}
+    z_names  = {1:'Z1 — מנוחה (<60%)', 2:'Z2 — אירובי (60-70%)',
+                3:'Z3 — סף אירובי (70-80%)', 4:'Z4 — סף לקטי (80-90%)', 5:'Z5 — אנאירובי (>90%)'}
+
+    # SUP-specific zone targets per workout type
+    if wtype == 'אירובי':
+        target_note = "יעד: Z2 ≥70% | SUP אירובי בסיסי = בונה עמידות משיכה ב-60-70% HRmax"
+        z2_ok = hr_zones.get(2, 0) >= 60
+        z3_warn = hr_zones.get(3, 0) + hr_zones.get(4, 0) + hr_zones.get(5, 0) > 25
+        zone_verdict = ("✓ חלוקת עומס אירובי נכונה — בסיס לשיפור DPS ועמידות" if z2_ok and not z3_warn else
+                        "⚠️ עומס גבוה מדי לאימון אירובי — שקול להאט ולהתמקד בטכניקה" if z3_warn else
+                        "⚡ Z2 נמוך — שקול להגביר קצב קל לבניית בסיס אירובי")
+    elif wtype == 'אירובי ארוך':
+        target_note = "יעד: Z2 ≥75% | מרחקים ארוכים ב-SUP דורשים יעילות משיכה מקסימלית בדופק נמוך"
+        zone_verdict = ("✓ שמירה על Z2 לאורך המרחק — יעילות אנרגטית גבוהה" if hr_zones.get(2, 0) >= 65 else
+                        "⚠️ Z2 נמוך לאימון ארוך — עלות אנרגטית גבוהה מדי")
+    elif wtype == 'טמפו':
+        target_note = "יעד: Z3-Z4 ≥60% | טמפו SUP = חתירה מתמשכת בסף הלקטי לשיפור race pace"
+        z34 = hr_zones.get(3, 0) + hr_zones.get(4, 0)
+        zone_verdict = ("✓ עומס טמפו נכון — חתירה בסף הלקטי" if z34 >= 55 else
+                        f"⚡ Z3+Z4 = {z34}% — אימון קצת קל מדי לטמפו, שקול להגביר")
+    else:
+        target_note = ""; zone_verdict = ""
+
+    z_rows = ""
+    for z in range(1, 6):
+        pct_z = hr_zones.get(z, 0)
+        if pct_z == 0: continue
+        z_rows += (
+            f'<div class="zone-row">'
+            f'<div class="zl" style="color:{z_colors[z]}">{z}</div>'
+            f'<div class="zbar-bg"><div class="zbar" style="width:{max(4,pct_z*2.8):.0f}px;background:{z_colors[z]}">'
+            f'{pct_z}%</div></div>'
+            f'<div class="zt" style="color:#90a4ae;font-size:0.78em">{z_names.get(z,"")}</div>'
+            f'</div>'
+        )
+
+    zones_html = f"""
+  <div class="section">
+    <div class="section-title">💓 אזורי דופק — התפלגות האימון</div>
+    <div class="section-insight">{zone_verdict}</div>
+    {f'<div style="font-size:0.78em;color:#546e7a;margin-bottom:10px">{target_note}</div>' if target_note else ''}
+    {z_rows}
+  </div>""" if hr_zones else ""
+
+    # ── 5. Aerobic Decoupling (Pa:HR) — אירובי/ארוך בלבד ──
+    pa_hr = analysis.get('pa_hr')
+    pa_html = ""
+    if pa_hr is not None and wtype in ('אירובי', 'אירובי ארוך'):
+        pa_color = "#66bb6a" if pa_hr < 5 else ("#ffa726" if pa_hr < 9 else "#ef5350")
+        if pa_hr < 5:
+            pa_verdict = "✓ מצוין — מערכת אירובית חזקה, מהירות נשמרת ביחס לדופק"
+            pa_explain = "בחתירת SUP, Pa:HR<5% = הלב עובד ביחס קבוע למהירות לאורך כל האימון — בסיס אירובי חזק"
+        elif pa_hr < 9:
+            pa_verdict = "⚡ בינוני — אוורור אירובי מתפתח"
+            pa_explain = "Pa:HR 5-9% = עייפות קרדיו-וסקולרית בינונית. בSUP זה מתבטא בעלייה בדופק בלי עלייה מקבילה במהירות/DPS"
+        else:
+            pa_verdict = "⚠️ דחייה אירובית — האימון היה קשה מדי לאירובי"
+            pa_explain = "Pa:HR>9% = הלב מאמץ הרבה יותר בשליש האחרון לאותה מהירות. SUP: בדוק DPS בסוף האימון — סימן לעייפות טכנית+קרדיו"
+
+        pa_html = f"""
+  <div class="section">
+    <div class="section-title">🫀 Aerobic Decoupling (Pa:HR)</div>
+    <div class="section-insight" style="color:{pa_color}">{pa_verdict}</div>
+    <div style="display:flex;align-items:center;gap:16px;margin:10px 0">
+      <div style="background:rgba(255,255,255,0.05);border-radius:10px;padding:14px 20px;text-align:center">
+        <div style="font-size:2em;font-weight:700;color:{pa_color}">{pa_hr}%</div>
+        <div style="font-size:0.72em;color:#78909c;margin-top:2px">Pa:HR Index</div>
+      </div>
+      <div style="font-size:0.8em;color:#90a4ae;line-height:1.55;flex:1">{pa_explain}</div>
+    </div>
+    <div style="font-size:0.75em;color:#37474f;display:flex;gap:8px">
+      <span style="color:#66bb6a">▌</span><span style="color:#546e7a">&lt;5% מצוין</span>
+      <span style="color:#ffa726">▌</span><span style="color:#546e7a">5-9% מתפתח</span>
+      <span style="color:#ef5350">▌</span><span style="color:#546e7a">&gt;9% עומס יתר</span>
+    </div>
+  </div>"""
+
+    return pacing_html + fatigue_html + eff_html + zones_html + pa_html
+
+
+# ===== SUP KNOWLEDGE BASE =====
+
+_KB_CACHE: dict = {}
+
+def load_knowledge() -> dict:
+    """טוען data/sup_knowledge.json — מטמון בזיכרון לכל ריצה."""
+    global _KB_CACHE
+    if _KB_CACHE:
+        return _KB_CACHE
+    kb_path = Path("data/sup_knowledge.json")
+    if kb_path.exists():
+        try:
+            _KB_CACHE = json.loads(kb_path.read_text(encoding="utf-8"))
+        except Exception:
+            _KB_CACHE = {}
+    return _KB_CACHE
+
+# מיפוי שמות עברי למפתחות JSON
+_TYPE_MAP = {
+    "אירובי":      "aerobic",
+    "אירובי ארוך": "aerobic_long",
+    "טמפו":        "tempo",
+    "ספרינטים":    "sprints",
+}
+
+
+def build_research_html(workout_type: str, w: dict, lap_analysis: dict) -> str:
+    """
+    📚 סקשן "מה מחקר SUP אומר" — משווה מדדי האימון ל-benchmarks מהמאגר המקצועי.
+    מוצג בתחתית המייל, אחרי כל ניתוחי הק"מ.
+    """
+    kb = load_knowledge()
+    if not kb:
+        return ""
+
+    bm_key = _TYPE_MAP.get(workout_type, "")
+    benchmarks = (kb.get("benchmarks") or {}).get(bm_key, {})
+    insights   = [i for i in (kb.get("insights") or [])
+                  if bm_key in (i.get("workout_types") or [])]
+
+    if not benchmarks and not insights:
+        return ""
+
+    updated = kb.get("updated", "")
+
+    def _cmp(actual, target, unit, label, low_good=False, fmt=".1f"):
+        """כרטיס השוואה: ערך בפועל vs יעד."""
+        if actual is None or target is None:
+            return ""
+        good = (actual <= target) if low_good else (actual >= target)
+        color  = "#66bb6a" if good else ("#ffa726" if abs(actual - target) / target < 0.15 else "#ef5350")
+        symbol = "✓" if good else ("⚡" if abs(actual - target) / target < 0.15 else "⚠️")
+        arrow  = "↓" if low_good else "↑"
+        tip    = f" ({arrow}{abs(actual - target):{fmt}}{unit} ליעד)" if not good else ""
+        return (
+            f'<div style="display:flex;justify-content:space-between;align-items:center;'
+            f'padding:7px 10px;border-bottom:1px solid rgba(255,255,255,0.05)">'
+            f'<span style="font-size:0.83em;color:rgba(230,238,250,0.6)">{label}</span>'
+            f'<span style="font-size:0.83em">'
+            f'<strong style="color:#e0e0e0">{actual:{fmt}}{unit}</strong>'
+            f'<span style="color:#546e7a;margin:0 6px">vs יעד</span>'
+            f'<span style="color:{color}">{target:{fmt}}{unit} {symbol}{tip}</span>'
+            f'</span></div>'
+        )
+
+    rows = ""
+
+    # DPS
+    dps_actual = w.get("dps")
+    dps_target = benchmarks.get("dps_m")
+    rows += _cmp(dps_actual, dps_target, "מ'", "DPS — מרחק למשיכה", fmt=".2f")
+
+    # SPM
+    spm_actual = w.get("spm")
+    spm_target = benchmarks.get("spm")
+    rows += _cmp(spm_actual, spm_target, "", "SPM — משיכות לדקה", fmt=".0f")
+
+    # Pa:HR
+    pa_hr = (lap_analysis or {}).get("pa_hr")
+    pa_target = benchmarks.get("pa_hr_pct")
+    if pa_hr is not None and pa_target is not None:
+        rows += _cmp(pa_hr, pa_target, "%", "Pa:HR — Aerobic Decoupling", low_good=True)
+
+    # Pace CV
+    pace_cv = (lap_analysis or {}).get("pace_cv")
+    cv_target = benchmarks.get("pace_cv_pct")
+    if pace_cv is not None and cv_target is not None:
+        rows += _cmp(pace_cv, cv_target, "%", "Pace CV — עקביות קצב", low_good=True)
+
+    # Z2 / Z34 / Z45
+    hz = (lap_analysis or {}).get("hr_zones", {})
+    if workout_type in ("אירובי", "אירובי ארוך"):
+        z2_actual = hz.get(2)
+        z2_target = benchmarks.get("z2_pct")
+        rows += _cmp(z2_actual, z2_target, "%", "Z2 — בסיס אירובי", fmt=".0f")
+    elif workout_type == "טמפו":
+        z34_actual = (hz.get(3, 0) or 0) + (hz.get(4, 0) or 0)
+        z34_target = benchmarks.get("z34_pct")
+        rows += _cmp(z34_actual, z34_target, "%", "Z3+Z4 — אזור טמפו", fmt=".0f")
+    elif workout_type == "ספרינטים":
+        la = lap_analysis or {}
+        sz = la.get("sprint_zones", {})
+        z45_actual = (sz.get(4, 0) or 0) + (sz.get(5, 0) or 0)
+        z45_target = benchmarks.get("z45_pct")
+        rows += _cmp(z45_actual, z45_target, "%", "Z4+Z5 — עצימות ספרינטים", fmt=".0f")
+
+    if not rows and not insights:
+        return ""
+
+    # תובנות מהמאגר (מקסימום 2)
+    insight_items = ""
+    for ins in insights[:2]:
+        src = ins.get("source_domain", "")
+        txt = ins.get("insight_he", "")
+        if txt:
+            src_span = f' <span style="color:#546e7a;font-size:0.88em">({src})</span>' if src else ''
+            insight_items += (
+                f'<li style="margin-bottom:7px;line-height:1.55;font-size:0.83em;color:rgba(230,238,250,0.7)">'
+                f'{txt}{src_span}</li>'
+            )
+
+    sources_line = " | ".join(set(
+        d for d in [i.get("source_domain","") for i in insights[:2]] if d
+    ))
+
+    return f"""
+  <div class="section">
+    <div class="section-title">📚 מחקר SUP — השוואה לבנצ'מארקים מקצועיים</div>
+    <div class="section-insight">מבוסס על: {sources_line or "supracer.com | distancepaddler.com"}</div>
+    {f'<div style="margin-bottom:10px">{rows}</div>' if rows else ''}
+    {f'<ul style="margin:10px 0 0;padding-right:18px">{insight_items}</ul>' if insight_items else ''}
+    <div style="font-size:0.72em;color:#37474f;margin-top:8px;text-align:left">
+      עודכן: {updated}
+    </div>
+  </div>"""
+
+
+# ===== WELLNESS (Body Battery + Sleep before workout) =====
+
+def fetch_wellness_before_workout(api, workout_date_str: str) -> dict:
+    """Fetch Body Battery + sleep for the night before the workout."""
+    from datetime import datetime
+    result = {}
+    try:
+        p = workout_date_str.split(".")
+        date_iso = f"{p[2]}-{p[1]}-{p[0]}"
+
+        # Sleep — Garmin date = that calendar day's sleep (previous night)
+        sleep = api.get_sleep_data(date_iso)
+        dto = (sleep or {}).get("dailySleepDTO", {})
+        if dto:
+            total = dto.get("sleepTimeSeconds", 0) or 0
+            deep  = dto.get("deepSleepSeconds",  0) or 0
+            rem   = dto.get("remSleepSeconds",   0) or 0
+            result["sleep_hours"] = round(total / 3600, 1)
+            result["deep_min"]    = round(deep / 60)
+            result["deep_pct"]    = round(deep / total * 100) if total else 0
+            result["rem_min"]     = round(rem / 60)
+
+        # Body Battery — last value (end of sleep = pre-workout level)
+        bb_data = api.get_body_battery(date_iso)
+        for entry in (bb_data or []):
+            if entry.get("date") == date_iso:
+                vals = entry.get("bodyBatteryValuesArray", [])
+                if vals:
+                    result["body_battery"] = vals[-1][1]
+                result["bb_charged"] = entry.get("charged", 0)
+                break
+
+        # HRV — lastNight value (ms) + status (BALANCED/UNBALANCED/LOW/POOR)
+        try:
+            hrv_data = api.get_hrv_data(date_iso)
+            summary  = (hrv_data or {}).get("hrvSummary", {})
+            if summary:
+                result["hrv_value"]  = summary.get("lastNight")       # ms
+                result["hrv_status"] = summary.get("status", "")      # BALANCED etc.
+                baseline = summary.get("baseline") or {}
+                result["hrv_balanced_low"]  = baseline.get("balancedLow")
+                result["hrv_balanced_high"] = baseline.get("balancedUpper")
+        except Exception:
+            pass  # שעון ללא תמיכת HRV
+
+    except Exception as e:
+        print(f"  [Wellness] {e}")
+    return result
 
 
 def date_to_iso(d: str) -> str:
@@ -754,7 +1747,7 @@ def git_push():
 # ===== MAIN =====
 def main():
     print("=" * 50)
-    print("SUP Challenge — Garmin Sync")
+    print("SUP Training — Garmin Sync")
     print(f"זמן: {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}")
     print("=" * 50)
 
@@ -776,15 +1769,14 @@ def main():
 
             # ויקטור יורש סיווגים ממקסים לתאריכים משותפים
             shared = athlete1_types if i > 0 else {}
-            data = fetch_athlete(cfg, shared_types=shared)
+            data, api = fetch_athlete(cfg, shared_types=shared)
             save_json(data, cfg["output"])
 
             # שמור מיפוי תאריך→סוג של מקסים לשימוש בויקטור
             if i == 0:
                 athlete1_types = {w["date"]: w["type"] for w in data["workouts"]}
 
-            # שלח מייל רק לספורטאים שמוגדרים ב-ATHLETE_EMAILS (ויקטור)
-            # מקסים כבר מקבל מייל מ-garmin_sup_tracker.py
+            # שלח מייל לספורטאים ב-ATHLETE_EMAILS
             if to_email and data.get("workouts"):
                 new_ws = []
                 for w in data["workouts"]:
@@ -792,11 +1784,41 @@ def main():
                         new_ws.append(w)
                     else:
                         break  # ממוין newest-first
+                analysis_updated = False
                 for w in new_ws:
                     if w.get("distance", 0) > 0:  # דלג על אימונים ריקים
                         print(f"  [Email] אימון חדש — {w['date']} {w['type']}")
+                        wellness     = fetch_wellness_before_workout(api, w["date"])
+                        lap_analysis = fetch_lap_analysis(api, w["id"], workout_type=w.get("type", ""))
+                        if wellness:
+                            print(f"  [Wellness] BB={wellness.get('body_battery','?')} שינה={wellness.get('sleep_hours','?')}h עמוקה={wellness.get('deep_pct','?')}%")
+                        if lap_analysis:
+                            if lap_analysis.get('sprints'):
+                                print(f"  [Laps] {len(lap_analysis['sprints'])} ספרינטים")
+                            elif lap_analysis.get('laps'):
+                                print(f"  [Laps] {len(lap_analysis['laps'])} קטעים | {lap_analysis.get('pacing',{}).get('pattern','')}")
+                            # שמור מדדי ניתוח ב-workout dict לצורך הדו"ח החודשי
+                            hz = lap_analysis.get('hr_zones', {})
+                            w['hr_z1']  = hz.get(1, 0); w['hr_z2'] = hz.get(2, 0)
+                            w['hr_z3']  = hz.get(3, 0); w['hr_z4'] = hz.get(4, 0)
+                            w['hr_z5']  = hz.get(5, 0)
+                            w['pa_hr']   = lap_analysis.get('pa_hr')
+                            w['pace_cv'] = lap_analysis.get('pace_cv')
+                            w['dps_cv']  = lap_analysis.get('dps_cv')
+                            if lap_analysis.get('sprints'):
+                                smry = lap_analysis.get('summary', {})
+                                w['sprint_count'] = smry.get('count', 0)
+                                w['peak_speed']   = smry.get('peak_speed', 0)
+                            analysis_updated = True
                         send_workout_email(to_email, cfg["name"], w,
-                                           all_workouts=data.get("workouts", []))
+                                           all_workouts=data.get("workouts", []),
+                                           wellness=wellness,
+                                           lap_analysis=lap_analysis)
+
+                # שמור מחדש עם מדדי הניתוח שנוספו
+                if analysis_updated:
+                    save_json(data, cfg["output"])
+                    print("  [JSON] נשמר מחדש עם מדדי ניתוח")
 
         except Exception as e:
             print(f"  שגיאה: {e}")
