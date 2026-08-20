@@ -568,8 +568,6 @@ const TRAINING_PLANS = {
         { t:'interval', d:"15 דק'", hr:'130-140' },
         { t:'cooldown', d:"5 דק'",  hr:null },
       ]},
-    ],
-    q2: [
       { name: 'ספרינטים 4', dur: 74, steps: [
         { t:'warmup',  d:"10 דק'", hr:null },
         { t:'warmup',  d:"20 דק'", hr:null },
@@ -584,6 +582,8 @@ const TRAINING_PLANS = {
         ]},
         { t:'cooldown', d:"10 דק'", hr:null },
       ]},
+    ],
+    q2: [
       { name: 'ספרינט 5', dur: 65, steps: [
         { t:'warmup', d:"10 דק'", hr:null },
         { t:'warmup', d:"5 דק'",  hr:'127-135' },
@@ -616,7 +616,7 @@ function hrBadgeHtml(hr) {
   const parts = hr.split('-').map(Number);
   const mid = (parts[0] + (parts[1] || parts[0])) / 2;
   const { z, bg, fg } = hrToZone(mid);
-  return `<span class="tp-step-hr" style="background:${bg};color:${fg}">${hr} <b>${z}</b></span>`;
+  return `<span class="tp-step-hr" style="background:${bg};color:${fg}">${hr}&nbsp;&nbsp;<b>${z}</b></span>`;
 }
 
 const STEP_COLORS = {
@@ -889,7 +889,7 @@ function renderWorkoutsTable(filterAthlete = 'all', filterType = 'all', filterLo
   tbody.innerHTML = '';
 
   if (!filtered.length) {
-    tbody.innerHTML = '<tr><td colspan="14" class="empty-state"><div class="empty-icon">🌊</div><p>אין אימונים תואמים לפילטר</p></td></tr>';
+    tbody.innerHTML = '<tr><td colspan="15" class="empty-state"><div class="empty-icon">🌊</div><p>אין אימונים תואמים לפילטר</p></td></tr>';
     return;
   }
 
@@ -916,11 +916,15 @@ function renderWorkoutsTable(filterAthlete = 'all', filterType = 'all', filterLo
     const showNum = !seenDates.has(w.date);
     if (showNum) seenDates.add(w.date);
 
+    const planTypes = ['טמפו','ספרינטים'];
+    const workoutNum = planTypes.includes(w.type) && w.workout_name ? w.workout_name : '';
+
     tr.innerHTML = `
       <td class="workout-num">${showNum ? num : ''}</td>
       <td>${w.date}</td>
       <td><span class="${badgeClass}">${w.athleteName}</span></td>
       <td><span class="type-badge ${typeBadge[w.type] || ''}">${w.type}</span></td>
+      <td style="font-size:0.8rem;color:var(--accent-cyan);white-space:nowrap">${workoutNum}</td>
       <td>${locIcon} ${w.location || '—'}</td>
       <td>${isZero ? '—' : w.distance.toFixed(2)}</td>
       <td>${isZero ? '—' : w.duration}</td>
