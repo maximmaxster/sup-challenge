@@ -370,7 +370,9 @@ function renderComparisonTable() {
 
   const typeEl = document.getElementById('last-workout-type');
   const dateEl = document.getElementById('last-workout-date');
-  if (typeEl) typeEl.textContent = lw1.type || '';
+  const planTypes = ['טמפו','ספרינטים'];
+  const wNumLabel = planTypes.includes(lw1.type) && lw1.workout_name ? ` — ${lw1.workout_name}` : '';
+  if (typeEl) typeEl.textContent = (lw1.type || '') + wNumLabel;
   if (dateEl) dateEl.textContent = lastDate || '';
 
   const metrics = [

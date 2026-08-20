@@ -226,7 +226,7 @@ def detect_type(z4_str: str, z5_str: str, avg_hr: int, dist_km: float, dur_sec: 
 
 # ===== PARSE ACTIVITY =====
 def parse_activity(act: dict, zones: list, cfg: dict = None, hr_values: list = None,
-                   shared_types: dict = None) -> dict:
+                   shared_types: dict = None, workout_names: dict = None) -> dict:
     if cfg is None:
         cfg = {}
     if hr_values is None:
@@ -278,12 +278,19 @@ def parse_activity(act: dict, zones: list, cfg: dict = None, hr_values: list = N
                                    spm_max=spm_max,
                                    hr_values=hr_values)
 
+    wid = act.get("workoutId")
+    wname = (workout_names or {}).get(wid, "") if wid else ""
+
     return {
         "id": str(act.get("activityId", "")),
         "date": date_str,
+        "start_hour": start_dt.hour,
         "type": workout_type,
+        "workout_name": wname,
         "location": location,
         "lat": lat,
+        "lon": float(act.get("startLongitude") or act.get("beginLongitude") or
+                     act.get("summaryDTO", {}).get("startLongitude") or 35.05),
         "distance": dist_km,
         "duration": seconds_to_hms(dur_sec),
         "dur_sec": dur_sec,
@@ -304,6 +311,13 @@ def fetch_athlete(cfg: dict, shared_types: dict = None) -> dict:
     print(f"\n{'='*50}")
     print(f"שולף נתונים: {cfg['name']}")
     api = connect_garmin(cfg)
+
+    # build workout name lookup {workoutId: workoutName}
+    try:
+        wlist = api.get_workouts(0, 100)
+        workout_names = {w["workoutId"]: w["workoutName"] for w in wlist if w.get("workoutId")}
+    except Exception:
+        workout_names = {}
 
     activities = api.get_activities(0, MAX_ACTIVITIES)
     sup_list = [a for a in activities if is_sup(a)]
@@ -333,7 +347,7 @@ def fetch_athlete(cfg: dict, shared_types: dict = None) -> dict:
         hr_ts = get_hr_timeseries(api, act_id)
 
         try:
-            w = parse_activity(act, zones, cfg=cfg, hr_values=hr_ts, shared_types=shared_types or {})
+            w = parse_activity(act, zones, cfg=cfg, hr_values=hr_ts, shared_types=shared_types or {}, workout_names=workout_names)
             workouts.append(w)
             print(f"    ✓ {w['date']}  {w['type']:10s}  {w['distance']}ק\"מ  {w['avg_speed']}קמ\"ש  Z4:{w['z4']}")
         except Exception as e:
@@ -402,10 +416,26 @@ def save_json(data: dict, path: Path):
 
 
 # ===== EMAIL REPORT =====
+def _similar_conditions(w_curr: dict, w_prev: dict) -> bool:
+    """האם שני אימונים התרחשו בתנאי מזג אוויר דומים (רוח ±5, גל ±0.2)."""
+    curr_wind = w_curr.get("wind_kmh")
+    prev_wind = w_prev.get("wind_kmh")
+    if curr_wind is None or prev_wind is None:
+        return False
+    if abs(curr_wind - prev_wind) > 5:
+        return False
+    curr_wave = w_curr.get("wave_height_m")
+    prev_wave = w_prev.get("wave_height_m")
+    if curr_wave is not None and prev_wave is not None:
+        if abs(curr_wave - prev_wave) > 0.2:
+            return False
+    return True
+
+
 def get_history_from_json(all_workouts: list, current_w: dict, n: int = 5) -> tuple:
     """
     מחזיר (prev_stats, history_list) — ממוצע + רשימת N אימונים קודמים
-    מאותו סוג ומיקום, מהנתונים שנשמרו ב-JSON.
+    מאותו סוג ומיקום. אם יש נתוני מזג אוויר — מוסיף similar_conditions_stats.
     """
     wtype    = current_w.get("type", "")
     wloc     = current_w.get("location", "")
@@ -422,12 +452,15 @@ def get_history_from_json(all_workouts: list, current_w: dict, n: int = 5) -> tu
 
     history = [
         {
-            "date":     w["date"],
-            "distance": w.get("distance", ""),
-            "duration": w.get("duration", ""),
-            "speed":    w.get("avg_speed", ""),
-            "avg_hr":   w.get("avg_hr", ""),
-            "dps":      w.get("dps", ""),
+            "date":        w["date"],
+            "distance":    w.get("distance", ""),
+            "duration":    w.get("duration", ""),
+            "speed":       w.get("avg_speed", ""),
+            "avg_hr":      w.get("avg_hr", ""),
+            "dps":         w.get("dps", ""),
+            "wind_kmh":    w.get("wind_kmh"),
+            "wave_height_m": w.get("wave_height_m"),
+            "similar_cond": _similar_conditions(current_w, w),
         }
         for w in same
     ]
@@ -450,13 +483,62 @@ def get_history_from_json(all_workouts: list, current_w: dict, n: int = 5) -> tu
         "hr":    round(sum(hrs)/len(hrs))          if hrs    else None,
         "dps":   round(sum(dpss)/len(dpss), 2)     if dpss   else None,
     }
+
+    # השוואה לאותו מספר אימון — רק מ-01.06.2026
+    PLAN_CUTOFF = "2026-06-01"
+    def _after_cutoff(d):
+        try:
+            p = d.split(".")
+            return f"{p[2]}-{p[1]}-{p[0]}" >= PLAN_CUTOFF
+        except Exception:
+            return False
+
+    wname = current_w.get("workout_name", "")
+    if wname and _after_cutoff(cur_date):
+        same_plan = [
+            w for w in all_workouts
+            if w.get("workout_name") == wname
+            and w.get("date") != cur_date
+            and w.get("distance", 0) > 0
+            and _after_cutoff(w.get("date", ""))
+        ]
+        if same_plan:
+            sp_speeds = [w["avg_speed"] for w in same_plan if w.get("avg_speed")]
+            sp_hrs    = [w["avg_hr"]    for w in same_plan if w.get("avg_hr")]
+            sp_dpss   = [w["dps"]       for w in same_plan if w.get("dps")]
+            sp_old = same_plan[-1]["date"]; sp_new = same_plan[0]["date"]
+            prev_stats["same_workout"] = {
+                "name":  wname,
+                "count": len(same_plan),
+                "label": f"{sp_old[:5]} – {sp_new[:5]}" if len(same_plan) > 1 else sp_old[:5],
+                "speed": round(sum(sp_speeds)/len(sp_speeds), 1) if sp_speeds else None,
+                "hr":    round(sum(sp_hrs)/len(sp_hrs))          if sp_hrs    else None,
+                "dps":   round(sum(sp_dpss)/len(sp_dpss), 2)     if sp_dpss   else None,
+            }
+
+    # השוואה בתנאים דומים — אם יש מספיק נתונים
+    similar = [w for w in same if _similar_conditions(current_w, w)]
+    if len(similar) >= 2:
+        sim_speeds = [w["avg_speed"] for w in similar if w.get("avg_speed")]
+        sim_hrs    = [w["avg_hr"]    for w in similar if w.get("avg_hr")]
+        sim_dpss   = [w["dps"]       for w in similar if w.get("dps")]
+        sim_old = similar[-1]["date"]; sim_new = similar[0]["date"]
+        prev_stats["similar"] = {
+            "count": len(similar),
+            "label": f"{sim_old[:5]} – {sim_new[:5]}",
+            "speed": round(sum(sim_speeds)/len(sim_speeds), 1) if sim_speeds else None,
+            "hr":    round(sum(sim_hrs)/len(sim_hrs))          if sim_hrs    else None,
+            "dps":   round(sum(sim_dpss)/len(sim_dpss), 2)     if sim_dpss   else None,
+            "wind_range": f"{min(w.get('wind_kmh',0) for w in similar):.0f}–{max(w.get('wind_kmh',0) for w in similar):.0f} קמ\"ש",
+        }
+
     return prev_stats, history
 
 
 def build_email_html(w: dict, athlete_name: str,
                      prev_stats: dict = None, history: list = None,
                      wellness: dict = None, lap_analysis: dict = None,
-                     research_html: str = "") -> str:
+                     research_html: str = "", weather: dict = None) -> str:
     """צור דוח HTML לאימון — פורמט זהה לדוח של מקסים"""
     try:
         d = datetime.strptime(w["date"], "%d.%m.%Y")
@@ -506,9 +588,21 @@ def build_email_html(w: dict, athlete_name: str,
         return f'<div class="delta" style="color:{color}">{arrow} {sign}{pct_d:.1f}%</div>'
 
     if prev_stats:
+        _wnd = w.get('wind_kmh'); _wdir = w.get('wind_dir_he'); _wgst = w.get('wind_gusts_kmh')
+        _wv  = w.get('wave_height_m'); _wvdir = w.get('wave_dir_he')
+        _weather_chips = ""
+        if _wnd is not None:
+            _weather_chips += f'<span class="wx-chip">💨 {_wnd} קמ"ש {_wdir or ""}</span>'
+        if _wgst is not None:
+            _weather_chips += f'<span class="wx-chip">נחשולים {_wgst} קמ"ש</span>'
+        if _wv is not None:
+            _weather_chips += f'<span class="wx-chip">🌊 גל {_wv}מ\' {_wvdir or ""}</span>'
+        _weather_row = f'<div class="wx-row">{_weather_chips}</div>' if _weather_chips else ""
+
         compare_html = f"""
   <div class="section">
-    <div class="section-title">📊 ממוצע {prev_stats['count']} אימונים אחרונים — {w.get('type','')} {w.get('location','')} ({prev_stats['label']})</div>
+    <div class="section-title">📊 ממוצע {prev_stats['count']} אימונים אחרונים — {w.get('type','')} {w.get('location','')}{"  |  " + w["workout_name"] if w.get("workout_name") else ""} ({prev_stats['label']})</div>
+    {_weather_row}
     <div class="cmp-grid">
       <div class="cmp-card">
         <div class="clbl">מהירות (קמ"ש)</div>
@@ -527,6 +621,65 @@ def build_email_html(w: dict, athlete_name: str,
         <div class="curr">{w.get('dps','')}</div>
         <div class="prev">ממוצע: {prev_stats['dps'] or '—'}</div>
         {delta_html(w.get('dps'), prev_stats['dps'])}
+      </div>
+    </div>
+  </div>"""
+        sw = prev_stats.get("same_workout")
+        if sw:
+            compare_html += f"""
+  <div class="section">
+    <div class="section-title">🎯 השוואה לאותו אימון — {sw['name']}</div>
+    <div style="font-size:12px;color:#546e7a;margin-bottom:8px;text-align:center">
+      ממוצע {sw['count']} ביצועים ({sw['label']})
+    </div>
+    <div class="cmp-grid">
+      <div class="cmp-card">
+        <div class="clbl">מהירות (קמ"ש)</div>
+        <div class="curr">{w.get('avg_speed','')}</div>
+        <div class="prev">ממוצע: {sw['speed'] or '—'}</div>
+        {delta_html(w.get('avg_speed'), sw['speed'])}
+      </div>
+      <div class="cmp-card">
+        <div class="clbl">דופק ממוצע</div>
+        <div class="curr">{w.get('avg_hr','')}</div>
+        <div class="prev">ממוצע: {sw['hr'] or '—'}</div>
+        {delta_html(w.get('avg_hr'), sw['hr'], reverse=True)}
+      </div>
+      <div class="cmp-card">
+        <div class="clbl">DPS (מטר)</div>
+        <div class="curr">{w.get('dps','')}</div>
+        <div class="prev">ממוצע: {sw['dps'] or '—'}</div>
+        {delta_html(w.get('dps'), sw['dps'])}
+      </div>
+    </div>
+  </div>"""
+
+        sim = prev_stats.get("similar")
+        if sim:
+            compare_html += f"""
+  <div class="section">
+    <div class="section-title">🌊 השוואה בתנאים דומים — רוח {sim['wind_range']}</div>
+    <div style="font-size:12px;color:#546e7a;margin-bottom:8px;text-align:center">
+      ממוצע {sim['count']} אימונים בתנאים דומים ({sim['label']})
+    </div>
+    <div class="cmp-grid">
+      <div class="cmp-card">
+        <div class="clbl">מהירות (קמ"ש)</div>
+        <div class="curr">{w.get('avg_speed','')}</div>
+        <div class="prev">ממוצע: {sim['speed']}</div>
+        {delta_html(w.get('avg_speed'), sim['speed'])}
+      </div>
+      <div class="cmp-card">
+        <div class="clbl">דופק ממוצע</div>
+        <div class="curr">{w.get('avg_hr','')}</div>
+        <div class="prev">ממוצע: {sim['hr'] or '—'}</div>
+        {delta_html(w.get('avg_hr'), sim['hr'], reverse=True)}
+      </div>
+      <div class="cmp-card">
+        <div class="clbl">DPS (מטר)</div>
+        <div class="curr">{w.get('dps','')}</div>
+        <div class="prev">ממוצע: {sim['dps']}</div>
+        {delta_html(w.get('dps'), sim['dps'])}
       </div>
     </div>
   </div>"""
@@ -658,6 +811,8 @@ body{{font-family:'Segoe UI',Arial,sans-serif;background:#0f1923;color:#e0e0e0;p
 .zbar{{height:18px;border-radius:5px;display:inline-flex;align-items:center;justify-content:flex-end;padding:0 6px;font-size:10px;color:white;font-weight:700;min-width:5px}}
 .zt{{width:52px;font-size:11px;color:#90caf9;text-align:left;flex-shrink:0}}
 .cmp-grid{{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}}
+.wx-row{{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;justify-content:center}}
+.wx-chip{{background:#0d2a3a;border:1px solid #1e4d7a;border-radius:20px;padding:4px 12px;font-size:12px;color:#4fc3f7}}
 .cmp-card{{background:#0d1e2e;border-radius:10px;padding:14px 12px;text-align:center}}
 .cmp-card .clbl{{font-size:11px;color:#546e7a;margin-bottom:8px}}
 .cmp-card .curr{{font-size:22px;font-weight:700;color:#e0e0e0}}
@@ -703,6 +858,7 @@ tr.hl td{{color:#4fc3f7!important;font-weight:600}}
     <div class="zone-row"><div class="zl">Z5</div><div class="zbar-bg"><div class="zbar" style="width:{px(z5s)}px;background:#b71c1c">{pct(z5s)}</div></div><div class="zt">{w.get('z5','0:00')}</div></div>
   </div>
   {wellness_html}
+  {build_weather_html(weather or {})}
   {compare_html}
   {hist_section}
   {build_lap_analysis_html(lap_analysis or {}, prev_stats=prev_stats, history=history)}
@@ -728,7 +884,10 @@ def send_workout_email(to_email: str, athlete_name: str, workout: dict,
             history = [current_entry] + history_prev[:4]
 
         research_html = build_research_html(workout.get('type', ''), workout, lap_analysis or {})
-        html = build_email_html(workout, athlete_name, prev_stats, history, wellness=wellness, lap_analysis=lap_analysis, research_html=research_html)
+        weather = {k: workout.get(k) for k in ('wind_kmh','wind_dir_he','wind_gusts_kmh',
+                                                 'wave_height_m','wave_period_s','wave_dir_he','temp_c')}
+        html = build_email_html(workout, athlete_name, prev_stats, history, wellness=wellness,
+                                lap_analysis=lap_analysis, research_html=research_html, weather=weather)
         subject = (f"🏄 SUP | {workout.get('date','')} — "
                    f"{workout.get('type','')} {workout.get('location','')} | "
                    f"{workout.get('distance','')} ק\"מ")
@@ -1614,6 +1773,115 @@ def build_research_html(workout_type: str, w: dict, lap_analysis: dict) -> str:
   </div>"""
 
 
+# ===== WEATHER CONDITIONS (Open-Meteo) =====
+
+def _wind_dir_he(deg):
+    if deg is None: return ""
+    dirs = ["צפון","צפון-מזרח","מזרח","דרום-מזרח","דרום","דרום-מערב","מערב","צפון-מערב"]
+    return dirs[round(deg / 45) % 8]
+
+def fetch_weather_conditions(date_str: str, hour: int, lat: float, lon: float, is_sea: bool) -> dict:
+    """Open-Meteo archive — רוח + גלים לפי שעת האימון."""
+    import urllib.request as _ur
+    parts = date_str.split(".")
+    iso = f"{parts[2]}-{parts[1]}-{parts[0]}"
+    result = {}
+    try:
+        url = (f"https://archive-api.open-meteo.com/v1/archive"
+               f"?latitude={lat:.4f}&longitude={lon:.4f}"
+               f"&hourly=wind_speed_10m,wind_direction_10m,wind_gusts_10m,temperature_2m"
+               f"&start_date={iso}&end_date={iso}"
+               f"&timezone=Asia%2FJerusalem&wind_speed_unit=kmh")
+        with _ur.urlopen(url, timeout=12) as r:
+            h = __import__('json').loads(r.read())['hourly']
+        times = h.get('time', [])
+        target = f"{iso}T{hour:02d}:00"
+        idx = times.index(target) if target in times else min(hour, len(times)-1)
+        result['wind_kmh']       = round(h['wind_speed_10m'][idx], 1)  if h.get('wind_speed_10m')  else None
+        result['wind_dir_deg']   = h['wind_direction_10m'][idx]         if h.get('wind_direction_10m') else None
+        result['wind_dir_he']    = _wind_dir_he(result['wind_dir_deg'])
+        result['wind_gusts_kmh'] = round(h['wind_gusts_10m'][idx], 1)  if h.get('wind_gusts_10m') else None
+        result['temp_c']         = round(h['temperature_2m'][idx], 1)  if h.get('temperature_2m') else None
+    except Exception as e:
+        print(f"  [Weather] wind: {e}")
+
+    if is_sea:
+        try:
+            url2 = (f"https://marine-api.open-meteo.com/v1/marine"
+                    f"?latitude={lat:.4f}&longitude={lon:.4f}"
+                    f"&hourly=wave_height,wave_period,wave_direction"
+                    f"&start_date={iso}&end_date={iso}"
+                    f"&timezone=Asia%2FJerusalem")
+            with _ur.urlopen(url2, timeout=12) as r:
+                h2 = __import__('json').loads(r.read())['hourly']
+            times2 = h2.get('time', [])
+            target2 = f"{iso}T{hour:02d}:00"
+            idx2 = times2.index(target2) if target2 in times2 else min(hour, len(times2)-1)
+            result['wave_height_m']  = round(h2['wave_height'][idx2], 2)  if h2.get('wave_height') else None
+            result['wave_period_s']  = round(h2['wave_period'][idx2], 1)  if h2.get('wave_period') else None
+            result['wave_dir_deg']   = h2['wave_direction'][idx2]          if h2.get('wave_direction') else None
+            result['wave_dir_he']    = _wind_dir_he(result['wave_dir_deg'])
+        except Exception as e:
+            print(f"  [Weather] marine: {e}")
+
+    return result
+
+
+def build_weather_html(w: dict) -> str:
+    """סקשן תנאי מים — רוח + גלים מ-Open-Meteo."""
+    wind = w.get('wind_kmh')
+    if wind is None:
+        return ""
+
+    gusts   = w.get('wind_gusts_kmh')
+    dir_he  = w.get('wind_dir_he', '')
+    wave_h  = w.get('wave_height_m')
+    wave_p  = w.get('wave_period_s')
+    wave_dir= w.get('wave_dir_he', '')
+    temp_c  = w.get('temp_c')
+
+    # Wind color
+    wc = "#66bb6a" if wind < 15 else ("#ffa726" if wind < 25 else "#ef5350")
+    wl = "קל" if wind < 15 else ("בינוני" if wind < 25 else "חזק")
+
+    gusts_html = f'<div class="unt">נחשולים: {gusts} קמ"ש</div>' if gusts else ''
+    wind_card = (f'<div class="card">'
+                 f'<div class="lbl">רוח</div>'
+                 f'<div class="val" style="font-size:20px;color:{wc}">{wind}</div>'
+                 f'<div class="unt">קמ"ש {dir_he} · {wl}</div>'
+                 f'{gusts_html}'
+                 f'</div>')
+
+    wave_card = ""
+    if wave_h is not None:
+        wvc = "#66bb6a" if wave_h < 0.4 else ("#ffa726" if wave_h < 0.8 else "#ef5350")
+        wvl = "שטוח" if wave_h < 0.4 else ("גלים קטנים" if wave_h < 0.8 else "גלים גבוהים")
+        wave_card = (f'<div class="card">'
+                     f'<div class="lbl">גלים</div>'
+                     f'<div class="val" style="font-size:20px;color:{wvc}">{wave_h}מ\'</div>'
+                     f'<div class="unt">{wvl}{f" · {wave_p}שנ\'" if wave_p else ""}{f" · {wave_dir}" if wave_dir else ""}</div>'
+                     f'</div>')
+
+    temp_card = ""
+    if temp_c is not None:
+        tc = "#ef5350" if temp_c > 30 else ("#66bb6a" if temp_c > 18 else "#4fc3f7")
+        temp_card = (f'<div class="card">'
+                     f'<div class="lbl">טמפרטורה</div>'
+                     f'<div class="val" style="font-size:20px;color:{tc}">{temp_c}°</div>'
+                     f'<div class="unt">מעלות</div>'
+                     f'</div>')
+
+    return f"""
+  <div class="section">
+    <div class="section-title">🌊 תנאי מים — שעת האימון</div>
+    <div class="cards">
+      {wind_card}
+      {wave_card}
+      {temp_card}
+    </div>
+  </div>"""
+
+
 # ===== WELLNESS (Body Battery + Sleep before workout) =====
 
 def fetch_wellness_before_workout(api, workout_date_str: str) -> dict:
@@ -1790,6 +2058,16 @@ def main():
                         print(f"  [Email] אימון חדש — {w['date']} {w['type']}")
                         wellness     = fetch_wellness_before_workout(api, w["date"])
                         lap_analysis = fetch_lap_analysis(api, w["id"], workout_type=w.get("type", ""))
+                        _lat = w.get("lat")
+                        _lon = w.get("lon")
+                        if w.get("location") == "ים" and _lat and _lon:
+                            weather_cond = fetch_weather_conditions(
+                                w["date"], w.get("start_hour", 10),
+                                _lat, _lon, is_sea=True
+                            )
+                            if weather_cond:
+                                w.update(weather_cond)
+                            print(f"  [Weather] רוח={weather_cond.get('wind_kmh')}קמ\"ש {weather_cond.get('wind_dir_he','')} | גל={weather_cond.get('wave_height_m','—')}מ'")
                         if wellness:
                             print(f"  [Wellness] BB={wellness.get('body_battery','?')} שינה={wellness.get('sleep_hours','?')}h עמוקה={wellness.get('deep_pct','?')}%")
                         if lap_analysis:
@@ -1805,6 +2083,7 @@ def main():
                             w['pa_hr']   = lap_analysis.get('pa_hr')
                             w['pace_cv'] = lap_analysis.get('pace_cv')
                             w['dps_cv']  = lap_analysis.get('dps_cv')
+                        # weather fields already merged via w.update(weather_cond) above
                             if lap_analysis.get('sprints'):
                                 smry = lap_analysis.get('summary', {})
                                 w['sprint_count'] = smry.get('count', 0)
