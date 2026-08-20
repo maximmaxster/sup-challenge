@@ -385,6 +385,22 @@ function renderComparisonTable() {
     { label: 'Z5',   fmt: v => v && v !== '0:00' ? v : '—', num: w => 0, raw: w => w.z5 || '' },
   ];
 
+  // weather chips
+  const wxRow = document.getElementById('weather-chips-row');
+  if (wxRow) {
+    const chips = [];
+    if (lw1.wind_kmh != null)      chips.push(`💨 ${lw1.wind_kmh} קמ"ש ${lw1.wind_dir_he || ''}`);
+    if (lw1.wind_gusts_kmh != null) chips.push(`נחשולים ${lw1.wind_gusts_kmh} קמ"ש`);
+    if (lw1.temp_c != null)         chips.push(`🌡️ ${lw1.temp_c}°C`);
+    if (lw1.wave_height_m != null)  chips.push(`🌊 גל ${lw1.wave_height_m}מ' ${lw1.wave_dir_he || ''}`);
+    if (chips.length) {
+      wxRow.innerHTML = chips.map(c => `<span class="weather-chip">${c}</span>`).join('');
+      wxRow.style.display = 'flex';
+    } else {
+      wxRow.style.display = 'none';
+    }
+  }
+
   const grid = document.getElementById('comparison-tbody');
   grid.innerHTML = metrics.map(m => {
     const n1 = m.num(lw1), n2 = m.num(lw2);

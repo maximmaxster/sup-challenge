@@ -753,6 +753,23 @@ section {
 .cmp-lose { color: rgba(255,255,255,0.35); }
 .cmp-tie  { color: #fff; }
 
+.weather-chips-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin: 0 0 14px 0;
+}
+.weather-chip {
+  background: rgba(0, 180, 216, 0.1);
+  border: 1px solid rgba(0, 180, 216, 0.3);
+  border-radius: 20px;
+  padding: 5px 14px;
+  font-size: 0.8rem;
+  color: var(--accent-cyan);
+  white-space: nowrap;
+}
+
 .lw-type-badge {
   display: inline-block;
   font-size: 0.72rem;
