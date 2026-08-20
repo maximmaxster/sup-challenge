@@ -1324,7 +1324,6 @@ section {
   font-size: 0.8rem;
 }
 .tp-step:last-child { border-bottom: none; }
-.tp-step-icon { font-size: 0.85rem; width: 18px; text-align: center; flex-shrink: 0; }
 .tp-step-label { color: var(--text-primary); flex: 1; }
 .tp-step-dur { color: var(--text-secondary); min-width: 40px; text-align: left; font-size: 0.75rem; }
 .tp-step-hr {

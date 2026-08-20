@@ -619,22 +619,17 @@ function hrBadgeHtml(hr) {
   return `<span class="tp-step-hr" style="background:${bg};color:${fg}">${hr} <b>${z}</b></span>`;
 }
 
-const STEP_DOT = {
-  warmup:   { color:'#4fc3f7', sym:'▲' },
-  cooldown: { color:'#66bb6a', sym:'▼' },
-  interval: { color:'#ffa726', sym:'●' },
-  recover:  { color:'#90caf9', sym:'○' },
-  recovery: { color:'#90caf9', sym:'○' },
-  rest:     { color:'#90caf9', sym:'○' },
+const STEP_COLORS = {
+  warmup:'#4fc3f7', cooldown:'#66bb6a', interval:'#ffa726',
+  recover:'#90caf9', recovery:'#90caf9', rest:'#90caf9',
 };
 const STEP_HE = { warmup:'חימום', cooldown:'שחרור', interval:'אינטרוול', recover:'התאוששות', recovery:'התאוששות', rest:'מנוחה' };
 
 function renderStep(s) {
-  const dot = STEP_DOT[s.t] || { color:'#fff', sym:'▶' };
+  const color = STEP_COLORS[s.t] || '#fff';
   const label = STEP_HE[s.t] || s.t;
   return `<div class="tp-step">
-    <span class="tp-step-icon" style="color:${dot.color}">${dot.sym}</span>
-    <span class="tp-step-label">${label}</span>
+    <span class="tp-step-label" style="color:${color};font-weight:600">${label}</span>
     <span class="tp-step-dur">${s.d}</span>
     ${hrBadgeHtml(s.hr)}
   </div>`;
