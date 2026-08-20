@@ -602,40 +602,41 @@ const TRAINING_PLANS = {
   },
 };
 
-function hrColor(hr) {
-  if (!hr) return 'rgba(255,255,255,0.12)';
-  const lo = parseInt(hr.split('-')[0]);
-  if (lo >= 155) return 'rgba(239,83,80,0.25)';
-  if (lo >= 145) return 'rgba(255,167,38,0.25)';
-  if (lo >= 135) return 'rgba(255,183,0,0.2)';
-  if (lo >= 125) return 'rgba(102,187,106,0.2)';
-  return 'rgba(79,195,247,0.15)';
+const HRMAX = 183;
+function hrToZone(mid) {
+  const p = mid / HRMAX * 100;
+  if (p < 60) return { z:'Z1', bg:'rgba(79,195,247,0.15)',  fg:'#4fc3f7' };
+  if (p < 70) return { z:'Z2', bg:'rgba(102,187,106,0.18)', fg:'#66bb6a' };
+  if (p < 80) return { z:'Z3', bg:'rgba(255,183,0,0.18)',   fg:'#ffb700' };
+  if (p < 90) return { z:'Z4', bg:'rgba(255,167,38,0.22)',  fg:'#ffa726' };
+  return             { z:'Z5', bg:'rgba(239,83,80,0.22)',   fg:'#ef5350' };
 }
-function hrText(hr) {
-  if (!hr) return 'rgba(255,255,255,0.5)';
-  const lo = parseInt(hr.split('-')[0]);
-  if (lo >= 155) return '#ef5350';
-  if (lo >= 145) return '#ffa726';
-  if (lo >= 135) return '#ffb700';
-  if (lo >= 125) return '#66bb6a';
-  return '#4fc3f7';
+function hrBadgeHtml(hr) {
+  if (!hr) return '';
+  const parts = hr.split('-').map(Number);
+  const mid = (parts[0] + (parts[1] || parts[0])) / 2;
+  const { z, bg, fg } = hrToZone(mid);
+  return `<span class="tp-step-hr" style="background:${bg};color:${fg}">${hr} <b>${z}</b></span>`;
 }
-const STEP_ICONS = { warmup:'🔥', cooldown:'❄️', interval:'⚡', recover:'💧', recovery:'💧', rest:'💧' };
+
+const STEP_DOT = {
+  warmup:   { color:'#4fc3f7', sym:'▲' },
+  cooldown: { color:'#66bb6a', sym:'▼' },
+  interval: { color:'#ffa726', sym:'●' },
+  recover:  { color:'#90caf9', sym:'○' },
+  recovery: { color:'#90caf9', sym:'○' },
+  rest:     { color:'#90caf9', sym:'○' },
+};
 const STEP_HE = { warmup:'חימום', cooldown:'שחרור', interval:'אינטרוול', recover:'התאוששות', recovery:'התאוששות', rest:'מנוחה' };
 
 function renderStep(s) {
-  const icon = STEP_ICONS[s.t] || '▶';
+  const dot = STEP_DOT[s.t] || { color:'#fff', sym:'▶' };
   const label = STEP_HE[s.t] || s.t;
-  const hrBg = hrColor(s.hr);
-  const hrFg = hrText(s.hr);
-  const hrBadge = s.hr
-    ? `<span class="tp-step-hr" style="background:${hrBg};color:${hrFg}">💓 ${s.hr}</span>`
-    : '';
   return `<div class="tp-step">
-    <span class="tp-step-icon">${icon}</span>
+    <span class="tp-step-icon" style="color:${dot.color}">${dot.sym}</span>
     <span class="tp-step-label">${label}</span>
     <span class="tp-step-dur">${s.d}</span>
-    ${hrBadge}
+    ${hrBadgeHtml(s.hr)}
   </div>`;
 }
 
