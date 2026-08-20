@@ -1239,6 +1239,108 @@ section {
   font-weight: 700;
 }
 
+/* ===== TRAINING PLANS ===== */
+.tp-type-tabs { display: flex; gap: 8px; margin-bottom: 20px; }
+.tp-type-btn {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: var(--text-secondary);
+  border-radius: 8px;
+  padding: 8px 24px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s;
+}
+.tp-type-btn.active {
+  background: rgba(0,212,255,0.15);
+  border-color: var(--accent-cyan);
+  color: var(--accent-cyan);
+}
+.tp-quarter-tabs { display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap; }
+.tp-q-btn {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: var(--text-secondary);
+  border-radius: 6px;
+  padding: 6px 18px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s;
+}
+.tp-q-btn.active {
+  background: rgba(255,183,0,0.15);
+  border-color: #ffb700;
+  color: #ffb700;
+}
+.tp-pane.hidden, .tp-q-pane.hidden { display: none; }
+.tp-empty-quarter {
+  text-align: center;
+  color: var(--text-secondary);
+  padding: 40px;
+  font-size: 0.9rem;
+  border: 1px dashed rgba(255,255,255,0.1);
+  border-radius: 12px;
+}
+.tp-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+.tp-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 14px;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+.tp-card:hover { border-color: rgba(0,212,255,0.3); }
+.tp-card-header {
+  background: rgba(0,212,255,0.08);
+  border-bottom: 1px solid rgba(0,212,255,0.15);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.tp-card-name { font-size: 0.95rem; font-weight: 700; color: var(--accent-cyan); }
+.tp-card-dur {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  background: rgba(0,0,0,0.2);
+  border-radius: 20px;
+  padding: 3px 10px;
+}
+.tp-card-body { padding: 12px 14px; }
+.tp-step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  font-size: 0.8rem;
+}
+.tp-step:last-child { border-bottom: none; }
+.tp-step-icon { font-size: 0.85rem; width: 18px; text-align: center; flex-shrink: 0; }
+.tp-step-label { color: var(--text-primary); flex: 1; }
+.tp-step-dur { color: var(--text-secondary); min-width: 40px; text-align: left; font-size: 0.75rem; }
+.tp-step-hr {
+  font-size: 0.7rem;
+  border-radius: 10px;
+  padding: 1px 7px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.tp-repeat-block {
+  margin: 4px 0;
+  border-right: 2px solid rgba(255,183,0,0.4);
+  padding-right: 10px;
+}
+.tp-repeat-header { font-size: 0.75rem; color: #ffb700; font-weight: 700; padding: 3px 0; }
+
 /* extra states for annual library using acmp-tbl classes */
 .acmp-zero { color: var(--text-secondary); opacity: 0.35; }
 .acmp-grand-total { font-weight: 700; color: var(--accent-cyan); }
@@ -2752,3 +2854,4 @@ select:focus-visible,
     scroll-behavior: auto !important;
   }
 }
+

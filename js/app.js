@@ -423,6 +423,288 @@ function renderComparisonTable() {
   }).join('');
 }
 
+// ===== TRAINING PLANS =====
+const TRAINING_PLANS = {
+  tempo: {
+    q1: [
+      { name: 'אימון טמפו 1', dur: 80, steps: [
+        { t:'warmup', d:"10 דק'", hr:'110-120' },
+        { t:'warmup', d:"5 דק'",  hr:'130-135' },
+        { t:'repeat', n:3, steps:[
+          { t:'interval', d:"10 דק'", hr:'135-140' },
+          { t:'interval', d:"10 דק'", hr:'150-155' },
+        ]},
+        { t:'cooldown', d:"5 דק'", hr:'110-120' },
+      ]},
+      { name: 'אימון טמפו 2', dur: 80, steps: [
+        { t:'warmup', d:"10 דק'", hr:'110-125' },
+        { t:'warmup', d:"5 דק'",  hr:'130-135' },
+        { t:'repeat', n:4, steps:[
+          { t:'interval', d:"6 דק'",  hr:'135-140' },
+          { t:'interval', d:"4 דק'",  hr:'146-155' },
+          { t:'recover',  d:"2 דק'",  hr:'115-125' },
+        ]},
+        { t:'interval', d:"12 דק'", hr:'130-140' },
+        { t:'cooldown',  d:"5 דק'",  hr:'115-125' },
+      ]},
+      { name: 'אימון טמפו 3', dur: 75, steps: [
+        { t:'warmup', d:"10 דק'", hr:null },
+        { t:'warmup', d:"5 דק'",  hr:'130-135' },
+        { t:'repeat', n:3, steps:[
+          { t:'interval', d:"8 דק'",  hr:'145-155' },
+          { t:'interval', d:"12 דק'", hr:'135-145' },
+        ]},
+      ]},
+      { name: 'אימון טמפו 4', dur: 79, steps: [
+        { t:'warmup', d:"10 דק'", hr:'110-125' },
+        { t:'warmup', d:"5 דק'",  hr:'127-135' },
+        { t:'interval', d:"6 דק'",  hr:'132-138' },
+        { t:'interval', d:"4 דק'",  hr:'146-152' },
+        { t:'interval', d:"8 דק'",  hr:'134-140' },
+        { t:'interval', d:"4 דק'",  hr:'148-156' },
+        { t:'interval', d:"10 דק'", hr:'136-142' },
+        { t:'interval', d:"4 דק'",  hr:'150-158' },
+        { t:'interval', d:"8 דק'",  hr:'134-140' },
+        { t:'interval', d:"4 דק'",  hr:'148-156' },
+        { t:'interval', d:"6 דק'",  hr:'132-138' },
+        { t:'cooldown', d:"5 דק'",  hr:'110-125' },
+      ]},
+      { name: 'אימון טמפו 5', dur: 80, steps: [
+        { t:'warmup', d:"10 דק'", hr:'110-120' },
+        { t:'warmup', d:"5 דק'",  hr:'130-135' },
+        { t:'repeat', n:4, steps:[
+          { t:'interval', d:"5 דק'",  hr:'145-155' },
+          { t:'interval', d:"10 דק'", hr:'135-145' },
+        ]},
+        { t:'cooldown', d:"5 דק'", hr:'110-120' },
+      ]},
+    ],
+    q2: [
+      { name: 'אימון טמפו 6', dur: 81, steps: [
+        { t:'warmup', d:"10 דק'", hr:null },
+        { t:'warmup', d:"5 דק'",  hr:'127-135' },
+        { t:'repeat', n:3, steps:[
+          { t:'interval', d:"7 דק'", hr:'135-140' },
+          { t:'interval', d:"7 דק'", hr:'145-150' },
+          { t:'interval', d:"6 דק'", hr:'155-160' },
+          { t:'cooldown', d:"2 דק'", hr:'120-126' },
+        ]},
+      ]},
+      { name: 'אימון טמפו 7', dur: 80, steps: [
+        { t:'warmup', d:"10 דק'", hr:null },
+        { t:'warmup', d:"5 דק'",  hr:'127-135' },
+        { t:'repeat', n:4, steps:[
+          { t:'interval', d:"5 דק'", hr:'135-140' },
+          { t:'interval', d:"3 דק'", hr:'150-155' },
+          { t:'interval', d:"2 דק'", hr:'155-160' },
+          { t:'cooldown', d:"2 דק'", hr:'120-126' },
+        ]},
+        { t:'interval', d:"7 דק'", hr:'130-140' },
+      ]},
+      { name: 'אימון טמפו 8', dur: 75, steps: [
+        { t:'warmup', d:"10 דק'", hr:null },
+        { t:'warmup', d:"5 דק'",  hr:'127-135' },
+        { t:'repeat', n:8, steps:[
+          { t:'interval', d:"3 דק'", hr:'150-155' },
+          { t:'recover',  d:"2 דק'", hr:'140-145' },
+        ]},
+        { t:'interval', d:"15 דק'", hr:'147-155' },
+        { t:'interval', d:"5 דק'",  hr:'156-162' },
+      ]},
+      { name: 'אימון טמפו 9', dur: 75, steps: [
+        { t:'warmup', d:"10 דק'", hr:null },
+        { t:'warmup', d:"5 דק'",  hr:'127-135' },
+        { t:'interval', d:"15 דק'", hr:'135-140' },
+        { t:'interval', d:"10 דק'", hr:'145-150' },
+        { t:'interval', d:"5 דק'",  hr:'140-145' },
+        { t:'interval', d:"5 דק'",  hr:'145-150' },
+        { t:'interval', d:"5 דק'",  hr:'150-160' },
+        { t:'interval', d:"10 דק'", hr:'150-160' },
+      ]},
+    ],
+  },
+  sprints: {
+    q1: [
+      { name: 'ספרינט 1', dur: 77, steps: [
+        { t:'warmup',  d:"10 דק'", hr:null },
+        { t:'interval', d:"5 דק'",  hr:null },
+        { t:'repeat', n:8, steps:[
+          { t:'interval', d:"0:20",  hr:'155-170' },
+          { t:'recover',  d:"1:40",  hr:'125-135' },
+        ]},
+        { t:'interval', d:"10 דק'", hr:'130-140' },
+        { t:'repeat', n:8, steps:[
+          { t:'interval', d:"0:20",  hr:'155-170' },
+          { t:'recover',  d:"1:40",  hr:'125-135' },
+        ]},
+        { t:'interval', d:"20 דק'", hr:'130-140' },
+      ]},
+      { name: 'ספרינט 2', dur: 77, steps: [
+        { t:'warmup',  d:"10 דק'", hr:null },
+        { t:'interval', d:"5 דק'",  hr:null },
+        { t:'repeat', n:8, steps:[
+          { t:'interval', d:"0:25",  hr:'155-170' },
+          { t:'recover',  d:"1:35",  hr:'125-135' },
+        ]},
+        { t:'interval', d:"10 דק'", hr:'130-140' },
+        { t:'repeat', n:8, steps:[
+          { t:'interval', d:"0:25",  hr:'155-170' },
+          { t:'recover',  d:"1:35",  hr:'125-135' },
+        ]},
+        { t:'interval', d:"20 דק'", hr:'130-140' },
+      ]},
+      { name: 'ספרינטים 3', dur: 82, steps: [
+        { t:'warmup',  d:"10 דק'", hr:null },
+        { t:'interval', d:"5 דק'",  hr:null },
+        { t:'repeat', n:8, steps:[
+          { t:'interval', d:"0:30",  hr:'155-170' },
+          { t:'recover',  d:"1:30",  hr:'125-135' },
+        ]},
+        { t:'interval', d:"15 דק'", hr:'130-140' },
+        { t:'repeat', n:8, steps:[
+          { t:'interval', d:"0:30",  hr:'155-170' },
+          { t:'recover',  d:"1:30",  hr:'125-135' },
+        ]},
+        { t:'interval', d:"15 דק'", hr:'130-140' },
+        { t:'cooldown', d:"5 דק'",  hr:null },
+      ]},
+    ],
+    q2: [
+      { name: 'ספרינטים 4', dur: 74, steps: [
+        { t:'warmup',  d:"10 דק'", hr:null },
+        { t:'warmup',  d:"20 דק'", hr:null },
+        { t:'repeat', n:8, steps:[
+          { t:'interval', d:"0:40",  hr:null },
+          { t:'recover',  d:"0:30",  hr:null },
+        ]},
+        { t:'interval', d:"5 דק'",  hr:null },
+        { t:'repeat', n:8, steps:[
+          { t:'interval', d:'0.1 ק"מ', hr:null },
+          { t:'recover',  d:"2:30",  hr:null },
+        ]},
+        { t:'cooldown', d:"10 דק'", hr:null },
+      ]},
+      { name: 'ספרינט 5', dur: 65, steps: [
+        { t:'warmup', d:"10 דק'", hr:null },
+        { t:'warmup', d:"5 דק'",  hr:'127-135' },
+        { t:'repeat', n:10, steps:[
+          { t:'interval', d:"0:20",  hr:null },
+          { t:'interval', d:"1:10",  hr:null },
+        ]},
+        { t:'interval', d:"10 דק'", hr:null },
+        { t:'repeat', n:10, steps:[
+          { t:'interval', d:"0:20",  hr:null },
+          { t:'interval', d:"1:10",  hr:null },
+        ]},
+        { t:'interval', d:"10 דק'", hr:null },
+      ]},
+    ],
+  },
+};
+
+function hrColor(hr) {
+  if (!hr) return 'rgba(255,255,255,0.12)';
+  const lo = parseInt(hr.split('-')[0]);
+  if (lo >= 155) return 'rgba(239,83,80,0.25)';
+  if (lo >= 145) return 'rgba(255,167,38,0.25)';
+  if (lo >= 135) return 'rgba(255,183,0,0.2)';
+  if (lo >= 125) return 'rgba(102,187,106,0.2)';
+  return 'rgba(79,195,247,0.15)';
+}
+function hrText(hr) {
+  if (!hr) return 'rgba(255,255,255,0.5)';
+  const lo = parseInt(hr.split('-')[0]);
+  if (lo >= 155) return '#ef5350';
+  if (lo >= 145) return '#ffa726';
+  if (lo >= 135) return '#ffb700';
+  if (lo >= 125) return '#66bb6a';
+  return '#4fc3f7';
+}
+const STEP_ICONS = { warmup:'🔥', cooldown:'❄️', interval:'⚡', recover:'💧', recovery:'💧', rest:'💧' };
+const STEP_HE = { warmup:'חימום', cooldown:'שחרור', interval:'אינטרוול', recover:'התאוששות', recovery:'התאוששות', rest:'מנוחה' };
+
+function renderStep(s) {
+  const icon = STEP_ICONS[s.t] || '▶';
+  const label = STEP_HE[s.t] || s.t;
+  const hrBg = hrColor(s.hr);
+  const hrFg = hrText(s.hr);
+  const hrBadge = s.hr
+    ? `<span class="tp-step-hr" style="background:${hrBg};color:${hrFg}">💓 ${s.hr}</span>`
+    : '';
+  return `<div class="tp-step">
+    <span class="tp-step-icon">${icon}</span>
+    <span class="tp-step-label">${label}</span>
+    <span class="tp-step-dur">${s.d}</span>
+    ${hrBadge}
+  </div>`;
+}
+
+function renderSteps(steps) {
+  return steps.map(s => {
+    if (s.t === 'repeat') {
+      const inner = s.steps.map(renderStep).join('');
+      return `<div class="tp-repeat-block">
+        <div class="tp-repeat-header">🔁 ×${s.n}</div>
+        ${inner}
+      </div>`;
+    }
+    return renderStep(s);
+  }).join('');
+}
+
+function renderWorkoutCard(w) {
+  return `<div class="tp-card">
+    <div class="tp-card-header">
+      <span class="tp-card-name">${w.name}</span>
+      <span class="tp-card-dur">⏱ ${w.dur} דק'</span>
+    </div>
+    <div class="tp-card-body">${renderSteps(w.steps)}</div>
+  </div>`;
+}
+
+function initTrainingPlans() {
+  // Render cards
+  ['q1','q2'].forEach(q => {
+    const el = document.getElementById(`tp-cards-tempo-${q}`);
+    if (el) el.innerHTML = (TRAINING_PLANS.tempo[q] || []).map(renderWorkoutCard).join('');
+  });
+  ['q1','q2'].forEach(q => {
+    const el = document.getElementById(`tp-cards-sprints-${q}`);
+    if (el) el.innerHTML = (TRAINING_PLANS.sprints[q] || []).map(renderWorkoutCard).join('');
+  });
+
+  // Type tab switching
+  document.querySelectorAll('.tp-type-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tp-type-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const type = btn.dataset.type;
+      document.querySelectorAll('.tp-pane').forEach(p => p.classList.add('hidden'));
+      document.getElementById(`tp-pane-${type}`).classList.remove('hidden');
+    });
+  });
+
+  // Quarter tab switching (tempo)
+  document.querySelectorAll('#tp-pane-tempo .tp-q-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#tp-pane-tempo .tp-q-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll('#tp-pane-tempo .tp-q-pane').forEach(p => p.classList.add('hidden'));
+      document.getElementById(`tp-q-${btn.dataset.q}`).classList.remove('hidden');
+    });
+  });
+
+  // Quarter tab switching (sprints)
+  document.querySelectorAll('#tp-pane-sprints .tp-q-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#tp-pane-sprints .tp-q-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll('#tp-pane-sprints .tp-q-pane').forEach(p => p.classList.add('hidden'));
+      document.getElementById(`tp-q-${btn.dataset.q}`).classList.remove('hidden');
+    });
+  });
+}
+
 // ===== CHARTS =====
 function renderCharts() {
   renderSpeedChart('week');
@@ -2186,6 +2468,8 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('lightbox').addEventListener('click', e => {
     if (e.target === e.currentTarget) closeLightbox();
   });
+
+  initTrainingPlans();
 
   const now = new Date();
   const pad = n => String(n).padStart(2, '0');

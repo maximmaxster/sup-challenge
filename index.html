@@ -54,7 +54,8 @@
     <nav>
       <a href="#athletes" class="active">ראשי</a>
       <a href="#comparison">השוואה</a>
-      <a href="#workouts">אימונים</a>
+      <a href="#workouts">סיכומים</a>
+      <a href="#training-plans">אימונים</a>
       <a href="#progress">התקדמות</a>
       <a href="#races">תחרויות</a>
     </nav>
@@ -424,7 +425,7 @@
 
   <!-- ========== SECTION 4: WORKOUTS TABLE ========== -->
   <section id="workouts" class="section-tab">
-    <h2 class="section-title">רשימת אימונים</h2>
+    <h2 class="section-title">סיכומים</h2>
 
     <!-- בחירת חותר לטבלה חודשית -->
     <div class="workouts-athlete-selector">
@@ -482,6 +483,62 @@
           <tr><td colspan="13" class="empty-state"><div class="empty-icon">⏳</div><p>טוען אימונים...</p></td></tr>
         </tbody>
       </table>
+    </div>
+  </section>
+
+  <!-- ========== SECTION 4b: TRAINING PLANS ========== -->
+  <section id="training-plans" class="section-tab">
+    <h2 class="section-title">מבנה אימונים</h2>
+
+    <!-- type tabs -->
+    <div class="tp-type-tabs">
+      <button class="tp-type-btn active" data-type="tempo">טמפו</button>
+      <button class="tp-type-btn" data-type="sprints">ספרינטים</button>
+    </div>
+
+    <!-- TEMPO -->
+    <div class="tp-pane" id="tp-pane-tempo">
+      <div class="tp-quarter-tabs">
+        <button class="tp-q-btn active" data-q="q1">רבעון 1</button>
+        <button class="tp-q-btn" data-q="q2">רבעון 2</button>
+        <button class="tp-q-btn" data-q="q3">רבעון 3</button>
+        <button class="tp-q-btn" data-q="q4">רבעון 4</button>
+      </div>
+
+      <div class="tp-q-pane" id="tp-q-q1">
+        <div class="tp-cards-grid" id="tp-cards-tempo-q1"></div>
+      </div>
+      <div class="tp-q-pane hidden" id="tp-q-q2">
+        <div class="tp-cards-grid" id="tp-cards-tempo-q2"></div>
+      </div>
+      <div class="tp-q-pane hidden" id="tp-q-q3">
+        <div class="tp-empty-quarter">אימונים לרבעון 3 יתווספו בקרוב</div>
+      </div>
+      <div class="tp-q-pane hidden" id="tp-q-q4">
+        <div class="tp-empty-quarter">אימונים לרבעון 4 יתווספו בקרוב</div>
+      </div>
+    </div>
+
+    <!-- SPRINTS -->
+    <div class="tp-pane hidden" id="tp-pane-sprints">
+      <div class="tp-quarter-tabs">
+        <button class="tp-q-btn active" data-q="sq1">רבעון 1</button>
+        <button class="tp-q-btn" data-q="sq2">רבעון 2</button>
+        <button class="tp-q-btn" data-q="sq3">רבעון 3</button>
+        <button class="tp-q-btn" data-q="sq4">רבעון 4</button>
+      </div>
+      <div class="tp-q-pane" id="tp-q-sq1">
+        <div class="tp-cards-grid" id="tp-cards-sprints-q1"></div>
+      </div>
+      <div class="tp-q-pane hidden" id="tp-q-sq2">
+        <div class="tp-cards-grid" id="tp-cards-sprints-q2"></div>
+      </div>
+      <div class="tp-q-pane hidden" id="tp-q-sq3">
+        <div class="tp-empty-quarter">אימונים לרבעון 3 יתווספו בקרוב</div>
+      </div>
+      <div class="tp-q-pane hidden" id="tp-q-sq4">
+        <div class="tp-empty-quarter">אימונים לרבעון 4 יתווספו בקרוב</div>
+      </div>
     </div>
   </section>
 
