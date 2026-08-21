@@ -375,12 +375,15 @@ function renderComparisonTable() {
   if (typeEl) typeEl.textContent = (lw1.type || '') + wNumLabel;
   if (dateEl) dateEl.textContent = lastDate || '';
 
+  const isSprints = lw1.type === 'ספרינטים';
   const metrics = [
     { label: 'מרחק', fmt: v => v ? v.toFixed(1) + ' ק"מ' : '—', num: w => w.distance || 0 },
     { label: 'זמן',  fmt: v => v || '—', num: w => 0, raw: w => w.duration || '' },
     { label: 'מהירות', fmt: v => v ? v.toFixed(1) : '—', num: w => w.avg_speed || 0 },
+    ...(isSprints ? [{ label: 'מהירות מקס', fmt: v => v ? v.toFixed(1) : '—', num: w => w.max_speed || 0 }] : []),
     { label: 'דופק', fmt: v => v ? v + '' : '—', num: w => w.avg_hr || 0, lower: true },
     { label: 'SPM',  fmt: v => v ? v + '' : '—', num: w => w.spm || 0 },
+    ...(isSprints ? [{ label: 'SPM מקס', fmt: v => v ? v + '' : '—', num: w => w.spm_max || 0 }] : []),
     { label: 'DPS',  fmt: v => v ? v.toFixed(2) : '—', num: w => w.dps || 0 },
     { label: 'Z3',   fmt: v => v && v !== '0:00' ? v : '—', num: w => 0, raw: w => w.z3 || '' },
     { label: 'Z4',   fmt: v => v && v !== '0:00' ? v : '—', num: w => 0, raw: w => w.z4 || '' },
