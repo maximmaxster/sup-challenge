@@ -783,6 +783,11 @@ section {
   letter-spacing: 0.04em;
   color: inherit;
 }
+.lw-sep {
+  color: rgba(0,212,255,0.35);
+  font-weight: 300;
+  padding: 0 0.3rem;
+}
 .lw-date-box, .lw-start-time {
   font-size: 0.82rem;
   font-weight: 600;
