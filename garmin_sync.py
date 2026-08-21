@@ -204,9 +204,8 @@ def detect_type(z4_str: str, z5_str: str, avg_hr: int, dist_km: float, dur_sec: 
     z4_sec = hms_to_sec(z4_str)
     z5_sec = hms_to_sec(z5_str)
 
-    # ספרינטים — כל 3 פרמטרים חייבים להתקיים ביחד
-    cycles = count_sprint_cycles(hr_values) if hr_values else 0
-    if z5_sec > 30 and cycles >= 2 and spm_max > 80:
+    # ספרינטים — SPM מקסימלי בלבד
+    if spm_max >= 85:
         return "ספרינטים"
 
     # אירובי ארוך: Z4 מתחת לסף ארוך + מרחק ומשך מינימלי
