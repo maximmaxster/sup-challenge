@@ -600,36 +600,13 @@ def build_email_html(w: dict, athlete_name: str,
             _weather_chips += f'<span class="wx-chip">🌊 גל {_wv}מ\' {_wvdir or ""}</span>'
         _weather_row = f'<div class="wx-row">{_weather_chips}</div>' if _weather_chips else ""
 
-        compare_html = f"""
-  <div class="section">
-    <div class="section-title">📊 ממוצע {prev_stats['count']} אימונים אחרונים — {w.get('type','')} {w.get('location','')}{"  |  " + w["workout_name"] if w.get("workout_name") else ""} ({prev_stats['label']})</div>
-    {_weather_row}
-    <div class="cmp-grid">
-      <div class="cmp-card">
-        <div class="clbl">מהירות (קמ"ש)</div>
-        <div class="curr">{w.get('avg_speed','')}</div>
-        <div class="prev">ממוצע: {prev_stats['speed']}</div>
-        {delta_html(w.get('avg_speed'), prev_stats['speed'])}
-      </div>
-      <div class="cmp-card">
-        <div class="clbl">דופק ממוצע</div>
-        <div class="curr">{w.get('avg_hr','')}</div>
-        <div class="prev">ממוצע: {prev_stats['hr'] or '—'}</div>
-        {delta_html(w.get('avg_hr'), prev_stats['hr'], reverse=True)}
-      </div>
-      <div class="cmp-card">
-        <div class="clbl">DPS (מטר)</div>
-        <div class="curr">{w.get('dps','')}</div>
-        <div class="prev">ממוצע: {prev_stats['dps'] or '—'}</div>
-        {delta_html(w.get('dps'), prev_stats['dps'])}
-      </div>
-    </div>
-  </div>"""
+        # ─── קטע 1: השוואה לאותו מספר אימון (טמפו/ספרינטים) ───
         sw = prev_stats.get("same_workout")
+        compare_html = ""
         if sw:
             compare_html += f"""
   <div class="section">
-    <div class="section-title">🎯 השוואה לאותו אימון — {sw['name']}</div>
+    <div class="section-title">🎯 השוואה לאותו מספר אימון — {sw['name']}</div>
     <div style="font-size:12px;color:#546e7a;margin-bottom:8px;text-align:center">
       ממוצע {sw['count']} ביצועים ({sw['label']})
     </div>
@@ -655,13 +632,14 @@ def build_email_html(w: dict, athlete_name: str,
     </div>
   </div>"""
 
+        # ─── קטע 2: ממוצע 5 אימונים — אותו סוג בתנאים דומים ───
         sim = prev_stats.get("similar")
         if sim:
             compare_html += f"""
   <div class="section">
-    <div class="section-title">🌊 השוואה בתנאים דומים — רוח {sim['wind_range']}</div>
+    <div class="section-title">📊 ממוצע {sim['count']} אימונים — {w.get('type','')} בתנאים דומים ({sim['label']})</div>
     <div style="font-size:12px;color:#546e7a;margin-bottom:8px;text-align:center">
-      ממוצע {sim['count']} אימונים בתנאים דומים ({sim['label']})
+      {_weather_row}
     </div>
     <div class="cmp-grid">
       <div class="cmp-card">
@@ -681,6 +659,33 @@ def build_email_html(w: dict, athlete_name: str,
         <div class="curr">{w.get('dps','')}</div>
         <div class="prev">ממוצע: {sim['dps']}</div>
         {delta_html(w.get('dps'), sim['dps'])}
+      </div>
+    </div>
+  </div>"""
+        elif prev_stats.get('count', 0) > 0:
+            # fallback: אין תנאים דומים — ממוצע כללי של אותו סוג
+            compare_html += f"""
+  <div class="section">
+    <div class="section-title">📊 ממוצע {prev_stats['count']} אימונים — {w.get('type','')} {w.get('location','')} ({prev_stats['label']})</div>
+    {_weather_row}
+    <div class="cmp-grid">
+      <div class="cmp-card">
+        <div class="clbl">מהירות (קמ"ש)</div>
+        <div class="curr">{w.get('avg_speed','')}</div>
+        <div class="prev">ממוצע: {prev_stats['speed']}</div>
+        {delta_html(w.get('avg_speed'), prev_stats['speed'])}
+      </div>
+      <div class="cmp-card">
+        <div class="clbl">דופק ממוצע</div>
+        <div class="curr">{w.get('avg_hr','')}</div>
+        <div class="prev">ממוצע: {prev_stats['hr'] or '—'}</div>
+        {delta_html(w.get('avg_hr'), prev_stats['hr'], reverse=True)}
+      </div>
+      <div class="cmp-card">
+        <div class="clbl">DPS (מטר)</div>
+        <div class="curr">{w.get('dps','')}</div>
+        <div class="prev">ממוצע: {prev_stats['dps'] or '—'}</div>
+        {delta_html(w.get('dps'), prev_stats['dps'])}
       </div>
     </div>
   </div>"""
@@ -929,7 +934,7 @@ def send_workout_email(to_email: str, athlete_name: str, workout: dict,
 WARMUP_CUTOFF_SEC = 900  # 15 minutes
 
 
-def fetch_lap_analysis(api, act_id: str, workout_type: str = '') -> dict:
+def fetch_lap_analysis(api, act_id: str, workout_type: str = '', total_dist_km: float = 0) -> dict:
     """
     Fetch per-lap data, skip warmup (first 15 min + WARMUP intensity),
     return pacing / fatigue / efficiency analysis.
@@ -1075,12 +1080,18 @@ def fetch_lap_analysis(api, act_id: str, workout_type: str = '') -> dict:
 
     # ── REGULAR WORKOUTS: aerobic / אירובי ארוך / טמפו ──
     main_laps, cum_sec = [], 0
+    cum_dist_m = 0
     for lap in laps:
         cum_sec += _dur(lap)
         if lap.get('intensityType') == 'WARMUP' or cum_sec <= WARMUP_CUTOFF_SEC:
             continue
         if _dist(lap) < 200:
             continue
+        # חותך laps שחורגים ב-15%+ ממרחק האמיתי (מניעת ספירה כפולה בסיבוב)
+        if total_dist_km > 0:
+            cum_dist_m += _dist(lap)
+            if cum_dist_m > total_dist_km * 1000 * 1.15:
+                break
         main_laps.append(lap)
 
     if len(main_laps) < 2:
@@ -2080,7 +2091,7 @@ def main():
                     if w.get("distance", 0) > 0:  # דלג על אימונים ריקים
                         print(f"  [Email] אימון חדש — {w['date']} {w['type']}")
                         wellness     = fetch_wellness_before_workout(api, w["date"])
-                        lap_analysis = fetch_lap_analysis(api, w["id"], workout_type=w.get("type", ""))
+                        lap_analysis = fetch_lap_analysis(api, w["id"], workout_type=w.get("type", ""), total_dist_km=w.get("distance", 0))
                         _lat = w.get("lat")
                         _lon = w.get("lon")
                         if w.get("location") == "ים" and _lat and _lon:
