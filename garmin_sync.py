@@ -796,15 +796,16 @@ tr.hl td{{color:#4fc3f7!important;font-weight:600}}
     </div>
     <div class="ti">🌊</div>
   </div>
-  <table width="100%" cellpadding="4" cellspacing="6" style="margin-bottom:10px">
+  <table width="100%" cellpadding="4" cellspacing="6" style="margin-bottom:10px;table-layout:fixed">
     <tr>
-      <td width="25%"><div class="card"><div class="lbl">מרחק</div><div class="val">{w.get('distance','')}</div><div class="unt">ק"מ</div></div></td>
-      <td width="25%"><div class="card"><div class="lbl">זמן</div><div class="val">{w.get('duration','')}</div><div class="unt"></div></div></td>
-      <td width="25%"><div class="card"><div class="lbl">מהירות</div><div class="val">{w.get('avg_speed','')}</div><div class="unt">קמ"ש</div></div></td>
-      <td width="25%"><div class="card"><div class="lbl">מהירות מקס</div><div class="val">{w.get('max_speed','') or '—'}</div><div class="unt">קמ"ש</div></div></td>
+      <td width="20%"><div class="card"><div class="lbl">מרחק</div><div class="val">{w.get('distance','')}</div><div class="unt">ק"מ</div></div></td>
+      <td width="20%"><div class="card"><div class="lbl">זמן</div><div class="val">{w.get('duration','')}</div><div class="unt"></div></div></td>
+      <td width="20%"><div class="card"><div class="lbl">מהירות</div><div class="val">{w.get('avg_speed','')}</div><div class="unt">קמ"ש</div></div></td>
+      <td width="20%"><div class="card"><div class="lbl">מהירות מקס</div><div class="val">{w.get('max_speed','') or '—'}</div><div class="unt">קמ"ש</div></div></td>
+      <td width="20%"></td>
     </tr>
   </table>
-  <table width="100%" cellpadding="4" cellspacing="6" style="margin-bottom:10px">
+  <table width="100%" cellpadding="4" cellspacing="6" style="margin-bottom:10px;table-layout:fixed">
     <tr>
       <td width="20%"><div class="card"><div class="lbl">דופק</div><div class="val">{w.get('avg_hr',0) or '—'}</div><div class="unt">bpm</div></div></td>
       <td width="20%"><div class="card"><div class="lbl">דופק מקס</div><div class="val">{w.get('max_hr',0) or '—'}</div><div class="unt">bpm</div></div></td>
