@@ -632,63 +632,7 @@ def build_email_html(w: dict, athlete_name: str,
     </div>
   </div>"""
 
-        # ─── קטע 2: ממוצע 5 אימונים — אותו סוג בתנאים דומים ───
-        sim = prev_stats.get("similar")
-        if sim:
-            compare_html += f"""
-  <div class="section">
-    <div class="section-title">📊 ממוצע {sim['count']} אימונים — {w.get('type','')} בתנאים דומים ({sim['label']})</div>
-    <div style="font-size:12px;color:#546e7a;margin-bottom:8px;text-align:center">
-      {_weather_row}
-    </div>
-    <div class="cmp-grid">
-      <div class="cmp-card">
-        <div class="clbl">מהירות (קמ"ש)</div>
-        <div class="curr">{w.get('avg_speed','')}</div>
-        <div class="prev">ממוצע: {sim['speed']}</div>
-        {delta_html(w.get('avg_speed'), sim['speed'])}
-      </div>
-      <div class="cmp-card">
-        <div class="clbl">דופק ממוצע</div>
-        <div class="curr">{w.get('avg_hr','')}</div>
-        <div class="prev">ממוצע: {sim['hr'] or '—'}</div>
-        {delta_html(w.get('avg_hr'), sim['hr'], reverse=True)}
-      </div>
-      <div class="cmp-card">
-        <div class="clbl">DPS (מטר)</div>
-        <div class="curr">{w.get('dps','')}</div>
-        <div class="prev">ממוצע: {sim['dps']}</div>
-        {delta_html(w.get('dps'), sim['dps'])}
-      </div>
-    </div>
-  </div>"""
-        elif prev_stats.get('count', 0) > 0:
-            # fallback: אין תנאים דומים — ממוצע כללי של אותו סוג
-            compare_html += f"""
-  <div class="section">
-    <div class="section-title">📊 ממוצע {prev_stats['count']} אימונים — {w.get('type','')} {w.get('location','')} ({prev_stats['label']})</div>
-    {_weather_row}
-    <div class="cmp-grid">
-      <div class="cmp-card">
-        <div class="clbl">מהירות (קמ"ש)</div>
-        <div class="curr">{w.get('avg_speed','')}</div>
-        <div class="prev">ממוצע: {prev_stats['speed']}</div>
-        {delta_html(w.get('avg_speed'), prev_stats['speed'])}
-      </div>
-      <div class="cmp-card">
-        <div class="clbl">דופק ממוצע</div>
-        <div class="curr">{w.get('avg_hr','')}</div>
-        <div class="prev">ממוצע: {prev_stats['hr'] or '—'}</div>
-        {delta_html(w.get('avg_hr'), prev_stats['hr'], reverse=True)}
-      </div>
-      <div class="cmp-card">
-        <div class="clbl">DPS (מטר)</div>
-        <div class="curr">{w.get('dps','')}</div>
-        <div class="prev">ממוצע: {prev_stats['dps'] or '—'}</div>
-        {delta_html(w.get('dps'), prev_stats['dps'])}
-      </div>
-    </div>
-  </div>"""
+        # קטע 2 (ממוצע 5 בכרטיסים) הוסר — הטבלה hist_section משמשת כהשוואת 5 האימונים
     else:
         compare_html = """
   <div class="section" style="text-align:center;color:#546e7a;padding:14px">
@@ -712,7 +656,7 @@ def build_email_html(w: dict, athlete_name: str,
     if hist_rows:
         hist_section = f"""
   <div class="section">
-    <div class="section-title">📋 אימונים אחרונים — {w.get('type','')} {w.get('location','')}</div>
+    <div class="section-title">📊 אימונים אחרונים — {w.get('type','')} {w.get('location','')}</div>
     <table>
       <thead><tr><th>תאריך</th><th>מרחק</th><th>זמן</th><th>מהירות</th><th>דופק</th><th>DPS</th></tr></thead>
       <tbody>{hist_rows}</tbody>
