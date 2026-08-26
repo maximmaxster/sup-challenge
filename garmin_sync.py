@@ -242,6 +242,7 @@ def parse_activity(act: dict, zones: list, cfg: dict = None, hr_values: list = N
     max_speed = round(max_speed_ms * 3.6, 1) if max_speed_ms else 0
 
     avg_hr = int(act.get("averageHR") or 0)
+    max_hr  = int(act.get("maxHR") or 0)
 
     # DPS — avgStrokeDistance comes in cm
     avg_stroke_dist = act.get("avgStrokeDistance") or 0
@@ -296,6 +297,7 @@ def parse_activity(act: dict, zones: list, cfg: dict = None, hr_values: list = N
         "avg_speed": speed,
         "max_speed": max_speed,
         "avg_hr": avg_hr,
+        "max_hr": max_hr,
         "spm": spm,
         "spm_max": spm_max,
         "dps": dps,
@@ -765,15 +767,27 @@ def build_email_html(w: dict, athlete_name: str,
                         f'<span style="font-size:11px;color:{hrv_color};margin-right:4px">ms · {hrv_label}</span>'
                         f'{baseline_txt}')
 
+        # Sleep score card
+        ss = wellness.get("sleep_score")
+        ss_color = "#66bb6a" if (ss or 0) >= 80 else ("#ffa726" if (ss or 0) >= 60 else "#ef5350")
+        ss_html = (f'<span style="font-size:22px;font-weight:700;color:{ss_color}">{ss}</span>'
+                   if ss is not None else '<span style="color:#546e7a">—</span>')
+
+        hrv_card = (f'<div class="card"><div class="lbl">HRV</div><div class="val">{hrv_html}</div></div>'
+                    if hrv_val is not None else "")
+
         wellness_html = f"""
   <div class="section">
     <div class="section-title">🔋 מצב לפני האימון — הלילה שעבר</div>
-    <div class="cards">
+    <div class="cards" style="grid-template-columns:repeat(3,1fr)">
       <div class="card"><div class="lbl">Body Battery</div><div class="val">{bb_html}</div></div>
-      <div class="card"><div class="lbl">HRV</div><div class="val">{hrv_html}</div></div>
+      <div class="card"><div class="lbl">ציון שינה</div><div class="val">{ss_html}</div></div>
       <div class="card"><div class="lbl">שינה כוללת</div><div class="val">{slp_html}</div></div>
+    </div>
+    <div class="cards" style="grid-template-columns:repeat(3,1fr);margin-top:8px">
       <div class="card"><div class="lbl">שינה עמוקה</div><div class="val">{deep_html}</div></div>
       <div class="card"><div class="lbl">REM</div><div class="val">{rem_html}</div></div>
+      {hrv_card}
     </div>
   </div>"""
 
@@ -826,27 +840,34 @@ tr.hl td{{color:#4fc3f7!important;font-weight:600}}
 .footer{{text-align:center;margin-top:14px;font-size:10px;color:#37474f}}
 </style></head>
 <body><div class="wrap">
-  <div class="header">
+  <div class="header" style="text-align:center;flex-direction:column;align-items:center">
     <div class="header-icon">🏄</div>
     <div class="header-text">
       <h1>סיכום אימון SUP — {athlete_name}</h1>
-      <div class="dt">{date_display}</div>
+      <div class="dt">{date_display}{'  ·  ' + str(w.get('start_hour','')) + ':00' if w.get('start_hour') is not None else ''}</div>
       <div class="sub">עודכן אוטומטית מ-Garmin Connect</div>
     </div>
   </div>
   <div class="banner">
-    <div><div class="tn">{w.get('type','')}</div><div class="tl">📍 {w.get('location','')}</div></div>
+    <div style="flex:1">
+      <div class="tn">{w.get('type','')}{' — ' + w['workout_name'] if w.get('workout_name') else ''}</div>
+      <div class="tl">📍 {w.get('location','')}</div>
+      {build_weather_html(weather or {})}
+    </div>
     <div class="ti">🌊</div>
   </div>
-  <div class="cards">
+  <div class="cards" style="grid-template-columns:repeat(4,1fr)">
     <div class="card"><div class="lbl">מרחק</div><div class="val">{w.get('distance','')}</div><div class="unt">ק"מ</div></div>
-    <div class="card"><div class="lbl">זמן</div><div class="val">{w.get('duration','')}</div><div class="unt">דקות</div></div>
+    <div class="card"><div class="lbl">זמן</div><div class="val">{w.get('duration','')}</div><div class="unt"></div></div>
     <div class="card"><div class="lbl">מהירות</div><div class="val">{w.get('avg_speed','')}</div><div class="unt">קמ"ש</div></div>
+    <div class="card"><div class="lbl">מהירות מקס</div><div class="val">{w.get('max_speed','') or '—'}</div><div class="unt">קמ"ש</div></div>
   </div>
-  <div class="chips">
-    <div class="chip">💓 דופק: <strong>{w.get('avg_hr',0)} bpm</strong></div>
-    <div class="chip">🚣 SPM: <strong>{w.get('spm',0)}</strong></div>
-    <div class="chip">📏 DPS: <strong>{w.get('dps',0)} מ'</strong></div>
+  <div class="cards" style="grid-template-columns:repeat(5,1fr)">
+    <div class="card"><div class="lbl">דופק</div><div class="val">{w.get('avg_hr',0) or '—'}</div><div class="unt">bpm</div></div>
+    <div class="card"><div class="lbl">דופק מקס</div><div class="val">{w.get('max_hr',0) or '—'}</div><div class="unt">bpm</div></div>
+    <div class="card"><div class="lbl">SPM</div><div class="val">{w.get('spm',0) or '—'}</div><div class="unt"></div></div>
+    <div class="card"><div class="lbl">SPM מקס</div><div class="val">{w.get('spm_max',0) or '—'}</div><div class="unt"></div></div>
+    <div class="card"><div class="lbl">DPS</div><div class="val">{w.get('dps',0) or '—'}</div><div class="unt">מ'</div></div>
   </div>
   <div class="section">
     <div class="section-title">⏱ זמן בזונות דופק</div>
@@ -857,7 +878,6 @@ tr.hl td{{color:#4fc3f7!important;font-weight:600}}
     <div class="zone-row"><div class="zl">Z5</div><div class="zbar-bg"><div class="zbar" style="width:{px(z5s)}px;background:#b71c1c">{pct(z5s)}</div></div><div class="zt">{w.get('z5','0:00')}</div></div>
   </div>
   {wellness_html}
-  {build_weather_html(weather or {})}
   {compare_html}
   {hist_section}
   {build_lap_analysis_html(lap_analysis or {}, prev_stats=prev_stats, history=history)}
@@ -1870,15 +1890,17 @@ def build_weather_html(w: dict) -> str:
                      f'<div class="unt">מעלות</div>'
                      f'</div>')
 
-    return f"""
-  <div class="section">
-    <div class="section-title">🌊 תנאי מים — שעת האימון</div>
-    <div class="cards">
-      {wind_card}
-      {wave_card}
-      {temp_card}
-    </div>
-  </div>"""
+    chips = []
+    if wind is not None:
+        chips.append(f'💨 {wind} קמ"ש {dir_he}')
+    if gusts:
+        chips.append(f'שיאי רוח {gusts} קמ"ש')
+    if wave_h is not None:
+        chips.append(f'🌊 גל {wave_h}מ\'{(" · " + wave_dir) if wave_dir else ""}')
+    if temp_c is not None:
+        chips.append(f'🌡️ {temp_c}°C')
+    chips_html = "".join(f'<span style="background:rgba(0,0,0,0.25);border-radius:14px;padding:3px 10px;font-size:11px;color:rgba(255,255,255,0.85);white-space:nowrap">{c}</span>' for c in chips)
+    return f'<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px">{chips_html}</div>'
 
 
 # ===== WELLNESS (Body Battery + Sleep before workout) =====
@@ -1902,6 +1924,8 @@ def fetch_wellness_before_workout(api, workout_date_str: str) -> dict:
             result["deep_min"]    = round(deep / 60)
             result["deep_pct"]    = round(deep / total * 100) if total else 0
             result["rem_min"]     = round(rem / 60)
+            scores = dto.get("sleepScores") or {}
+            result["sleep_score"] = scores.get("overall", {}).get("value") if isinstance(scores.get("overall"), dict) else scores.get("overall")
 
         # Body Battery — last value (end of sleep = pre-workout level)
         bb_data = api.get_body_battery(date_iso)
