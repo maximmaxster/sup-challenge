@@ -1557,7 +1557,7 @@ def build_lap_analysis_html(analysis: dict, prev_stats: dict = None, history: li
             f'<div class="zl" style="color:{z_colors[z]}">{z}</div>'
             f'<div class="zbar-bg"><div class="zbar" style="width:{max(4,pct_z*2.8):.0f}px;background:{z_colors[z]}">'
             f'{pct_z}%</div></div>'
-            f'<div class="zt" style="color:#90a4ae;font-size:0.78em">{z_names.get(z,"")}</div>'
+            f''
             f'</div>'
         )
 
