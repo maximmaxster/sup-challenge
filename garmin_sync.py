@@ -610,26 +610,13 @@ def build_email_html(w: dict, athlete_name: str,
     <div style="font-size:12px;color:#546e7a;margin-bottom:8px;text-align:center">
       ממוצע {sw['count']} ביצועים ({sw['label']})
     </div>
-    <div class="cmp-grid">
-      <div class="cmp-card">
-        <div class="clbl">מהירות (קמ"ש)</div>
-        <div class="curr">{w.get('avg_speed','')}</div>
-        <div class="prev">ממוצע: {sw['speed'] or '—'}</div>
-        {delta_html(w.get('avg_speed'), sw['speed'])}
-      </div>
-      <div class="cmp-card">
-        <div class="clbl">דופק ממוצע</div>
-        <div class="curr">{w.get('avg_hr','')}</div>
-        <div class="prev">ממוצע: {sw['hr'] or '—'}</div>
-        {delta_html(w.get('avg_hr'), sw['hr'], reverse=True)}
-      </div>
-      <div class="cmp-card">
-        <div class="clbl">DPS (מטר)</div>
-        <div class="curr">{w.get('dps','')}</div>
-        <div class="prev">ממוצע: {sw['dps'] or '—'}</div>
-        {delta_html(w.get('dps'), sw['dps'])}
-      </div>
-    </div>
+    <table width="100%" cellpadding="4" cellspacing="6">
+      <tr>
+        <td width="33%"><div class="cmp-card"><div class="clbl">מהירות (קמ"ש)</div><div class="curr">{w.get('avg_speed','')}</div><div class="prev">ממוצע: {sw['speed'] or '—'}</div>{delta_html(w.get('avg_speed'), sw['speed'])}</div></td>
+        <td width="33%"><div class="cmp-card"><div class="clbl">דופק ממוצע</div><div class="curr">{w.get('avg_hr','')}</div><div class="prev">ממוצע: {sw['hr'] or '—'}</div>{delta_html(w.get('avg_hr'), sw['hr'], reverse=True)}</div></td>
+        <td width="34%"><div class="cmp-card"><div class="clbl">DPS (מטר)</div><div class="curr">{w.get('dps','')}</div><div class="prev">ממוצע: {sw['dps'] or '—'}</div>{delta_html(w.get('dps'), sw['dps'])}</div></td>
+      </tr>
+    </table>
   </div>"""
 
         # קטע 2 (ממוצע 5 בכרטיסים) הוסר — הטבלה hist_section משמשת כהשוואת 5 האימונים
@@ -728,16 +715,20 @@ def build_email_html(w: dict, athlete_name: str,
         wellness_html = f"""
   <div class="section">
     <div class="section-title">🔋 מצב לפני האימון — הלילה שעבר</div>
-    <div class="cards" style="grid-template-columns:repeat(3,1fr)">
-      <div class="card"><div class="lbl">Body Battery</div><div class="val">{bb_html}</div></div>
-      <div class="card"><div class="lbl">ציון שינה</div><div class="val">{ss_html}</div></div>
-      <div class="card"><div class="lbl">שינה כוללת</div><div class="val">{slp_html}</div></div>
-    </div>
-    <div class="cards" style="grid-template-columns:repeat(3,1fr);margin-top:8px">
-      <div class="card"><div class="lbl">שינה עמוקה</div><div class="val">{deep_html}</div></div>
-      <div class="card"><div class="lbl">REM</div><div class="val">{rem_html}</div></div>
-      {hrv_card}
-    </div>
+    <table width="100%" cellpadding="4" cellspacing="6" style="margin-bottom:8px">
+      <tr>
+        <td width="33%"><div class="card"><div class="lbl">Body Battery</div><div class="val">{bb_html}</div></div></td>
+        <td width="33%"><div class="card"><div class="lbl">ציון שינה</div><div class="val">{ss_html}</div></div></td>
+        <td width="34%"><div class="card"><div class="lbl">שינה כוללת</div><div class="val">{slp_html}</div></div></td>
+      </tr>
+    </table>
+    <table width="100%" cellpadding="4" cellspacing="6">
+      <tr>
+        <td width="33%"><div class="card"><div class="lbl">שינה עמוקה</div><div class="val">{deep_html}</div></div></td>
+        <td width="33%"><div class="card"><div class="lbl">REM</div><div class="val">{rem_html}</div></div></td>
+        <td width="34%">{hrv_card}</td>
+      </tr>
+    </table>
   </div>"""
 
     return f"""<!DOCTYPE html>
@@ -805,19 +796,23 @@ tr.hl td{{color:#4fc3f7!important;font-weight:600}}
     </div>
     <div class="ti">🌊</div>
   </div>
-  <div class="cards" style="grid-template-columns:repeat(4,1fr)">
-    <div class="card"><div class="lbl">מרחק</div><div class="val">{w.get('distance','')}</div><div class="unt">ק"מ</div></div>
-    <div class="card"><div class="lbl">זמן</div><div class="val">{w.get('duration','')}</div><div class="unt"></div></div>
-    <div class="card"><div class="lbl">מהירות</div><div class="val">{w.get('avg_speed','')}</div><div class="unt">קמ"ש</div></div>
-    <div class="card"><div class="lbl">מהירות מקס</div><div class="val">{w.get('max_speed','') or '—'}</div><div class="unt">קמ"ש</div></div>
-  </div>
-  <div class="cards" style="grid-template-columns:repeat(5,1fr)">
-    <div class="card"><div class="lbl">דופק</div><div class="val">{w.get('avg_hr',0) or '—'}</div><div class="unt">bpm</div></div>
-    <div class="card"><div class="lbl">דופק מקס</div><div class="val">{w.get('max_hr',0) or '—'}</div><div class="unt">bpm</div></div>
-    <div class="card"><div class="lbl">SPM</div><div class="val">{w.get('spm',0) or '—'}</div><div class="unt"></div></div>
-    <div class="card"><div class="lbl">SPM מקס</div><div class="val">{w.get('spm_max',0) or '—'}</div><div class="unt"></div></div>
-    <div class="card"><div class="lbl">DPS</div><div class="val">{w.get('dps',0) or '—'}</div><div class="unt">מ'</div></div>
-  </div>
+  <table width="100%" cellpadding="4" cellspacing="6" style="margin-bottom:10px">
+    <tr>
+      <td width="25%"><div class="card"><div class="lbl">מרחק</div><div class="val">{w.get('distance','')}</div><div class="unt">ק"מ</div></div></td>
+      <td width="25%"><div class="card"><div class="lbl">זמן</div><div class="val">{w.get('duration','')}</div><div class="unt"></div></div></td>
+      <td width="25%"><div class="card"><div class="lbl">מהירות</div><div class="val">{w.get('avg_speed','')}</div><div class="unt">קמ"ש</div></div></td>
+      <td width="25%"><div class="card"><div class="lbl">מהירות מקס</div><div class="val">{w.get('max_speed','') or '—'}</div><div class="unt">קמ"ש</div></div></td>
+    </tr>
+  </table>
+  <table width="100%" cellpadding="4" cellspacing="6" style="margin-bottom:10px">
+    <tr>
+      <td width="20%"><div class="card"><div class="lbl">דופק</div><div class="val">{w.get('avg_hr',0) or '—'}</div><div class="unt">bpm</div></div></td>
+      <td width="20%"><div class="card"><div class="lbl">דופק מקס</div><div class="val">{w.get('max_hr',0) or '—'}</div><div class="unt">bpm</div></div></td>
+      <td width="20%"><div class="card"><div class="lbl">SPM</div><div class="val">{w.get('spm',0) or '—'}</div><div class="unt"></div></div></td>
+      <td width="20%"><div class="card"><div class="lbl">SPM מקס</div><div class="val">{w.get('spm_max',0) or '—'}</div><div class="unt"></div></div></td>
+      <td width="20%"><div class="card"><div class="lbl">DPS</div><div class="val">{w.get('dps',0) or '—'}</div><div class="unt">מ'</div></div></td>
+    </tr>
+  </table>
   <div class="section">
     <div class="section-title">⏱ זמן בזונות דופק</div>
     <div class="zone-row"><div class="zl">Z1</div><div class="zbar-bg"><div class="zbar" style="width:{px(z1s)}px;background:#37474f">{pct(z1s)}</div></div><div class="zt">{z1s//60}:{z1s%60:02d}</div></div>
@@ -1569,8 +1564,6 @@ def build_lap_analysis_html(analysis: dict, prev_stats: dict = None, history: li
     zones_html = f"""
   <div class="section">
     <div class="section-title">💓 אזורי דופק — התפלגות האימון</div>
-    <div class="section-insight">{zone_verdict}</div>
-    {f'<div style="font-size:0.78em;color:#546e7a;margin-bottom:10px">{target_note}</div>' if target_note else ''}
     {z_rows}
   </div>""" if hr_zones else ""
 
