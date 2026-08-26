@@ -902,7 +902,7 @@ def send_workout_email(to_email: str, athlete_name: str, workout: dict,
             }
             history = [current_entry] + history_prev[:4]
 
-        research_html = build_research_html(workout.get('type', ''), workout, lap_analysis or {})
+        research_html = ""
         weather = {k: workout.get(k) for k in ('wind_kmh','wind_dir_he','wind_gusts_kmh',
                                                  'wave_height_m','wave_period_s','wave_dir_he','temp_c')}
         html = build_email_html(workout, athlete_name, prev_stats, history, wellness=wellness,
@@ -1591,7 +1591,7 @@ def build_lap_analysis_html(analysis: dict, prev_stats: dict = None, history: li
         zone_verdict = ("✓ שמירה על Z2 לאורך המרחק — יעילות אנרגטית גבוהה" if hr_zones.get(2, 0) >= 65 else
                         "⚠️ Z2 נמוך לאימון ארוך — עלות אנרגטית גבוהה מדי")
     elif wtype == 'טמפו':
-        target_note = "יעד: Z3-Z4 ≥60% | טמפו SUP = חתירה מתמשכת בסף הלקטי לשיפור race pace"
+        target_note = "יעד: Z3-Z4 ≥60% | טמפו SUP = חתירה מתמשכת בסף הלקטי"
         z34 = hr_zones.get(3, 0) + hr_zones.get(4, 0)
         zone_verdict = ("✓ עומס טמפו נכון — חתירה בסף הלקטי" if z34 >= 55 else
                         f"⚡ Z3+Z4 = {z34}% — אימון קצת קל מדי לטמפו, שקול להגביר")
