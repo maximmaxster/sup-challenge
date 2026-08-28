@@ -45,7 +45,8 @@
       "sprint_count": 20,
       "peak_speed": 10.2,
       "sprint_avg_speed": 9.21,
-      "sprint_spm_max": 76.0
+      "sprint_spm_max": 76.0,
+      "sprint_avg_hr": 148.55
     },
     {
       "id": "24118454760",
@@ -116,7 +117,8 @@
       "z4": "33:02",
       "z5": "0:26",
       "sprint_avg_speed": 9.57,
-      "sprint_spm_max": 77.0
+      "sprint_spm_max": 77.0,
+      "sprint_avg_hr": 148.25
     },
     {
       "id": "24031199847",
@@ -210,7 +212,8 @@
       "z4": "36:37",
       "z5": "0:25",
       "sprint_avg_speed": 8.56,
-      "sprint_spm_max": 68.0
+      "sprint_spm_max": 68.0,
+      "sprint_avg_hr": 150.05
     },
     {
       "id": "23918235200",
@@ -603,7 +606,8 @@
       "z4": "16:19",
       "z5": "0:00",
       "sprint_avg_speed": 8.09,
-      "sprint_spm_max": 71.0
+      "sprint_spm_max": 71.0,
+      "sprint_avg_hr": 141.93
     },
     {
       "id": "23413614321",
@@ -697,7 +701,8 @@
       "z4": "21:39",
       "z5": "0:22",
       "sprint_avg_speed": 9.08,
-      "sprint_spm_max": 68.0
+      "sprint_spm_max": 68.0,
+      "sprint_avg_hr": 145.62
     },
     {
       "id": "23312645569",
@@ -1274,7 +1279,8 @@
       "z4": "18:48",
       "z5": "1:13",
       "sprint_avg_speed": 9.32,
-      "sprint_spm_max": 77.0
+      "sprint_spm_max": 77.0,
+      "sprint_avg_hr": 148.69
     },
     {
       "id": "21852065986",
@@ -1368,7 +1374,8 @@
       "z4": "16:26",
       "z5": "0:05",
       "sprint_avg_speed": 9.79,
-      "sprint_spm_max": 80.0
+      "sprint_spm_max": 80.0,
+      "sprint_avg_hr": 145.06
     },
     {
       "id": "21758235502",
@@ -1646,7 +1653,8 @@
       "z4": "15:03",
       "z5": "0:26",
       "sprint_avg_speed": 9.82,
-      "sprint_spm_max": 78.0
+      "sprint_spm_max": 78.0,
+      "sprint_avg_hr": 145.0
     },
     {
       "id": "21295097027",
@@ -1740,7 +1748,8 @@
       "z4": "8:19",
       "z5": "0:00",
       "sprint_avg_speed": 9.06,
-      "sprint_spm_max": 77.0
+      "sprint_spm_max": 77.0,
+      "sprint_avg_hr": 136.56
     },
     {
       "id": "21235342597",
@@ -2294,7 +2303,8 @@
       "z4": "0:00",
       "z5": "0:00",
       "sprint_avg_speed": 10.39,
-      "sprint_spm_max": 75.0
+      "sprint_spm_max": 75.0,
+      "sprint_avg_hr": 114.91
     },
     {
       "id": "20652154963",
@@ -2388,7 +2398,8 @@
       "z4": "6:39",
       "z5": "0:12",
       "sprint_avg_speed": 9.52,
-      "sprint_spm_max": 81.0
+      "sprint_spm_max": 81.0,
+      "sprint_avg_hr": 132.1
     },
     {
       "id": "20583114658",
@@ -2528,7 +2539,8 @@
       "z4": "18:43",
       "z5": "4:54",
       "sprint_avg_speed": 8.45,
-      "sprint_spm_max": 72.0
+      "sprint_spm_max": 72.0,
+      "sprint_avg_hr": 155.0
     },
     {
       "id": "20462341615",
@@ -2760,7 +2772,8 @@
       "z4": "15:12",
       "z5": "0:00",
       "sprint_avg_speed": 9.32,
-      "sprint_spm_max": 76.0
+      "sprint_spm_max": 76.0,
+      "sprint_avg_hr": 147.75
     },
     {
       "id": "20284846793",
