@@ -1317,7 +1317,7 @@ const PROG_TYPES = [
     key: 'aerobic', types: ['אירובי'], label: 'אירובי', icon: '🏄',
     metrics: [
       { key: 'distance_total', label: "סה\"כ מרחק", unit: "ק\"מ", lb: false },
-      { key: 'distance',       label: 'ממוצע מרחק', unit: "ק\"מ", lb: false },
+      { key: 'spm',            label: 'SPM',         unit: '',     lb: false },
       { key: 'hr',             label: 'דופק',        unit: 'BPM',  lb: true  },
       { key: 'dps',            label: 'DPS',          unit: "מ'",   lb: false },
       { key: 'speed',          label: 'מהירות',       unit: 'קמ"ש', lb: false },
@@ -1328,7 +1328,7 @@ const PROG_TYPES = [
     key: 'tempo', types: ['טמפו'], label: 'טמפו / אינטרוואלים', icon: '🌊',
     metrics: [
       { key: 'distance_total', label: "סה\"כ מרחק", unit: "ק\"מ", lb: false },
-      { key: 'distance',       label: 'ממוצע מרחק', unit: "ק\"מ", lb: false },
+      { key: 'spm',            label: 'SPM',         unit: '',     lb: false },
       { key: 'hr',             label: 'דופק',        unit: 'BPM',  lb: true  },
       { key: 'dps',            label: 'DPS',          unit: "מ'",   lb: false },
       { key: 'speed',          label: 'מהירות',       unit: 'קמ"ש', lb: false },
@@ -1339,7 +1339,7 @@ const PROG_TYPES = [
     key: 'aerobic_long', types: ['אירובי ארוך'], label: 'אירובי ארוך', icon: '🌅',
     metrics: [
       { key: 'distance_total', label: "סה\"כ מרחק", unit: "ק\"מ", lb: false },
-      { key: 'distance',       label: 'ממוצע מרחק', unit: "ק\"מ", lb: false },
+      { key: 'spm',            label: 'SPM',         unit: '',     lb: false },
       { key: 'hr',             label: 'דופק',        unit: 'BPM',  lb: true  },
       { key: 'dps',            label: 'DPS',          unit: "מ'",   lb: false },
       { key: 'speed',          label: 'מהירות',       unit: 'קמ"ש', lb: false },
@@ -1349,10 +1349,10 @@ const PROG_TYPES = [
   {
     key: 'sprints', types: ['ספרינטים'], label: 'ספרינטים', icon: '⚡',
     metrics: [
-      { key: 'speed', label: 'מהירות', unit: 'קמ"ש', lb: false },
-      { key: 'spm',   label: 'SPM',    unit: '',      lb: false },
-      { key: 'hr',    label: 'דופק',   unit: 'BPM',   lb: true  },
-      { key: 'eff',   label: 'יעילות', unit: '',      lb: false },
+      { key: 'sprint_avg_speed', label: 'מהירות חזרות', unit: 'קמ"ש', lb: false },
+      { key: 'spm_max',          label: 'SPM מקס',      unit: '',      lb: false },
+      { key: 'hr',               label: 'דופק',          unit: 'BPM',   lb: true  },
+      { key: 'eff',              label: 'יעילות',         unit: '',      lb: false },
     ]
   },
 ];
@@ -1382,6 +1382,8 @@ function progCalcStats(workouts, start, end, types) {
   const spd = vm('avg_speed'), hr = vm('avg_hr');
   const distTotal = ws.reduce((s,w)=>s+(w.distance||0),0);
   return { count: ws.length, speed: spd, hr, dps: vm('dps'), spm: vm('spm'),
+           spm_max: vm('spm_max'),
+           sprint_avg_speed: vm('sprint_avg_speed'),
            distance_total: distTotal,
            distance: distTotal / ws.length,
            eff: hr>0 ? +(spd/hr*100).toFixed(3) : 0 };
@@ -1430,7 +1432,8 @@ function progFmtVal(val, key) {
   if (!val || val === 0) return '—';
   if (key === 'eff')      return (+val).toFixed(2);
   if (key === 'speed')    return (+val).toFixed(1);
-  if (key === 'hr' || key === 'spm') return Math.round(val);
+  if (key === 'hr' || key === 'spm' || key === 'spm_max') return Math.round(val);
+  if (key === 'sprint_avg_speed') return (+val).toFixed(1);
   if (key === 'dps')      return (+val).toFixed(2);
   if (key === 'distance')       return (+val).toFixed(1);
   if (key === 'distance_total') return (+val).toFixed(1);
