@@ -1351,7 +1351,7 @@ const PROG_TYPES = [
     metrics: [
       { key: 'sprint_avg_speed', label: 'מהירות ממוצע', unit: 'קמ"ש', lb: false },
       { key: 'spm_max',          label: 'SPM מקס',      unit: '',      lb: false },
-      { key: 'hr',               label: 'דופק',          unit: 'BPM',   lb: true  },
+      { key: 'sprint_avg_hr',    label: 'דופק ממוצע',   unit: 'BPM',   lb: true  },
       { key: 'eff',              label: 'יעילות',         unit: '',      lb: false },
     ]
   },
@@ -1384,6 +1384,7 @@ function progCalcStats(workouts, start, end, types) {
   return { count: ws.length, speed: spd, hr, dps: vm('dps'), spm: vm('spm'),
            spm_max: vm('spm_max'),
            sprint_avg_speed: vm('sprint_avg_speed'),
+           sprint_avg_hr: vm('sprint_avg_hr'),
            distance_total: distTotal,
            distance: distTotal / ws.length,
            eff: hr>0 ? +(spd/hr*100).toFixed(3) : 0 };
@@ -1432,7 +1433,7 @@ function progFmtVal(val, key) {
   if (!val || val === 0) return '—';
   if (key === 'eff')      return (+val).toFixed(2);
   if (key === 'speed')    return (+val).toFixed(1);
-  if (key === 'hr' || key === 'spm' || key === 'spm_max') return Math.round(val);
+  if (key === 'hr' || key === 'spm' || key === 'spm_max' || key === 'sprint_avg_hr') return Math.round(val);
   if (key === 'sprint_avg_speed') return (+val).toFixed(1);
   if (key === 'dps')      return (+val).toFixed(2);
   if (key === 'distance')       return (+val).toFixed(1);
