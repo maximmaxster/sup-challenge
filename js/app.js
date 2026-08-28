@@ -1349,7 +1349,7 @@ const PROG_TYPES = [
   {
     key: 'sprints', types: ['ספרינטים'], label: 'ספרינטים', icon: '⚡',
     metrics: [
-      { key: 'sprint_avg_speed', label: 'מהירות חזרות', unit: 'קמ"ש', lb: false },
+      { key: 'sprint_avg_speed', label: 'מהירות ממוצע', unit: 'קמ"ש', lb: false },
       { key: 'spm_max',          label: 'SPM מקס',      unit: '',      lb: false },
       { key: 'hr',               label: 'דופק',          unit: 'BPM',   lb: true  },
       { key: 'eff',              label: 'יעילות',         unit: '',      lb: false },
