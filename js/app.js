@@ -1427,43 +1427,47 @@ const PROG_TYPES = [
   {
     key: 'aerobic', types: ['אירובי'], label: 'אירובי', icon: '🏄',
     metrics: [
-      { key: 'distance_total', label: "סה\"כ מרחק", unit: "ק\"מ", lb: false },
-      { key: 'spm',            label: 'SPM',         unit: '',     lb: false },
-      { key: 'hr',             label: 'דופק',        unit: 'BPM',  lb: true  },
-      { key: 'dps',            label: 'DPS',          unit: "מ'",   lb: false },
-      { key: 'speed',          label: 'מהירות',       unit: 'קמ"ש', lb: false },
-      { key: 'eff',            label: 'יעילות',       unit: '',     lb: false },
+      { key: 'distance_total', label: "סה\"כ מרחק",   unit: "ק\"מ",  lb: false },
+      { key: 'spm',            label: 'SPM',            unit: '',      lb: false },
+      { key: 'hr',             label: 'דופק',           unit: 'BPM',   lb: true  },
+      { key: 'dps',            label: 'DPS',             unit: "מ'",    lb: false },
+      { key: 'speed',          label: 'מהירות',          unit: 'קמ"ש', lb: false },
+      { key: 'eff',            label: 'Stroke Index',    unit: '',      lb: false },
+      { key: 'ase',            label: 'ASE',             unit: '',      lb: false },
+      { key: 'pa_hr',          label: 'Pa:HR',           unit: '%',     lb: true  },
     ]
   },
   {
     key: 'tempo', types: ['טמפו'], label: 'טמפו / אינטרוואלים', icon: '🌊',
     metrics: [
-      { key: 'distance_total', label: "סה\"כ מרחק", unit: "ק\"מ", lb: false },
-      { key: 'spm',            label: 'SPM',         unit: '',     lb: false },
-      { key: 'hr',             label: 'דופק',        unit: 'BPM',  lb: true  },
-      { key: 'dps',            label: 'DPS',          unit: "מ'",   lb: false },
-      { key: 'speed',          label: 'מהירות',       unit: 'קמ"ש', lb: false },
-      { key: 'eff',            label: 'יעילות',       unit: '',     lb: false },
+      { key: 'distance_total', label: "סה\"כ מרחק",   unit: "ק\"מ",  lb: false },
+      { key: 'spm',            label: 'SPM',            unit: '',      lb: false },
+      { key: 'hr',             label: 'דופק',           unit: 'BPM',   lb: true  },
+      { key: 'dps',            label: 'DPS',             unit: "מ'",    lb: false },
+      { key: 'speed',          label: 'מהירות',          unit: 'קמ"ש', lb: false },
+      { key: 'eff',            label: 'Stroke Index',    unit: '',      lb: false },
+      { key: 'ase',            label: 'ASE',             unit: '',      lb: false },
     ]
   },
   {
     key: 'aerobic_long', types: ['אירובי ארוך'], label: 'אירובי ארוך', icon: '🌅',
     metrics: [
-      { key: 'distance_total', label: "סה\"כ מרחק", unit: "ק\"מ", lb: false },
-      { key: 'spm',            label: 'SPM',         unit: '',     lb: false },
-      { key: 'hr',             label: 'דופק',        unit: 'BPM',  lb: true  },
-      { key: 'dps',            label: 'DPS',          unit: "מ'",   lb: false },
-      { key: 'speed',          label: 'מהירות',       unit: 'קמ"ש', lb: false },
-      { key: 'eff',            label: 'יעילות',       unit: '',     lb: false },
+      { key: 'distance_total', label: "סה\"כ מרחק",   unit: "ק\"מ",  lb: false },
+      { key: 'spm',            label: 'SPM',            unit: '',      lb: false },
+      { key: 'hr',             label: 'דופק',           unit: 'BPM',   lb: true  },
+      { key: 'dps',            label: 'DPS',             unit: "מ'",    lb: false },
+      { key: 'speed',          label: 'מהירות',          unit: 'קמ"ש', lb: false },
+      { key: 'eff',            label: 'Stroke Index',    unit: '',      lb: false },
+      { key: 'ase',            label: 'ASE',             unit: '',      lb: false },
+      { key: 'pa_hr',          label: 'Pa:HR',           unit: '%',     lb: true  },
     ]
   },
   {
     key: 'sprints', types: ['ספרינטים'], label: 'ספרינטים', icon: '⚡',
     metrics: [
       { key: 'sprint_avg_speed', label: 'מהירות ממוצע', unit: 'קמ"ש', lb: false },
-      { key: 'spm_max',          label: 'SPM מקס',      unit: '',      lb: false },
-      { key: 'sprint_avg_hr',    label: 'דופק ממוצע',   unit: 'BPM',   lb: true  },
-      { key: 'eff',              label: 'יעילות',         unit: '',      lb: false },
+      { key: 'spm_max',          label: 'SPM מקס',       unit: '',      lb: false },
+      { key: 'sprint_avg_hr',    label: 'דופק ממוצע',    unit: 'BPM',   lb: true  },
     ]
   },
 ];
@@ -1490,15 +1494,21 @@ function progCalcStats(workouts, start, end, types) {
   });
   if (!ws.length) return null;
   const vm = key => { const v = ws.map(w=>w[key]||0).filter(x=>x>0); return v.length ? v.reduce((a,b)=>a+b,0)/v.length : 0; };
-  const spd = vm('avg_speed'), hr = vm('avg_hr');
+  const vmNullable = key => { const v = ws.map(w=>w[key]).filter(x=>x!=null && x!==0); return v.length ? v.reduce((a,b)=>a+b,0)/v.length : null; };
+  const spd = vm('avg_speed'), hr = vm('avg_hr'), dps = vm('dps');
+  const spd_ms = spd / 3.6;
+  const si  = (spd_ms > 0 && dps > 0) ? +(spd_ms * dps).toFixed(3) : 0;   // Stroke Index
+  const ase = (si > 0 && hr > 0)       ? +(si / hr * 100).toFixed(3) : 0;  // Aerobic Stroke Economy
   const distTotal = ws.reduce((s,w)=>s+(w.distance||0),0);
-  return { count: ws.length, speed: spd, hr, dps: vm('dps'), spm: vm('spm'),
+  return { count: ws.length, speed: spd, hr, dps, spm: vm('spm'),
            spm_max: vm('spm_max'),
            sprint_avg_speed: vm('sprint_avg_speed'),
            sprint_avg_hr: vm('sprint_avg_hr'),
            distance_total: distTotal,
            distance: distTotal / ws.length,
-           eff: hr>0 ? +(spd/hr*100).toFixed(3) : 0 };
+           eff: si,   // SI replaces old speed/HR formula
+           ase,
+           pa_hr: vmNullable('pa_hr') };
 }
 
 function progGetStats(workouts, periodKey) {
@@ -1541,8 +1551,10 @@ function progGetDecBase(workouts) {
 }
 
 function progFmtVal(val, key) {
-  if (!val || val === 0) return '—';
-  if (key === 'eff')      return (+val).toFixed(2);
+  if (val == null || val === 0) return '—';
+  if (key === 'eff')      return (+val).toFixed(2);   // Stroke Index
+  if (key === 'ase')      return (+val).toFixed(2);   // ASE
+  if (key === 'pa_hr')    return (+val).toFixed(1);   // Pa:HR %
   if (key === 'speed')    return (+val).toFixed(1);
   if (key === 'hr' || key === 'spm' || key === 'spm_max' || key === 'sprint_avg_hr') return Math.round(val);
   if (key === 'sprint_avg_speed') return (+val).toFixed(1);
@@ -1553,7 +1565,7 @@ function progFmtVal(val, key) {
 }
 
 function progDelta(bv, cv, lb) {
-  if (!bv || !cv || bv === 0 || cv === 0) return null;
+  if (bv == null || cv == null || bv === 0 || cv === 0) return null;
   const pct = ((cv - bv) / bv) * 100;
   const good = lb ? pct < -3 : pct > 3;
   const bad  = lb ? pct > 3  : pct < -3;
