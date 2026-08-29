@@ -57,6 +57,7 @@
       <a href="#workouts">סיכומים</a>
       <a href="#training-plans">אימונים</a>
       <a href="#progress">התקדמות</a>
+      <a href="#fitness">כושר</a>
       <a href="#races">תחרויות</a>
     </nav>
 
@@ -588,6 +589,71 @@
       <div class="chart-canvas-wrapper">
         <canvas id="efficiencyChart"></canvas>
       </div>
+    </div>
+  </section>
+
+  <!-- ========== SECTION: FITNESS (CTL/ATL/TSB) ========== -->
+  <section id="fitness" class="section-tab">
+    <h2 class="section-title">כושר</h2>
+
+    <div class="fitness-athlete-tabs">
+      <button class="fitness-tab-btn active" data-athlete="1" onclick="switchFitnessAthlete(1)">מקסים</button>
+      <button class="fitness-tab-btn" data-athlete="2" onclick="switchFitnessAthlete(2)">ויקטור</button>
+    </div>
+
+    <div class="fitness-date-label" id="fitness-date-label">—</div>
+
+    <div class="fitness-kpi-row">
+      <div class="fitness-kpi-card fitness-ctl">
+        <div class="fkpi-acronym">CTL</div>
+        <div class="fkpi-name">כושר</div>
+        <div class="fkpi-val" id="fit-ctl-val">—</div>
+        <div class="fkpi-level" id="fit-ctl-level"></div>
+        <div class="fkpi-hint" id="fit-ctl-hint">ממוצע 42 יום</div>
+      </div>
+      <div class="fitness-kpi-card fitness-atl">
+        <div class="fkpi-acronym">ATL</div>
+        <div class="fkpi-name">עייפות</div>
+        <div class="fkpi-val" id="fit-atl-val">—</div>
+        <div class="fkpi-level" id="fit-atl-level"></div>
+        <div class="fkpi-hint" id="fit-atl-hint">ממוצע 7 ימים</div>
+      </div>
+      <div class="fitness-kpi-card" id="fit-tsb-card">
+        <div class="fkpi-acronym">TSB</div>
+        <div class="fkpi-name">מוכנות</div>
+        <div class="fkpi-val" id="fit-tsb-val">—</div>
+        <div class="fkpi-level" id="fit-tsb-level"></div>
+        <div class="fkpi-hint" id="fit-tsb-hint">CTL פחות ATL</div>
+      </div>
+    </div>
+
+    <div class="fitness-banner" id="fit-banner">
+      <span class="fit-banner-icon" id="fit-banner-icon">🟢</span>
+      <div>
+        <div class="fit-banner-title" id="fit-banner-title"></div>
+        <div class="fit-banner-desc" id="fit-banner-desc"></div>
+      </div>
+    </div>
+
+    <div class="fitness-chart-wrap">
+      <div class="fitness-chart-header">
+        <span class="fitness-chart-title">כושר / עייפות / מוכנות — 2026</span>
+        <div class="fitness-legend">
+          <span class="fleg ctl-leg">CTL</span>
+          <span class="fleg atl-leg">ATL</span>
+          <span class="fleg tsb-leg">TSB</span>
+        </div>
+      </div>
+      <canvas id="fitnessChart"></canvas>
+    </div>
+
+    <div class="fitness-table-wrap">
+      <table class="fitness-table">
+        <thead><tr>
+          <th>שבוע</th><th>אימונים</th><th>CTL</th><th>ATL</th><th>TSB</th>
+        </tr></thead>
+        <tbody id="fit-trend-body"></tbody>
+      </table>
     </div>
   </section>
 

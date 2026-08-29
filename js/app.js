@@ -225,6 +225,7 @@ function renderAll() {
   renderRaces(1);
   buildAnnualCmpYearBtns();
   renderAnnualCmpTable();
+  renderFitness(1);
 }
 
 // ===== ATHLETE CARDS =====
@@ -2462,6 +2463,201 @@ function setupThemeToggle() {
       localStorage.setItem('sup_theme', 'light');
     }
   });
+}
+
+// ===== FITNESS TAB (CTL / ATL / TSB) =====
+
+let fitnessChart = null;
+
+function switchFitnessAthlete(n) {
+  document.querySelectorAll('.fitness-tab-btn').forEach((b, i) => {
+    b.classList.toggle('active', i === n - 1);
+  });
+  renderFitness(n);
+}
+
+function renderFitness(athleteNum) {
+  const data = athleteNum === 1 ? athlete1Data : athlete2Data;
+  const fitness = data?.fitness;
+  if (!fitness || !fitness.current) return;
+
+  const cur = fitness.current;
+  const ctl = cur.ctl || 0, atl = cur.atl || 0, tsb = cur.tsb || 0;
+
+  // Date label
+  const today = new Date();
+  const pad = n => String(n).padStart(2,'0');
+  const el = document.getElementById('fitness-date-label');
+  if (el) el.textContent = `מצב נוכחי — ${pad(today.getDate())}/${pad(today.getMonth()+1)}/${today.getFullYear()}`;
+
+  // CTL
+  const ctlLevel = ctl >= 85 ? ['מצוין','#66bb6a','rgba(102,187,106,.15)'] :
+                   ctl >= 65 ? ['טוב','#4fc3f7','rgba(79,195,247,.15)'] :
+                   ctl >= 40 ? ['ממוצע','#ffd54f','rgba(255,213,79,.12)'] :
+                               ['נמוך','#ef5350','rgba(239,83,80,.12)'];
+  document.getElementById('fit-ctl-val').textContent = Math.round(ctl);
+  const ctlLevelEl = document.getElementById('fit-ctl-level');
+  ctlLevelEl.textContent = ctlLevel[0];
+  ctlLevelEl.style.cssText = `color:${ctlLevel[1]};background:${ctlLevel[2]}`;
+  document.getElementById('fit-ctl-hint').innerHTML =
+    `ממוצע 42 יום<br>${ctl >= 65 ? '65-85 = טוב ✓' : ctl >= 40 ? '40-65 = ממוצע' : 'מתחת 40 = נמוך'}`;
+
+  // ATL
+  const diff = atl - ctl;
+  const atlLevel = diff > 15 ? ['עמוס מאוד','#ef5350','rgba(239,83,80,.12)'] :
+                   diff > 5  ? ['עמוס','#ffd54f','rgba(255,213,79,.12)'] :
+                   diff > -5 ? ['מאוזן','#66bb6a','rgba(102,187,106,.15)'] :
+                               ['נמוך','#4fc3f7','rgba(79,195,247,.15)'];
+  document.getElementById('fit-atl-val').textContent = Math.round(atl);
+  const atlLevelEl = document.getElementById('fit-atl-level');
+  atlLevelEl.textContent = atlLevel[0];
+  atlLevelEl.style.cssText = `color:${atlLevel[1]};background:${atlLevel[2]}`;
+  document.getElementById('fit-atl-hint').innerHTML =
+    `ממוצע 7 ימים<br>${diff > 5 ? 'גבוה מ-CTL — שבוע כבד' : 'קרוב ל-CTL = תקין ✓'}`;
+
+  // TSB
+  const tsbCard = document.getElementById('fit-tsb-card');
+  const tsbCls = tsb > 10 ? 'fit-tsb-good' : tsb >= -5 ? 'fit-tsb-neutral' : tsb >= -20 ? 'fit-tsb-ok' : 'fit-tsb-bad';
+  tsbCard.className = 'fitness-kpi-card ' + tsbCls;
+  const tsbLevel = tsb > 20 ? ['נוח מאוד','#66bb6a','rgba(102,187,106,.15)'] :
+                   tsb > 10 ? ['טרי','#66bb6a','rgba(102,187,106,.15)'] :
+                   tsb >= -5 ? ['מאוזן','#66bb6a','rgba(102,187,106,.15)'] :
+                   tsb >= -20 ? ['עמוס קל','#ffd54f','rgba(255,213,79,.12)'] :
+                               ['עמוס מאוד','#ef5350','rgba(239,83,80,.12)'];
+  document.getElementById('fit-tsb-val').textContent = (tsb >= 0 ? '+' : '') + Math.round(tsb);
+  const tsbLevelEl = document.getElementById('fit-tsb-level');
+  tsbLevelEl.textContent = tsbLevel[0];
+  tsbLevelEl.style.cssText = `color:${tsbLevel[1]};background:${tsbLevel[2]}`;
+  document.getElementById('fit-tsb-hint').innerHTML =
+    `CTL פחות ATL<br>${tsb > 0 ? 'חיובי = מוכן ✓' : 'שלילי = מתאושש'}`;
+
+  // Banner
+  const banner = document.getElementById('fit-banner');
+  const btitle = document.getElementById('fit-banner-title');
+  const bdesc  = document.getElementById('fit-banner-desc');
+  const bicon  = document.getElementById('fit-banner-icon');
+  if (tsb > 10) {
+    banner.className = 'fitness-banner fit-fresh';
+    bicon.textContent = '🟢'; btitle.textContent = 'טרי ומוכן';
+    bdesc.textContent = 'TSB חיובי — הגוף התאושש. מתאים לאימון טמפו קשה או ספרינטים.';
+  } else if (tsb >= 0) {
+    banner.className = 'fitness-banner fit-fresh';
+    bicon.textContent = '🟢'; btitle.textContent = 'מוכן';
+    bdesc.textContent = 'TSB מאוזן — אפשר לאמן בעצימות רגילה.';
+  } else if (tsb >= -15) {
+    banner.className = 'fitness-banner fit-neutral';
+    bicon.textContent = '🟡'; btitle.textContent = 'עמוס קל';
+    bdesc.textContent = 'TSB שלילי קל — עדיף אירובי. לא לדחוף חזק.';
+  } else {
+    banner.className = 'fitness-banner fit-loaded';
+    bicon.textContent = '🔴'; btitle.textContent = 'עמוס — שמור כוח';
+    bdesc.textContent = `עייפות גבוהה (ATL גבוה ב-${Math.round(Math.abs(diff))} מ-CTL). מנוחה פעילה או אירובי קל.`;
+  }
+
+  drawFitnessChart(fitness.series || []);
+  drawFitnessTrend(fitness.series || [], data.workouts || []);
+}
+
+function drawFitnessChart(series) {
+  if (!series.length) return;
+  const canvas = document.getElementById('fitnessChart');
+  if (!canvas) return;
+  const dpr = window.devicePixelRatio || 1;
+  const W = canvas.parentElement.clientWidth - 32;
+  const H = 200;
+  canvas.width = W * dpr; canvas.height = H * dpr;
+  canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+
+  const pad = { t: 10, r: 8, b: 26, l: 32 };
+  const cw = W - pad.l - pad.r, ch = H - pad.t - pad.b;
+  const allV = series.flatMap(d => [d.ctl, d.atl, d.tsb]);
+  const mn = Math.min(...allV) - 3, mx = Math.max(...allV) + 3;
+  const scX = i => pad.l + (i / (series.length - 1)) * cw;
+  const scY = v => pad.t + (1 - (v - mn) / (mx - mn)) * ch;
+  const y0 = scY(0);
+
+  // zero line
+  ctx.strokeStyle = 'rgba(255,255,255,0.08)'; ctx.lineWidth = 1; ctx.setLineDash([4,4]);
+  ctx.beginPath(); ctx.moveTo(pad.l, y0); ctx.lineTo(pad.l+cw, y0); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // month labels
+  const months = ['ינו','פבר','מרץ','אפר','מאי','יונ','יול','אוג','ספט','אוק','נוב','דצמ'];
+  let prevMonth = -1;
+  ctx.textAlign = 'center'; ctx.font = '10px Heebo, sans-serif';
+  series.forEach((d, i) => {
+    const parts = d.date.split('.');
+    const m = parseInt(parts[1], 10) - 1;
+    if (m !== prevMonth) {
+      prevMonth = m;
+      const x = scX(i);
+      ctx.strokeStyle = 'rgba(255,255,255,0.04)'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(x, pad.t); ctx.lineTo(x, pad.t+ch); ctx.stroke();
+      ctx.fillStyle = '#546e7a'; ctx.fillText(months[m], x, H - 6);
+    }
+  });
+
+  // TSB fill
+  ctx.save(); ctx.beginPath();
+  ctx.moveTo(scX(0), y0);
+  series.forEach((d,i) => ctx.lineTo(scX(i), scY(d.tsb)));
+  ctx.lineTo(scX(series.length-1), y0); ctx.closePath();
+  const gr = ctx.createLinearGradient(0, pad.t, 0, pad.t+ch);
+  gr.addColorStop(0,'rgba(102,187,106,0.18)'); gr.addColorStop(1,'rgba(239,83,80,0.1)');
+  ctx.fillStyle = gr; ctx.fill(); ctx.restore();
+
+  function drawLine(key, color, dash=[]) {
+    ctx.strokeStyle = color; ctx.lineWidth = 2; ctx.setLineDash(dash);
+    ctx.beginPath();
+    series.forEach((d,i) => i===0 ? ctx.moveTo(scX(i),scY(d[key])) : ctx.lineTo(scX(i),scY(d[key])));
+    ctx.stroke(); ctx.setLineDash([]);
+  }
+  drawLine('ctl','#4fc3f7');
+  drawLine('atl','#ff8c42',[5,3]);
+  drawLine('tsb','#66bb6a');
+
+  ctx.textAlign = 'right'; ctx.font = '10px Heebo, sans-serif';
+  [Math.round(mn), 0, Math.round(mx)].forEach(v => {
+    ctx.fillStyle = v === 0 ? '#78909c' : '#3a5568';
+    ctx.fillText(v, pad.l-3, scY(v)+4);
+  });
+}
+
+function drawFitnessTrend(series, workouts) {
+  const tbody = document.getElementById('fit-trend-body');
+  if (!tbody || !series.length) return;
+
+  // Last 6 weeks
+  const rows = [];
+  for (let w = 5; w >= 0; w--) {
+    const endIdx = series.length - 1 - w * 7;
+    if (endIdx < 0) continue;
+    const startIdx = Math.max(0, endIdx - 6);
+    const slice = series.slice(startIdx, endIdx + 1);
+    const last = slice[slice.length - 1];
+    const parts = last.date.split('.');
+    const label = `${parts[0]}/${parts[1]}`;
+    // count workouts in range
+    const startDate = slice[0].date, endDate = last.date;
+    const count = workouts.filter(wo => {
+      return wo.date >= startDate && wo.date <= endDate && (wo.distance || 0) > 0;
+    }).length;
+    rows.push({ label, count, ctl: last.ctl, atl: last.atl, tsb: last.tsb });
+  }
+
+  tbody.innerHTML = rows.map(r => {
+    const bcls = r.tsb > 5 ? 'pos' : r.tsb < -10 ? 'neg' : 'neu';
+    const tsbStr = (r.tsb >= 0 ? '+' : '') + Math.round(r.tsb);
+    return `<tr>
+      <td style="color:var(--text-muted)">${r.label}</td>
+      <td>${r.count} ימים</td>
+      <td style="color:#4fc3f7">${Math.round(r.ctl)}</td>
+      <td style="color:#ff8c42">${Math.round(r.atl)}</td>
+      <td><span class="fit-badge ${bcls}">${tsbStr}</span></td>
+    </tr>`;
+  }).join('');
 }
 
 document.addEventListener('DOMContentLoaded', () => {

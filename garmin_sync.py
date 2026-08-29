@@ -366,12 +366,59 @@ def fetch_athlete(cfg: dict, shared_types: dict = None) -> dict:
         if excluded:
             print(f"  הוסרו {excluded} פעילויות תחרות מהאימונים")
 
+    fitness = compute_fitness_metrics(workouts)
     return {
         "name": cfg["name"],
         "profile_image": cfg["profile_image"],
         "last_sync": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "workouts": workouts,
+        "fitness": fitness,
     }, api
+
+
+# ===== FITNESS METRICS (CTL / ATL / TSB) =====
+def compute_fitness_metrics(workouts: list) -> dict:
+    """מחשב CTL/ATL/TSB על בסיס TRIMP פשוט (avg_hr × שעות)."""
+    from datetime import timedelta
+    if not workouts:
+        return {}
+
+    # TRIMP per date
+    trimp_map: dict[str, float] = {}
+    for w in workouts:
+        date_str = w.get('date', '')
+        hr = float(w.get('avg_hr') or 0)
+        dur_sec = float(w.get('duration') or 0)
+        if not date_str or hr <= 0 or dur_sec <= 0:
+            continue
+        trimp = hr * (dur_sec / 3600.0)
+        trimp_map[date_str] = trimp_map.get(date_str, 0.0) + trimp
+
+    if not trimp_map:
+        return {}
+
+    dates = sorted(trimp_map.keys(), key=lambda d: datetime.strptime(d, '%d.%m.%Y'))
+    start = datetime.strptime(dates[0], '%d.%m.%Y')
+    today = datetime.now()
+
+    k_ctl = 1 / 42
+    k_atl = 1 / 7
+    ctl = atl = 0.0
+    series = []
+
+    cur = start
+    while cur.date() <= today.date():
+        d_str = cur.strftime('%d.%m.%Y')
+        trimp = trimp_map.get(d_str, 0.0)
+        ctl += (trimp - ctl) * k_ctl
+        atl += (trimp - atl) * k_atl
+        tsb = ctl - atl
+        if trimp > 0 or len(series) % 7 == 0 or cur.date() == today.date():
+            series.append({'date': d_str, 'ctl': round(ctl, 1), 'atl': round(atl, 1), 'tsb': round(tsb, 1)})
+        cur += timedelta(days=1)
+
+    last = series[-1] if series else {}
+    return {'series': series, 'current': {'ctl': last.get('ctl', 0), 'atl': last.get('atl', 0), 'tsb': last.get('tsb', 0)}}
 
 
 # ===== SAVE =====
@@ -1311,18 +1358,6 @@ def build_lap_analysis_html(analysis: dict, prev_stats: dict = None, history: li
       <tbody>{sprint_rows}</tbody>
     </table>
     {f'<div style="font-size:0.82em;color:#90a4ae;padding:8px 12px;background:rgba(255,255,255,0.04);border-radius:8px;margin-bottom:8px">{insights}</div>' if insights else ''}
-  </div>
-  <div class="section">
-    <div class="section-title">💓 אזורי דופק — ספרינטים vs מנוחות</div>
-    <div class="section-insight">{zone_verdict}</div>
-    <table style="width:100%;border-collapse:collapse">
-      <thead><tr>
-        <th style="padding:4px 8px;font-size:0.75em;color:#546e7a;font-weight:400;text-align:right">אזור</th>
-        <th style="padding:4px 8px;font-size:0.75em;color:#546e7a;font-weight:400">ספרינטים</th>
-        <th style="padding:4px 8px;font-size:0.75em;color:#546e7a;font-weight:400">מנוחות</th>
-      </tr></thead>
-      <tbody>{zone_rows_sprint}</tbody>
-    </table>
   </div>"""
         return sprint_html
 
@@ -1555,10 +1590,8 @@ def build_lap_analysis_html(analysis: dict, prev_stats: dict = None, history: li
         if pct_z == 0: continue
         z_rows += (
             f'<div class="zone-row">'
-            f'<div class="zl" style="color:{z_colors[z]}">{z}</div>'
             f'<div class="zbar-bg"><div class="zbar" style="width:{max(4,pct_z*2.8):.0f}px;background:{z_colors[z]}">'
             f'{pct_z}%</div></div>'
-            f''
             f'</div>'
         )
 
@@ -1601,7 +1634,7 @@ def build_lap_analysis_html(analysis: dict, prev_stats: dict = None, history: li
     </div>
   </div>"""
 
-    return pacing_html + fatigue_html + eff_html + zones_html + pa_html
+    return pacing_html + fatigue_html + eff_html + pa_html
 
 
 # ===== SUP KNOWLEDGE BASE =====
