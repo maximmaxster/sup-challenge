@@ -2305,7 +2305,7 @@ function showSection(id) {
   requestAnimationFrame(() => {
     window.dispatchEvent(new Event('resize'));
     if (id === 'athletes')  { renderComparisonTable(); }
-    if (id === 'comparison') { renderComparisonTable(); renderAnnualCmpTable(); renderYearlySummaryTable(); renderEfficiencyChart(); }
+    if (id === 'comparison') { renderComparisonTable(); renderAnnualCmpTable(); renderYearlySummaryTable(); setTimeout(renderEfficiencyChart, 60); }
     if (id === 'progress')  { renderTrendCharts(); renderProgress(); }
     if (id === 'charts')    { renderSpeedChart(currentRange.speed); renderDistanceChart(currentRange.distance); renderHrChart(currentRange.hr); renderDpsChart(currentRange.dps); }
     if (id === 'races')     { renderRaces(currentRacesAthlete || 1); }
