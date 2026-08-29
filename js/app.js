@@ -2515,15 +2515,16 @@ function renderFitness(athleteNum) {
   document.getElementById('fit-atl-hint').innerHTML =
     `ממוצע 7 ימים<br>${diff > 5 ? 'גבוה מ-CTL — שבוע כבד' : 'קרוב ל-CTL = תקין ✓'}`;
 
-  // TSB
+  // TSB — bar always green, value color changes by state
   const tsbCard = document.getElementById('fit-tsb-card');
-  const tsbCls = tsb > 10 ? 'fit-tsb-good' : tsb >= -5 ? 'fit-tsb-neutral' : tsb >= -20 ? 'fit-tsb-ok' : 'fit-tsb-bad';
-  tsbCard.className = 'fitness-kpi-card ' + tsbCls;
-  const tsbLevel = tsb > 20 ? ['נוח מאוד','#66bb6a','rgba(102,187,106,.15)'] :
-                   tsb > 10 ? ['טרי','#66bb6a','rgba(102,187,106,.15)'] :
-                   tsb >= -5 ? ['מאוזן','#66bb6a','rgba(102,187,106,.15)'] :
-                   tsb >= -20 ? ['עמוס קל','#ffd54f','rgba(255,213,79,.12)'] :
-                               ['עמוס מאוד','#ef5350','rgba(239,83,80,.12)'];
+  tsbCard.className = 'fitness-kpi-card fitness-tsb';
+  const tsbColor = tsb > 0 ? '#66bb6a' : tsb >= -15 ? '#ffd54f' : '#ef5350';
+  tsbCard.style.setProperty('--fit-tsb-color', tsbColor);
+  const tsbLevel = tsb > 20 ? ['נוח מאוד', tsbColor, `rgba(102,187,106,.15)`] :
+                   tsb > 10 ? ['טרי',        tsbColor, `rgba(102,187,106,.15)`] :
+                   tsb >= -5 ? ['מאוזן',      tsbColor, `rgba(102,187,106,.15)`] :
+                   tsb >= -15 ? ['עמוס קל',   tsbColor, `rgba(255,213,79,.12)`]  :
+                               ['עמוס מאוד',  tsbColor, `rgba(239,83,80,.12)`];
   document.getElementById('fit-tsb-val').textContent = (tsb >= 0 ? '+' : '') + Math.round(tsb);
   const tsbLevelEl = document.getElementById('fit-tsb-level');
   tsbLevelEl.textContent = tsbLevel[0];

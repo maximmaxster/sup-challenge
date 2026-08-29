@@ -1780,25 +1780,18 @@ section {
 }
 .fitness-ctl::before { background: var(--accent, #4fc3f7); }
 .fitness-atl::before { background: #ff8c42; }
-.fit-tsb-good::before  { background: #66bb6a; }
-.fit-tsb-neutral::before { background: #66bb6a; }
-.fit-tsb-ok::before    { background: #ffd54f; }
-.fit-tsb-bad::before   { background: #ef5350; }
+.fitness-tsb::before { background: #66bb6a; }
 
 .fkpi-acronym { font-size: 11px; font-weight: 700; letter-spacing: 1px; margin-bottom: 1px; }
 .fitness-ctl .fkpi-acronym { color: var(--accent, #4fc3f7); }
 .fitness-atl .fkpi-acronym { color: #ff8c42; }
-.fit-tsb-good  .fkpi-acronym, .fit-tsb-neutral .fkpi-acronym { color: #66bb6a; }
-.fit-tsb-ok    .fkpi-acronym { color: #ffd54f; }
-.fit-tsb-bad   .fkpi-acronym { color: #ef5350; }
+.fitness-tsb .fkpi-acronym { color: #66bb6a; }
 
 .fkpi-name { font-size: 10px; color: #90a4ae; margin-bottom: 6px; }
 .fkpi-val  { font-size: 30px; font-weight: 900; line-height: 1; margin-bottom: 5px; }
 .fitness-ctl .fkpi-val { color: var(--accent, #4fc3f7); }
 .fitness-atl .fkpi-val { color: #ff8c42; }
-.fit-tsb-good  .fkpi-val, .fit-tsb-neutral .fkpi-val { color: #66bb6a; }
-.fit-tsb-ok    .fkpi-val { color: #ffd54f; }
-.fit-tsb-bad   .fkpi-val { color: #ef5350; }
+.fitness-tsb .fkpi-val { color: var(--fit-tsb-color, #66bb6a); }
 
 .fkpi-level {
   display: inline-block; padding: 2px 8px; border-radius: 8px;
