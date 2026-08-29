@@ -762,8 +762,28 @@ function buildPlansByQuarter() {
   });
 }
 
+function activateTPQuarter(q) {
+  // Activate the correct quarter in both tempo and sprints panes
+  ['#tp-pane-tempo', '#tp-pane-sprints'].forEach(pane => {
+    const btns = document.querySelectorAll(`${pane} .tp-q-btn`);
+    const panes = document.querySelectorAll(`${pane} .tp-q-pane`);
+    btns.forEach(b => b.classList.remove('active'));
+    panes.forEach(p => p.classList.add('hidden'));
+    const target = [...btns].find(b => b.dataset.q === q || b.dataset.q === 's' + q);
+    if (target) {
+      target.classList.add('active');
+      const paneId = `tp-q-${target.dataset.q}`;
+      const paneEl = document.getElementById(paneId);
+      if (paneEl) paneEl.classList.remove('hidden');
+    }
+  });
+}
+
 function initTrainingPlans() {
   // Cards are built dynamically in buildPlansByQuarter() after data loads
+
+  // Auto-select current quarter on load
+  activateTPQuarter(currentQuarter());
 
   // Type tab switching
   document.querySelectorAll('.tp-type-btn').forEach(btn => {
