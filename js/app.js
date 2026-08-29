@@ -2554,7 +2554,12 @@ function renderFitness(athleteNum) {
     bdesc.textContent = `עייפות גבוהה (ATL גבוה ב-${Math.round(Math.abs(diff))} מ-CTL). מנוחה פעילה או אירובי קל.`;
   }
 
-  drawFitnessChart(fitness.series || []);
+  const fullSeries = fitness.series || [];
+  const yearSeries = fullSeries.filter(d => {
+    const parts = d.date.split('.');
+    return parseInt(parts[2], 10) >= 2026;
+  });
+  drawFitnessChart(yearSeries);
   drawFitnessTrend(fitness.series || [], data.workouts || []);
 }
 
@@ -2564,7 +2569,7 @@ function drawFitnessChart(series) {
   if (!canvas) return;
   const dpr = window.devicePixelRatio || 1;
   const W = canvas.parentElement.clientWidth - 32;
-  const H = 200;
+  const H = 280;
   canvas.width = W * dpr; canvas.height = H * dpr;
   canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
   const ctx = canvas.getContext('2d');
