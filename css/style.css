@@ -2590,12 +2590,11 @@ footer span {
 /* Cards grid */
 .prog-cards-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1.25rem;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
   margin-bottom: 1.5rem;
 }
-@media (max-width: 1024px) { .prog-cards-grid { grid-template-columns: 1fr 1fr; } }
-@media (max-width: 640px)  { .prog-cards-grid { grid-template-columns: 1fr; } }
+@media (max-width: 768px) { .prog-cards-grid { grid-template-columns: 1fr; } }
 
 .prog-card {
   padding: 1.25rem 1.4rem;
@@ -2688,7 +2687,7 @@ footer span {
 .pm-head-row {
   display: grid;
   grid-template-columns: 1.6fr 1fr 0.3fr 1fr 1fr;
-  font-size: 0.65rem;
+  font-size: 0.7rem;
   color: var(--text-muted);
   text-align: center;
   padding: 0 0 0.25rem;
@@ -2696,20 +2695,22 @@ footer span {
 }
 .pm-head-row span:first-child { text-align: right; }
 .pm-head-row.pm-head-6 { grid-template-columns: 1.4fr 0.9fr 0.3fr 0.9fr 0.9fr 1fr; }
-.pm-head-6 span:last-child {
-  color: #FFB300;
-  font-weight: 700;
-}
+.pm-head-6 span:last-child { color: #FFB300; font-weight: 700; }
+.pm-head-row.pm-head-7 { grid-template-columns: 1.4fr 0.85fr 0.25fr 0.85fr 0.75fr 0.85fr 0.85fr; }
+.pm-head-7 .pm-yoy-hdr { color: #4fc3f7; font-weight: 700; }
 
 .pm-row {
   display: grid;
   grid-template-columns: 1.6fr 1fr 0.3fr 1fr 1fr;
   align-items: center;
-  padding: 0.3rem 0;
+  padding: 0.35rem 0;
   border-bottom: 1px solid rgba(255,255,255,0.04);
   gap: 0.2rem;
 }
 .pm-row.pm-row-6 { grid-template-columns: 1.4fr 0.9fr 0.3fr 0.9fr 0.9fr 1fr; }
+.pm-row.pm-row-7 { grid-template-columns: 1.4fr 0.85fr 0.25fr 0.85fr 0.75fr 0.85fr 0.85fr; }
+.pm-yoy-val { font-size: 0.8rem; color: var(--text-muted); text-align: center; }
+.pm-row-7 .pm-delta:last-child { font-size: 0.72rem; }
 .pm-row:last-child { border-bottom: none; }
 /* vs Dec column special styling */
 .pm-row-6 .pm-delta:last-child {
@@ -2717,9 +2718,9 @@ footer span {
   border: 1px solid rgba(255,179,0,0.2);
 }
 
-.pm-lbl { font-size: 0.78rem; font-weight: 600; color: var(--text-secondary); }
+.pm-lbl { font-size: 0.82rem; font-weight: 600; color: var(--text-secondary); }
 .pm-bv, .pm-cv {
-  font-size: 0.82rem;
+  font-size: 0.92rem;
   font-weight: 700;
   color: var(--text-primary);
   text-align: center;

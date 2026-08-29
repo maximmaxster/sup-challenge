@@ -1413,10 +1413,10 @@ function populateYearFilter() {
 // ===========================
 
 const PROG_PERIODS = {
-  q1:       { start: new Date(2026,0,1),  end: new Date(2026,2,31),  label: 'Q1 — ינואר-מרץ 2026',        baseRef: 'base',     showVsDec: false },
-  q2:       { start: new Date(2026,3,1),  end: new Date(2026,5,30),  label: 'Q2 — אפריל-יוני 2026',        baseRef: 'q1',       showVsDec: false },
-  q3:       { start: new Date(2026,6,1),  end: new Date(2026,8,30),  label: 'Q3 — יולי-ספטמבר 2026',      baseRef: 'q2',       showVsDec: false },
-  q4:       { start: new Date(2026,9,1),  end: new Date(2026,11,31), label: 'Q4 — אוקטובר-דצמבר 2026',    baseRef: 'q3',       showVsDec: false },
+  q1:       { start: new Date(2026,0,1),  end: new Date(2026,2,31),  label: 'Q1 — ינואר-מרץ 2026',        baseRef: 'base',     showVsDec: false, yoyStart: new Date(2025,0,1),  yoyEnd: new Date(2025,2,31),  yoyLabel: "vs Q1'25" },
+  q2:       { start: new Date(2026,3,1),  end: new Date(2026,5,30),  label: 'Q2 — אפריל-יוני 2026',        baseRef: 'q1',       showVsDec: false, yoyStart: new Date(2025,3,1),  yoyEnd: new Date(2025,5,30),  yoyLabel: "vs Q2'25" },
+  q3:       { start: new Date(2026,6,1),  end: new Date(2026,8,30),  label: 'Q3 — יולי-ספטמבר 2026',      baseRef: 'q2',       showVsDec: false, yoyStart: new Date(2025,6,1),  yoyEnd: new Date(2025,8,30),  yoyLabel: "vs Q3'25" },
+  q4:       { start: new Date(2026,9,1),  end: new Date(2026,11,31), label: 'Q4 — אוקטובר-דצמבר 2026',    baseRef: 'q3',       showVsDec: false, yoyStart: new Date(2025,9,1),  yoyEnd: new Date(2025,11,31), yoyLabel: "vs Q4'25" },
   h1:       { isH1: true,                                             label: 'חצי שנתי — ממוצע Q1+Q2',     baseRef: 'base',     showVsDec: false },
   year:     { isMultiYear: true,                                      label: 'שנה — 2024 / 2025 / 2026',   baseRef: null,       showVsDec: false },
 };
@@ -1568,10 +1568,11 @@ function progDeltaHtml(delta) {
   return `<span class="pm-delta ${cls}">${arrow} ${sign}${delta.pct.toFixed(1)}%</span>`;
 }
 
-function renderProgCard(typeConf, base, curr, decBase, showVsDec, periodKey) {
+function renderProgCard(typeConf, base, curr, decBase, showVsDec, periodKey, yoy, yoyLabel) {
   const b  = base[typeConf.key];
   const c  = curr[typeConf.key];
   const db = decBase[typeConf.key];   // Dec 2025 always
+  const y  = yoy?.[typeConf.key];
 
   if (!b && !c) return `
     <div class="prog-card glass-card">
@@ -1581,21 +1582,26 @@ function renderProgCard(typeConf, base, curr, decBase, showVsDec, periodKey) {
 
   const future = !c ? `<div class="prog-future">⏳ נתונים יגיעו בתקופה זו</div>` : '';
 
+  const hasYoY = !!(yoy && yoyLabel);
   const rows = typeConf.metrics.map(m => {
-    const bv = b?.[m.key], cv = c?.[m.key], dv = db?.[m.key];
+    const bv = b?.[m.key], cv = c?.[m.key], dv = db?.[m.key], yv = y?.[m.key];
     const dRolling = (b && c) ? progDelta(bv, cv, m.lb) : null;
     const dVsDec   = (showVsDec && db && c) ? progDelta(dv, cv, m.lb) : null;
-    const vsDecCol = showVsDec
-      ? progDeltaHtml(dVsDec)
+    const dYoY     = (hasYoY && y && c) ? progDelta(yv, cv, m.lb) : null;
+    const vsDecCol = showVsDec ? progDeltaHtml(dVsDec) : '';
+    const yoyCol   = hasYoY
+      ? `<span class="pm-yoy-val">${progFmtVal(yv, m.key)}<small>${m.unit}</small></span>${progDeltaHtml(dYoY)}`
       : '';
+    const rowClass = hasYoY ? 'pm-row-7' : showVsDec ? 'pm-row-6' : '';
     return `
-      <div class="pm-row ${showVsDec ? 'pm-row-6' : ''}">
+      <div class="pm-row ${rowClass}">
         <span class="pm-lbl">${m.label}</span>
         <span class="pm-bv">${progFmtVal(bv, m.key)}<small>${m.unit}</small></span>
         <span class="pm-sep">→</span>
         <span class="pm-cv">${progFmtVal(cv, m.key)}<small>${m.unit}</small></span>
         ${progDeltaHtml(dRolling)}
         ${vsDecCol}
+        ${yoyCol}
       </div>`;
   }).join('');
 
@@ -1615,20 +1621,27 @@ function renderProgCard(typeConf, base, curr, decBase, showVsDec, periodKey) {
   const fewWarning = '';
 
   const vsDecHeader = showVsDec ? `<span>vs דצמ'25</span>` : '';
+  const yoyCountN   = y?.count ?? 0;
+  const yoyHeader   = hasYoY
+    ? `<span class="pm-yoy-hdr">${yoyLabel}</span><span class="pm-yoy-hdr">שינוי YoY</span>`
+    : '';
+  const yoyCountStr = hasYoY && yoyCountN > 0 ? ` · ${yoyCountN} אימון ${yoyLabel}` : '';
 
   // H1 note
   const h1Note = PROG_PERIODS[periodKey]?.isH1
     ? `<div class="prog-h1-info">📊 ממוצע Q1+Q2 — יתעדכן עם סיום יוני 2026</div>` : '';
 
+  const headClass = hasYoY ? 'pm-head-7' : showVsDec ? 'pm-head-6' : '';
+
   return `
     <div class="prog-card glass-card">
       <div class="prog-card-hdr">
         <div><span class="prog-icon">${typeConf.icon}</span><span class="prog-type-lbl">${typeConf.label}</span></div>
-        <div class="prog-counts">${baseN} אימון ${baseLabel} · ${currN} אימון ${currLabel}</div>
+        <div class="prog-counts">${baseN} אימון ${baseLabel} · ${currN} אימון ${currLabel}${yoyCountStr}</div>
       </div>
       ${fewWarning}
-      <div class="pm-head-row ${showVsDec ? 'pm-head-6' : ''}">
-        <span></span><span>${baseLabel}</span><span></span><span>${currLabel}</span><span>שינוי</span>${vsDecHeader}
+      <div class="pm-head-row ${headClass}">
+        <span></span><span>${baseLabel}</span><span></span><span>${currLabel}</span><span>שינוי</span>${vsDecHeader}${yoyHeader}
       </div>
       ${rows}
       ${future}
@@ -1815,10 +1828,16 @@ function renderProgress() {
     ? `<span class="ppi-period">${p.label}</span><span class="ppi-sep">·</span><span class="ppi-base">השוואה מול ${baseLabel}</span>`
     : `<span class="ppi-period">${p.label}</span>`;
 
+  // YoY stats — same quarter last year
+  const yoy = p.yoyStart ? PROG_TYPES.reduce((acc, t) => {
+    acc[t.key] = progCalcStats(ath.workouts, p.yoyStart, p.yoyEnd, t.types);
+    return acc;
+  }, {}) : null;
+
   // Cards
   const cardsEl = document.getElementById('prog-cards');
   if (cardsEl) cardsEl.innerHTML = PROG_TYPES.map(t =>
-    renderProgCard(t, base, curr, decBase, p.showVsDec, progPeriod)
+    renderProgCard(t, base, curr, decBase, p.showVsDec, progPeriod, yoy, p.yoyLabel)
   ).join('');
 
   // Efficiency chart
