@@ -33,7 +33,7 @@
   <link rel="icon" type="image/png" href="images/logo.png">
   <link rel="apple-touch-icon" href="images/logo-full.png">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" defer></script>
-  <script src="js/app.js?v=20260829l" defer></script>
+  <script src="js/app.js?v=20260829m" defer></script>
 </head>
 <body>
 
@@ -331,6 +331,33 @@
     </div>
     <div class="annual-cmp-table-wrap">
       <div id="annual-cmp-table"></div>
+    </div>
+
+    <!-- הסבר מדדים -->
+    <h3 class="subsection-title" style="margin-top:2rem">מדדי ביצוע — מה הם אומרים</h3>
+    <div class="metrics-explainer-grid">
+      <div class="metric-explainer-card">
+        <div class="mec-title">SI — Stroke Index</div>
+        <div class="mec-formula">מהירות (m/s) × DPS (m)</div>
+        <div class="mec-desc">המדד הראשי ליעילות טכנית בחתירת SUP. נגזר ממחקרי Craig &amp; Pendergast (1979) לספורט מים. כל שיפור ביעילות עובר דרך אחד משניים: DPS ארוך יותר (טכניקה טובה יותר) או מהירות גבוהה יותר באותה תנועה. ערך גבוה יותר = יעילות טכנית-אירובית טובה יותר.</div>
+        <div class="mec-benchmark"><span class="mec-bm-label">ערכי ייחוס:</span> 4.5–5.5 התחלה · 5.5–6.5 טוב · 6.5+ מצויין</div>
+      </div>
+      <div class="metric-explainer-card">
+        <div class="mec-title">ASE — Aerobic Stroke Economy</div>
+        <div class="mec-formula">SI ÷ דופק ממוצע × 100</div>
+        <div class="mec-desc">משלב יעילות טכנית עם כושר אירובי — כמה "SI" מפיק הגוף לכל פעימת לב. מאמן SUP שמשתמש בזה בנפרד מ-SI כי לב חזק יכול להסתיר טכניקה גרועה, ולהפך. עלייה ב-ASE לאורך זמן = שיפור כולל ב"כלכלת התנועה".</div>
+        <div class="mec-benchmark"><span class="mec-bm-label">פרשנות:</span> עולה עם הזמן = מתאמן מתפתח. ירידה = עייפות צבורה או ירידת טכניקה</div>
+      </div>
+      <div class="metric-explainer-card">
+        <div class="mec-title">Pa:HR — Aerobic Decoupling</div>
+        <div class="mec-formula">% שינוי ב-(מהירות÷דופק) בין מחצית ראשונה לשנייה</div>
+        <div class="mec-desc">מודד עד כמה הלב "מאמץ יותר" בחצי השני של אימון אירובי לאותה מהירות. בסיס אירובי חזק = הלב שומר על יחס קבוע מהירות/דופק לאורך כל האימון. נלקח ממתודולוגיית TrainingPeaks ומותאם לחתירת SUP.</div>
+        <div class="mec-benchmark">
+          <span class="mec-bm-good">פחות מ-5%</span> בסיס אירובי חזק &nbsp;·&nbsp;
+          <span class="mec-bm-mid">5%–9%</span> מתפתח &nbsp;·&nbsp;
+          <span class="mec-bm-bad">מעל 9%</span> עמוס מדי
+        </div>
+      </div>
     </div>
 
     <!-- סיכום רב-שנתי -->

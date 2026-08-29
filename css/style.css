@@ -1096,6 +1096,56 @@ section {
 .annual-cmp-athlete-btn:hover,
 .annual-cmp-year-btn:hover { filter: brightness(1.15); }
 
+/* ===== METRICS EXPLAINER ===== */
+.metrics-explainer-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+@media (max-width: 900px) { .metrics-explainer-grid { grid-template-columns: 1fr; } }
+
+.metric-explainer-card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(79,195,247,0.15);
+  border-radius: 12px;
+  padding: 1.1rem 1.2rem;
+  direction: rtl;
+}
+.mec-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #4fc3f7;
+  margin-bottom: 0.3rem;
+}
+.mec-formula {
+  font-size: 0.8rem;
+  font-family: 'Barlow Condensed', monospace;
+  color: #FFD60A;
+  background: rgba(255,214,10,0.07);
+  border-radius: 6px;
+  padding: 3px 8px;
+  display: inline-block;
+  margin-bottom: 0.65rem;
+  letter-spacing: 0.02em;
+}
+.mec-desc {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 0.65rem;
+}
+.mec-benchmark {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  border-top: 1px solid rgba(255,255,255,0.07);
+  padding-top: 0.5rem;
+}
+.mec-bm-label { color: var(--text-secondary); font-weight: 600; }
+.mec-bm-good  { color: #66bb6a; font-weight: 700; }
+.mec-bm-mid   { color: #ffa726; font-weight: 700; }
+.mec-bm-bad   { color: #ef5350; font-weight: 700; }
+
 /* ===== YEARLY SUMMARY TABLE ===== */
 .ys-wrap { overflow-x: auto; border-radius: 12px; border: 1px solid var(--border-color); }
 .ys-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; direction: rtl; }
