@@ -1836,9 +1836,12 @@ function renderProgress() {
     : baseLabelMap[p.baseRef]
     || (PROG_PERIODS[p.baseRef]?.yearNum ? String(PROG_PERIODS[p.baseRef].yearNum) : p.baseRef);
   const infoEl = document.getElementById('prog-period-info');
+  const yoyNote = p.yoyLabel
+    ? `<span class="ppi-sep">|</span><span class="ppi-yoy">📅 YoY = ${p.yoyLabel} — אותה תקופה אשתקד</span>`
+    : '';
   if (infoEl) infoEl.innerHTML = baseLabel
-    ? `<span class="ppi-period">${p.label}</span><span class="ppi-sep">·</span><span class="ppi-base">השוואה מול ${baseLabel}</span>`
-    : `<span class="ppi-period">${p.label}</span>`;
+    ? `<span class="ppi-period">${p.label}</span><span class="ppi-sep">·</span><span class="ppi-base">השוואה מול ${baseLabel}</span>${yoyNote}`
+    : `<span class="ppi-period">${p.label}</span>${yoyNote}`;
 
   // YoY stats — same quarter last year
   const yoy = p.yoyStart ? PROG_TYPES.reduce((acc, t) => {

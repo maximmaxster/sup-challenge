@@ -2586,6 +2586,7 @@ footer span {
 .ppi-period { font-weight: 700; font-size: 0.88rem; color: var(--text-primary); }
 .ppi-sep    { color: var(--text-muted); }
 .ppi-base   { font-size: 0.8rem; color: var(--text-secondary); }
+.ppi-yoy    { font-size: 0.78rem; color: #4fc3f7; font-weight: 500; }
 
 /* Cards grid */
 .prog-cards-grid {
@@ -2697,6 +2698,8 @@ footer span {
 .pm-head-6 span:last-child { color: #FFB300; font-weight: 700; }
 .pm-head-row.pm-head-7 { grid-template-columns: 1.4fr 0.85fr 0.25fr 0.85fr 0.75fr 0.85fr 0.85fr; }
 .pm-head-7 .pm-yoy-hdr { color: #4fc3f7; font-weight: 700; }
+/* Column header visibility */
+.pm-head-row span:not(:first-child) { color: var(--text-secondary); font-weight: 600; }
 
 .pm-row {
   display: grid;
@@ -2708,7 +2711,7 @@ footer span {
 }
 .pm-row.pm-row-6 { grid-template-columns: 1.4fr 0.9fr 0.3fr 0.9fr 0.9fr 1fr; }
 .pm-row.pm-row-7 { grid-template-columns: 1.4fr 0.85fr 0.25fr 0.85fr 0.75fr 0.85fr 0.85fr; }
-.pm-yoy-val { font-size: 0.8rem; color: var(--text-muted); text-align: center; }
+.pm-yoy-val { font-size: 0.88rem; color: var(--text-secondary); text-align: center; font-weight: 600; }
 .pm-row-7 .pm-delta:last-child { font-size: 0.72rem; }
 .pm-row:last-child { border-bottom: none; }
 /* vs Dec column special styling */
@@ -2724,7 +2727,7 @@ footer span {
   color: var(--text-primary);
   text-align: center;
 }
-.pm-bv small, .pm-cv small { font-size: 0.68rem; color: var(--text-muted); margin-right: 2px; }
+.pm-bv small, .pm-cv small { font-size: 0.7rem; color: var(--text-secondary); margin-right: 2px; font-weight: 500; }
 .pm-sep { text-align: center; color: var(--text-muted); font-size: 0.7rem; }
 
 /* ===== YEAR COMPARISON LAYOUT ===== */
