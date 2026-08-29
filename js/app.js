@@ -1022,7 +1022,7 @@ function renderWorkoutsTable(filterAthlete = 'all', filterType = 'all', filterLo
     const tr = document.createElement('tr');
     tr.className = typeClass[w.type] || '';
 
-    const locIcon = w.location === 'ים' ? '🌊' : w.location === 'נחל' ? '🏞️' : '';
+    const locIcon = '';
     const badgeClass = w.athlete === 1 ? 'badge-athlete1' : 'badge-athlete2';
     const isZero = w.distance === 0;
 
@@ -1036,7 +1036,7 @@ function renderWorkoutsTable(filterAthlete = 'all', filterType = 'all', filterLo
     const workoutNum = planTypes.includes(w.type) && w.workout_name ? w.workout_name : '';
     const planCard = findPlanWorkout(w.type, w.workout_name);
     const planBtn = planCard
-      ? `<button class="plan-peek-btn" onclick='showPlanModal(${JSON.stringify(planCard)})' title="מבנה אימון">📋</button>`
+      ? `<button class="plan-peek-btn" onclick='showPlanModal(${JSON.stringify(planCard)})' title="מבנה אימון">פרטים</button>`
       : '';
 
     tr.innerHTML = `
