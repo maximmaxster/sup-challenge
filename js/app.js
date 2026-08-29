@@ -1717,7 +1717,7 @@ function buildYearChart(canvasId, typeKey, statsArr) {
     data: {
       labels,
       datasets: [{
-        label: 'יעילות',
+        label: 'Stroke Index',
         data: effVals,
         backgroundColor: BAR_COLOR,
         borderColor: '#4ADE80',
@@ -1870,18 +1870,19 @@ function computeTrendBuckets(workouts, types, resolution) {
   const ws = workouts.filter(w => w.distance > 0 && types.includes(w.type));
   if (!ws.length) return { labels: [], effVals: [], counts: [] };
 
-  const buckets = {};   // key -> { speedSum, hrSum, n }
+  const buckets = {};   // key -> { speedSum, dpsSum, hrSum, n }
   ws.forEach(w => {
     const d = parseDMY(w.date);
     if (!d) return;
     const key = resolution === 'year'
       ? `${d.getFullYear()}`
       : `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-    if (!buckets[key]) buckets[key] = { speedSum: 0, hrSum: 0, n: 0, count: 0 };
+    if (!buckets[key]) buckets[key] = { speedSum: 0, dpsSum: 0, hrSum: 0, n: 0, count: 0 };
     buckets[key].count++;
-    if (w.avg_speed > 0 && w.avg_hr > 0) {
+    if (w.avg_speed > 0 && w.dps > 0) {
       buckets[key].speedSum += w.avg_speed;
-      buckets[key].hrSum    += w.avg_hr;
+      buckets[key].dpsSum   += w.dps;
+      buckets[key].hrSum    += w.avg_hr || 0;
       buckets[key].n++;
     }
   });
@@ -1894,7 +1895,9 @@ function computeTrendBuckets(workouts, types, resolution) {
   });
   const effVals = keys.map(k => {
     const b = buckets[k];
-    return b.n > 0 ? +((b.speedSum / b.n) / (b.hrSum / b.n) * 100).toFixed(3) : null;
+    if (b.n === 0) return null;
+    const si = (b.speedSum / b.n / 3.6) * (b.dpsSum / b.n);   // Stroke Index
+    return +si.toFixed(3);
   });
   const counts = keys.map(k => buckets[k].count);
 
@@ -1911,7 +1914,7 @@ function buildTrendChart(canvasId, labels, effVals, counts) {
     data: {
       labels,
       datasets: [{
-        label: 'יעילות',
+        label: 'Stroke Index',
         data: effVals,
         borderColor: '#00D4FF',
         backgroundColor: 'rgba(0,212,255,0.12)',
