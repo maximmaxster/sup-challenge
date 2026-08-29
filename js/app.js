@@ -2098,6 +2098,98 @@ const MONTHS_HE = ['ינואר','פברואר','מרץ','אפריל','מאי','�
 let annualCmpAthlete = 1;
 let annualCmpYear = new Date().getFullYear();
 
+function renderYearlySummaryTable() {
+  const el = document.getElementById('yearly-summary-table');
+  if (!el || !athlete1Data || !athlete2Data) return;
+
+  const YEARS = [2024, 2025, 2026];
+  const TYPES = [
+    { key: 'אירובי',      label: 'אירובי' },
+    { key: 'טמפו',        label: 'טמפו' },
+    { key: 'ספרינטים',    label: 'ספרינטים' },
+    { key: 'אירובי ארוך', label: 'ארוך' },
+  ];
+  const METRICS = [
+    { key: 'count',    label: 'אימונים', fmt: v => v,              unit: '',      lb: false },
+    { key: 'dist',     label: 'מרחק',    fmt: v => v.toFixed(0),   unit: "ק\"מ",  lb: false },
+    { key: 'si',       label: 'SI',      fmt: v => v.toFixed(2),   unit: '',      lb: false },
+    { key: 'ase',      label: 'ASE',     fmt: v => v.toFixed(2),   unit: '',      lb: false },
+    { key: 'speed',    label: 'מהירות',  fmt: v => v.toFixed(1),   unit: 'קמ"ש', lb: false },
+    { key: 'spm',      label: 'SPM',     fmt: v => Math.round(v),  unit: '',      lb: false },
+    { key: 'dps',      label: 'DPS',     fmt: v => v.toFixed(2),   unit: "מ'",   lb: false },
+  ];
+
+  function calcYear(workouts, typeKey, year) {
+    const ws = workouts.filter(w => {
+      if (!w.distance || w.distance === 0) return false;
+      if (w.type !== typeKey) return false;
+      const d = parseDMY(w.date);
+      return d && d.getFullYear() === year;
+    });
+    if (!ws.length) return null;
+    const vm = key => { const v = ws.map(w=>w[key]||0).filter(x=>x>0); return v.length ? v.reduce((a,b)=>a+b,0)/v.length : 0; };
+    const spd = vm('avg_speed'), dps = vm('dps');
+    const si  = spd > 0 && dps > 0 ? (spd/3.6)*dps : 0;
+    const ase = si > 0 && vm('avg_hr') > 0 ? si/vm('avg_hr')*100 : 0;
+    return {
+      count: ws.length,
+      dist:  ws.reduce((s,w)=>s+(w.distance||0),0),
+      si, ase,
+      speed: spd,
+      spm:   vm('spm'),
+      dps,
+    };
+  }
+
+  const rows = TYPES.map(t => {
+    const byYear = YEARS.map(y => ({
+      a1: calcYear(athlete1Data.workouts, t.key, y),
+      a2: calcYear(athlete2Data.workouts, t.key, y),
+    }));
+    if (byYear.every(b => !b.a1 && !b.a2)) return '';
+
+    const metricsRows = METRICS.map(m => {
+      const cells = YEARS.map(y => {
+        const b = byYear[YEARS.indexOf(y)];
+        const v1 = b.a1?.[m.key], v2 = b.a2?.[m.key];
+        const hasData = (v1 && v1 > 0) || (v2 && v2 > 0);
+        if (!hasData) return `<td class="ys-cell ys-empty" colspan="2">—</td>`;
+        const fmt1 = v1 && v1 > 0 ? m.fmt(v1) : '—';
+        const fmt2 = v2 && v2 > 0 ? m.fmt(v2) : '—';
+        const winner = (v1 && v2 && v1 > 0 && v2 > 0)
+          ? (m.lb ? (v1 < v2 ? 1 : v1 > v2 ? 2 : 0) : (v1 > v2 ? 1 : v1 < v2 ? 2 : 0))
+          : 0;
+        return `
+          <td class="ys-cell ys-a1 ${winner===1?'ys-win':''}"><span>${fmt1}</span>${m.unit?`<small>${m.unit}</small>`:''}</td>
+          <td class="ys-cell ys-a2 ${winner===2?'ys-win':''}"><span>${fmt2}</span>${m.unit?`<small>${m.unit}</small>`:''}</td>`;
+      }).join('');
+      return `<tr><td class="ys-metric">${m.label}</td>${cells}</tr>`;
+    }).join('');
+
+    return `
+      <tr class="ys-type-hdr"><td colspan="${1 + YEARS.length*2}">${t.label}</td></tr>
+      ${metricsRows}`;
+  }).join('');
+
+  const yearHeaders = YEARS.map(y =>
+    `<th colspan="2" class="ys-year-hdr">${y}</th>`
+  ).join('');
+  const athleteHeaders = YEARS.map(() =>
+    `<th class="ys-name ys-name-1">${athlete1Data.name.split(' ')[0]}</th><th class="ys-name ys-name-2">${athlete2Data.name.split(' ')[0]}</th>`
+  ).join('');
+
+  el.innerHTML = `
+    <div class="ys-wrap">
+      <table class="ys-table">
+        <thead>
+          <tr><th></th>${yearHeaders}</tr>
+          <tr><th class="ys-metric-hdr">מדד</th>${athleteHeaders}</tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
+}
+
 function renderAnnualCmpTable() {
   const workouts = annualCmpAthlete === 2 ? (athlete2Data?.workouts || []) : (athlete1Data?.workouts || []);
   const year = annualCmpYear;
@@ -2213,7 +2305,7 @@ function showSection(id) {
   requestAnimationFrame(() => {
     window.dispatchEvent(new Event('resize'));
     if (id === 'athletes')  { renderComparisonTable(); }
-    if (id === 'comparison') { renderComparisonTable(); renderAnnualCmpTable(); renderEfficiencyChart(); }
+    if (id === 'comparison') { renderComparisonTable(); renderAnnualCmpTable(); renderYearlySummaryTable(); renderEfficiencyChart(); }
     if (id === 'progress')  { renderTrendCharts(); renderProgress(); }
     if (id === 'charts')    { renderSpeedChart(currentRange.speed); renderDistanceChart(currentRange.distance); renderHrChart(currentRange.hr); renderDpsChart(currentRange.dps); }
     if (id === 'races')     { renderRaces(currentRacesAthlete || 1); }
