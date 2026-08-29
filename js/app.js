@@ -684,6 +684,47 @@ function renderWorkoutCard(w) {
   </div>`;
 }
 
+function dateToQ(dateStr) {
+  const parts = dateStr.split('.');
+  const m = parseInt(parts[1], 10);
+  if (m <= 3) return 'q1';
+  if (m <= 6) return 'q2';
+  if (m <= 9) return 'q3';
+  return 'q4';
+}
+
+function findPlanWorkout(type, workoutName, dateStr) {
+  const planType = type === 'טמפו' ? 'tempo' : type === 'ספרינטים' ? 'sprints' : null;
+  if (!planType || !workoutName) return null;
+  const q = dateToQ(dateStr);
+  const allQuarters = ['q1','q2','q3','q4'];
+  for (const qs of allQuarters) {
+    const cards = TRAINING_PLANS[planType][qs] || [];
+    const found = cards.find(c => c.name === workoutName);
+    if (found) return found;
+  }
+  return null;
+}
+
+function showPlanModal(plan) {
+  let modal = document.getElementById('plan-modal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'plan-modal';
+    modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:9000;display:flex;align-items:center;justify-content:center;padding:16px';
+    modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+    document.body.appendChild(modal);
+  }
+  modal.innerHTML = `
+    <div style="background:var(--card-bg,#1e2633);border-radius:12px;max-width:420px;width:100%;max-height:90vh;overflow-y:auto;padding:20px;position:relative">
+      <button onclick="document.getElementById('plan-modal').remove()"
+        style="position:absolute;top:10px;left:10px;background:none;border:none;color:#90a4ae;font-size:20px;cursor:pointer;line-height:1">✕</button>
+      <div style="font-size:15px;font-weight:700;color:var(--text-primary,#fff);margin-bottom:4px;text-align:right">${plan.name}</div>
+      <div style="font-size:12px;color:#90a4ae;margin-bottom:14px;text-align:right">⏱ ${plan.dur} דק'</div>
+      ${renderSteps(plan.steps)}
+    </div>`;
+}
+
 function initTrainingPlans() {
   // Render cards
   ['q1','q2','q3'].forEach(q => {
@@ -944,13 +985,17 @@ function renderWorkoutsTable(filterAthlete = 'all', filterType = 'all', filterLo
 
     const planTypes = ['טמפו','ספרינטים'];
     const workoutNum = planTypes.includes(w.type) && w.workout_name ? w.workout_name : '';
+    const planCard = findPlanWorkout(w.type, w.workout_name, w.date);
+    const planBtn = planCard
+      ? `<button class="plan-peek-btn" onclick='showPlanModal(${JSON.stringify(planCard)})' title="מבנה אימון">📋</button>`
+      : '';
 
     tr.innerHTML = `
       <td class="workout-num">${showNum ? num : ''}</td>
       <td>${w.date}</td>
       <td><span class="${badgeClass}">${w.athleteName}</span></td>
       <td><span class="type-badge ${typeBadge[w.type] || ''}">${w.type}</span></td>
-      <td style="font-size:0.8rem;color:var(--accent-cyan);white-space:nowrap">${workoutNum}</td>
+      <td style="font-size:0.8rem;color:var(--accent-cyan);white-space:nowrap">${workoutNum}${planBtn}</td>
       <td>${locIcon} ${w.location || '—'}</td>
       <td>${isZero ? '—' : w.distance.toFixed(2)}</td>
       <td>${isZero ? '—' : w.duration}</td>
