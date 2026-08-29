@@ -2590,11 +2590,10 @@ footer span {
 /* Cards grid */
 .prog-cards-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: 1fr;
   gap: 1.5rem;
   margin-bottom: 1.5rem;
 }
-@media (max-width: 768px) { .prog-cards-grid { grid-template-columns: 1fr; } }
 
 .prog-card {
   padding: 1.25rem 1.4rem;
@@ -2687,7 +2686,7 @@ footer span {
 .pm-head-row {
   display: grid;
   grid-template-columns: 1.6fr 1fr 0.3fr 1fr 1fr;
-  font-size: 0.7rem;
+  font-size: 0.78rem;
   color: var(--text-muted);
   text-align: center;
   padding: 0 0 0.25rem;
@@ -2718,14 +2717,14 @@ footer span {
   border: 1px solid rgba(255,179,0,0.2);
 }
 
-.pm-lbl { font-size: 0.82rem; font-weight: 600; color: var(--text-secondary); }
+.pm-lbl { font-size: 0.9rem; font-weight: 600; color: var(--text-secondary); }
 .pm-bv, .pm-cv {
-  font-size: 0.92rem;
+  font-size: 1.05rem;
   font-weight: 700;
   color: var(--text-primary);
   text-align: center;
 }
-.pm-bv small, .pm-cv small { font-size: 0.6rem; color: var(--text-muted); margin-right: 2px; }
+.pm-bv small, .pm-cv small { font-size: 0.68rem; color: var(--text-muted); margin-right: 2px; }
 .pm-sep { text-align: center; color: var(--text-muted); font-size: 0.7rem; }
 
 /* ===== YEAR COMPARISON LAYOUT ===== */
