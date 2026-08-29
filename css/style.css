@@ -350,9 +350,9 @@ section {
   margin-top: 2.5rem;
   margin-bottom: 1.5rem;
   display: inline-block;
-  padding: 0.4rem 1.4rem;
-  border-radius: 6px;
-  background: #d4610a;
+  padding: 0;
+  border-radius: 0;
+  background: none;
 }
 
 .section-title::before { content: ''; }
