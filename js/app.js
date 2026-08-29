@@ -1762,7 +1762,13 @@ function renderYearCards() {
 
   const infoEl = document.getElementById('prog-period-info');
   if (infoEl) infoEl.innerHTML =
-    `<span class="ppi-period">השוואה שנתית</span><span class="ppi-sep">·</span><span class="ppi-base">2024 vs 2025 vs 2026</span>`;
+    `<span class="ppi-period">השוואה שנתית</span><span class="ppi-sep">·</span><span class="ppi-base">2024 vs 2025 vs 2026</span>
+     <span class="ppi-sep">|</span>
+     <span class="ppi-metrics-legend">
+       <span class="ppi-metric-chip"><b>SI</b> = מהירות(m/s) × DPS — יעילות טכנית</span>
+       <span class="ppi-metric-chip"><b>ASE</b> = SI ÷ דופק — יעילות אירובית-טכנית</span>
+       <span class="ppi-metric-chip"><b>Pa:HR</b> &lt;5% = בסיס אירובי חזק</span>
+     </span>`;
 
   const cardsEl = document.getElementById('prog-cards');
   if (!cardsEl) return;
@@ -1836,12 +1842,18 @@ function renderProgress() {
     : baseLabelMap[p.baseRef]
     || (PROG_PERIODS[p.baseRef]?.yearNum ? String(PROG_PERIODS[p.baseRef].yearNum) : p.baseRef);
   const infoEl = document.getElementById('prog-period-info');
+  const metricsLegend = `<span class="ppi-sep">|</span>
+     <span class="ppi-metrics-legend">
+       <span class="ppi-metric-chip"><b>SI</b> = מהירות(m/s) × DPS</span>
+       <span class="ppi-metric-chip"><b>ASE</b> = SI ÷ דופק</span>
+       <span class="ppi-metric-chip"><b>Pa:HR</b> &lt;5% = בסיס אירובי חזק</span>
+     </span>`;
   const yoyNote = p.yoyLabel
-    ? `<span class="ppi-sep">|</span><span class="ppi-yoy">📅 YoY = ${p.yoyLabel} — אותה תקופה אשתקד</span>`
+    ? `<span class="ppi-sep">|</span><span class="ppi-yoy">📅 YoY = ${p.yoyLabel}</span>`
     : '';
   if (infoEl) infoEl.innerHTML = baseLabel
-    ? `<span class="ppi-period">${p.label}</span><span class="ppi-sep">·</span><span class="ppi-base">השוואה מול ${baseLabel}</span>${yoyNote}`
-    : `<span class="ppi-period">${p.label}</span>${yoyNote}`;
+    ? `<span class="ppi-period">${p.label}</span><span class="ppi-sep">·</span><span class="ppi-base">השוואה מול ${baseLabel}</span>${yoyNote}${metricsLegend}`
+    : `<span class="ppi-period">${p.label}</span>${yoyNote}${metricsLegend}`;
 
   // YoY stats — same quarter last year
   const yoy = p.yoyStart ? PROG_TYPES.reduce((acc, t) => {

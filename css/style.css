@@ -2587,6 +2587,17 @@ footer span {
 .ppi-sep    { color: var(--text-muted); }
 .ppi-base   { font-size: 0.8rem; color: var(--text-secondary); }
 .ppi-yoy    { font-size: 0.78rem; color: #4fc3f7; font-weight: 500; }
+.ppi-metrics-legend { display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center; }
+.ppi-metric-chip {
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 4px;
+  padding: 2px 7px;
+  white-space: nowrap;
+}
+.ppi-metric-chip b { color: #4fc3f7; }
 
 /* Cards grid */
 .prog-cards-grid {
