@@ -2,7 +2,7 @@
 garmin_sync.py — SUP Training Garmin Sync
 מתחבר לשני חשבונות Garmin Connect, מסנן SUP, שומר JSON + git push.
 פורמט זהה לקובץ האקסל ניתוח_אימוני_SUP.
-VERSION = 2026-08-29
+VERSION = 2026-08-29b
 """
 
 import os
@@ -379,7 +379,7 @@ def fetch_athlete(cfg: dict, shared_types: dict = None) -> dict:
 
 # ===== FITNESS METRICS (CTL / ATL / TSB) =====
 def compute_fitness_metrics(workouts: list) -> dict:
-    """מחשב CTL/ATL/TSB על בסיס TRIMP פשוט (avg_hr × שעות)."""
+    """מחשב CTL/ATL/TSB על בסיס Edwards TRIMP (זמן בזונות × מכפיל 1-5)."""
     from datetime import timedelta
     if not workouts:
         return {}
@@ -400,15 +400,35 @@ def compute_fitness_metrics(workouts: list) -> dict:
         except Exception:
             return 0.0
 
+    def _zone_min(val) -> float:
+        """ממיר HH:MM:SS לדקות."""
+        sec = _dur_sec(val)
+        return sec / 60.0
+
     trimp_map: dict[str, float] = {}
     for w in workouts:
         date_str = w.get('date', '')
-        hr = float(w.get('avg_hr') or 0)
         dur_sec = _dur_sec(w.get('duration'))
-        if not date_str or hr <= 0 or dur_sec <= 0:
+        if not date_str or dur_sec <= 0:
             continue
-        trimp = hr * (dur_sec / 3600.0)
-        trimp_map[date_str] = trimp_map.get(date_str, 0.0) + trimp
+
+        # Edwards TRIMP: זמן בכל זון (דקות) × מכפיל
+        z3_min = _zone_min(w.get('z3', ''))
+        z4_min = _zone_min(w.get('z4', ''))
+        z5_min = _zone_min(w.get('z5', ''))
+        dur_min = dur_sec / 60.0
+        z2_min = max(0.0, dur_min - z3_min - z4_min - z5_min - 1.0)
+        z1_min = max(0.0, dur_min - z2_min - z3_min - z4_min - z5_min)
+
+        trimp = z1_min*1 + z2_min*2 + z3_min*3 + z4_min*4 + z5_min*5
+
+        # fallback: אם אין נתוני זונות — TRIMP פשוט
+        if trimp == 0 and w.get('avg_hr'):
+            hr = float(w.get('avg_hr') or 0)
+            trimp = hr * (dur_sec / 3600.0)
+
+        if trimp > 0:
+            trimp_map[date_str] = trimp_map.get(date_str, 0.0) + trimp
 
     if not trimp_map:
         return {}
