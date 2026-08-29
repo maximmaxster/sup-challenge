@@ -1360,14 +1360,14 @@ const PROG_TYPES = [
 
 let progAthlete = 1;
 
-function previousQuarter() {
-  const m = new Date().getMonth(); // 0-based — מציג רבעון שהסתיים
-  if (m <= 2) return 'q1'; // ינואר-מרץ — אין קודם, מציג Q1
-  if (m <= 5) return 'q1';
-  if (m <= 8) return 'q2';
-  return 'q3';
+function currentQuarter() {
+  const m = new Date().getMonth(); // 0-based
+  if (m <= 2) return 'q1';
+  if (m <= 5) return 'q2';
+  if (m <= 8) return 'q3';
+  return 'q4';
 }
-let progPeriod = previousQuarter();
+let progPeriod = currentQuarter();
 
 function progCalcStats(workouts, start, end, types) {
   const ws = workouts.filter(w => {
@@ -1910,8 +1910,8 @@ function renderEfficiencyChart() {
 }
 
 function setupProgress() {
-  // Auto-activate previous quarter button
-  const pq = previousQuarter();
+  // Auto-activate current quarter button
+  const pq = currentQuarter();
   document.querySelectorAll('.prog-period-btn').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.period === pq);
   });
