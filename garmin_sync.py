@@ -2,7 +2,7 @@
 garmin_sync.py — SUP Training Garmin Sync
 מתחבר לשני חשבונות Garmin Connect, מסנן SUP, שומר JSON + git push.
 פורמט זהה לקובץ האקסל ניתוח_אימוני_SUP.
-VERSION = 2026-08-29b
+VERSION = 2026-08-29c
 """
 
 import os
@@ -1089,6 +1089,7 @@ def fetch_lap_analysis(api, act_id: str, workout_type: str = '', total_dist_km: 
                 'count':        n,
                 'peak_speed':   max((s['speed'] for s in sprints_data), default=0),
                 'avg_speed':    savg(sprints_data, lambda x: x['speed']),
+                'avg_hr':       savg(sprints_data, lambda x: x['hr']),
                 'avg_dps':      savg(sprints_data, lambda x: x['dps']),
                 'avg_spm':      savg(sprints_data, lambda x: x['spm']),
                 'first_speed':  f_speed,
@@ -2127,8 +2128,11 @@ def main():
                         # weather fields already merged via w.update(weather_cond) above
                             if lap_analysis.get('sprints'):
                                 smry = lap_analysis.get('summary', {})
-                                w['sprint_count'] = smry.get('count', 0)
-                                w['peak_speed']   = smry.get('peak_speed', 0)
+                                w['sprint_count']     = smry.get('count', 0)
+                                w['peak_speed']       = smry.get('peak_speed', 0)
+                                w['sprint_avg_speed'] = smry.get('avg_speed', 0)
+                                w['sprint_spm_max']   = smry.get('avg_spm', 0)
+                                w['sprint_avg_hr']    = smry.get('avg_hr', 0)
                             analysis_updated = True
                         send_workout_email(to_email, cfg["name"], w,
                                            all_workouts=data.get("workouts", []),
