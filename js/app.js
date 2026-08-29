@@ -489,7 +489,8 @@ const TRAINING_PLANS = {
         { t:'cooldown', d:"5 דק'", hr:'110-120' },
       ]},
     ],
-    q2: [
+    q2: [],
+    q3: [
       { name: 'אימון טמפו 6', dur: 81, steps: [
         { t:'warmup', d:"10 דק'", hr:null },
         { t:'warmup', d:"5 דק'",  hr:'127-135' },
@@ -593,7 +594,8 @@ const TRAINING_PLANS = {
         { t:'cooldown', d:"10 דק'", hr:null },
       ]},
     ],
-    q2: [
+    q2: [],
+    q3: [
       { name: 'ספרינט 5', dur: 65, steps: [
         { t:'warmup', d:"10 דק'", hr:null },
         { t:'warmup', d:"5 דק'",  hr:'127-135' },
@@ -605,6 +607,20 @@ const TRAINING_PLANS = {
         { t:'repeat', n:10, steps:[
           { t:'interval', d:"0:20",  hr:null },
           { t:'interval', d:"1:10",  hr:null },
+        ]},
+        { t:'interval', d:"10 דק'", hr:null },
+      ]},
+      { name: 'ספרינט 6', dur: 65, steps: [
+        { t:'warmup', d:"10 דק'", hr:null },
+        { t:'warmup', d:"5 דק'",  hr:'127-135' },
+        { t:'repeat', n:10, steps:[
+          { t:'interval', d:"0:25",  hr:null },
+          { t:'interval', d:"1:05",  hr:null },
+        ]},
+        { t:'interval', d:"10 דק'", hr:null },
+        { t:'repeat', n:10, steps:[
+          { t:'interval', d:"0:25",  hr:null },
+          { t:'interval', d:"1:05",  hr:null },
         ]},
         { t:'interval', d:"10 דק'", hr:null },
       ]},
@@ -670,11 +686,11 @@ function renderWorkoutCard(w) {
 
 function initTrainingPlans() {
   // Render cards
-  ['q1','q2'].forEach(q => {
+  ['q1','q2','q3'].forEach(q => {
     const el = document.getElementById(`tp-cards-tempo-${q}`);
     if (el) el.innerHTML = (TRAINING_PLANS.tempo[q] || []).map(renderWorkoutCard).join('');
   });
-  ['q1','q2'].forEach(q => {
+  ['q1','q2','q3'].forEach(q => {
     const el = document.getElementById(`tp-cards-sprints-${q}`);
     if (el) el.innerHTML = (TRAINING_PLANS.sprints[q] || []).map(renderWorkoutCard).join('');
   });
