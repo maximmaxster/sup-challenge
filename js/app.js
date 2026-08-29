@@ -1867,8 +1867,6 @@ function renderProgress() {
     renderProgCard(t, base, curr, decBase, p.showVsDec, progPeriod, yoy, p.yoyLabel)
   ).join('');
 
-  // Efficiency chart
-  renderEfficiencyChart();
   renderTrendCharts();
 }
 
@@ -2215,7 +2213,7 @@ function showSection(id) {
   requestAnimationFrame(() => {
     window.dispatchEvent(new Event('resize'));
     if (id === 'athletes')  { renderComparisonTable(); }
-    if (id === 'comparison') { renderComparisonTable(); renderAnnualCmpTable(); }
+    if (id === 'comparison') { renderComparisonTable(); renderAnnualCmpTable(); renderEfficiencyChart(); }
     if (id === 'progress')  { renderTrendCharts(); renderProgress(); }
     if (id === 'charts')    { renderSpeedChart(currentRange.speed); renderDistanceChart(currentRange.distance); renderHrChart(currentRange.hr); renderDpsChart(currentRange.dps); }
     if (id === 'races')     { renderRaces(currentRacesAthlete || 1); }

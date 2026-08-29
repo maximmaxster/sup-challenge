@@ -33,7 +33,7 @@
   <link rel="icon" type="image/png" href="images/logo.png">
   <link rel="apple-touch-icon" href="images/logo-full.png">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" defer></script>
-  <script src="js/app.js?v=20260829j" defer></script>
+  <script src="js/app.js?v=20260829k" defer></script>
 </head>
 <body>
 
@@ -332,6 +332,21 @@
     <div class="annual-cmp-table-wrap">
       <div id="annual-cmp-table"></div>
     </div>
+
+    <!-- Stroke Index לאורך זמן — השוואה בין השניים -->
+    <div class="glass-card prog-eff-card" style="margin-top:1.5rem">
+      <div class="prog-eff-header">
+        <div class="prog-eff-title">📈 Stroke Index לאורך זמן</div>
+        <div class="prog-eff-sub">מהירות(m/s) × DPS — ערך גבוה יותר = יעילות טכנית-אירובית טובה יותר</div>
+      </div>
+      <div class="chart-legend" style="margin-bottom:0.75rem;gap:1.5rem;display:flex">
+        <span><span class="legend-dot" style="background:var(--accent-cyan)"></span><span id="eff-legend-1">מקסים</span></span>
+        <span><span class="legend-dot" style="background:var(--accent-orange)"></span><span id="eff-legend-2">ויקטור</span></span>
+      </div>
+      <div class="chart-canvas-wrapper">
+        <canvas id="efficiencyChart"></canvas>
+      </div>
+    </div>
   </section>
 
   <!-- ========== SECTION 3: CHARTS ========== -->
@@ -576,20 +591,6 @@
     <!-- Per-type trend charts (full width, year/month toggle) -->
     <div class="prog-trend-grid" id="prog-trend-grid"></div>
 
-    <!-- Efficiency chart -->
-    <div class="glass-card prog-eff-card">
-      <div class="prog-eff-header">
-        <div class="prog-eff-title">📈 Stroke Index לאורך זמן</div>
-        <div class="prog-eff-sub">מהירות(m/s) × DPS — ערך גבוה יותר = יעילות טכנית-אירובית טובה יותר</div>
-      </div>
-      <div class="chart-legend" style="margin-bottom:0.75rem;gap:1.5rem;display:flex">
-        <span><span class="legend-dot" style="background:var(--accent-cyan)"></span><span id="eff-legend-1">מקסים</span></span>
-        <span><span class="legend-dot" style="background:var(--accent-orange)"></span><span id="eff-legend-2">ויקטור</span></span>
-      </div>
-      <div class="chart-canvas-wrapper">
-        <canvas id="efficiencyChart"></canvas>
-      </div>
-    </div>
   </section>
 
   <!-- ========== SECTION: FITNESS (CTL/ATL/TSB) ========== -->
