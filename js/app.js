@@ -155,7 +155,7 @@ async function loadData() {
   if (wb1) wb1.textContent = athlete1Data.name.split(' ')[0];
   if (wb2) wb2.textContent = athlete2Data.name.split(' ')[0];
 
-  renderAll();
+  try { renderAll(); } catch(e) { console.error('renderAll error:', e); }
   hideLoading();
 }
 
