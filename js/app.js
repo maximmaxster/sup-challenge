@@ -141,7 +141,6 @@ async function loadData() {
   document.getElementById('athlete1-name-table').textContent = athlete1Data.name;
   document.getElementById('athlete2-name-table').textContent = athlete2Data.name;
 
-  // Update legend names in charts
   ['speed','dist','hr','dps'].forEach(k => {
     const el1 = document.getElementById(`legend-${k}-1`);
     const el2 = document.getElementById(`legend-${k}-2`);
@@ -149,13 +148,12 @@ async function loadData() {
     if (el2) el2.textContent = athlete2Data.name;
   });
 
-  // Update workouts athlete button labels with real names
   const wb1 = document.getElementById('workouts-btn-1');
   const wb2 = document.getElementById('workouts-btn-2');
   if (wb1) wb1.textContent = athlete1Data.name.split(' ')[0];
   if (wb2) wb2.textContent = athlete2Data.name.split(' ')[0];
 
-  renderAll();
+  try { renderAll(); } catch(e) { console.error('renderAll failed:', e); }
   hideLoading();
 }
 
