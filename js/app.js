@@ -155,7 +155,7 @@ async function loadData() {
   if (wb1) wb1.textContent = athlete1Data.name.split(' ')[0];
   if (wb2) wb2.textContent = athlete2Data.name.split(' ')[0];
 
-  try { renderAll(); } catch(e) { console.error('renderAll error:', e); }
+  renderAll();
   hideLoading();
 }
 
@@ -363,6 +363,7 @@ function tryLoadAvatar(id, src, fallback) {
 
 // ===== LAST WORKOUT COMPARISON =====
 function renderComparisonTable() {
+  if (!athlete1Data || !athlete2Data) return;
   const lastDate = athlete1Data.workouts
     .filter(w => w.distance > 0)
     .sort((a, b) => parseDMY(b.date) - parseDMY(a.date))[0]?.date || '';
