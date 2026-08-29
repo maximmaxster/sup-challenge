@@ -223,6 +223,8 @@ function renderAll() {
   renderRaces(1);
   buildAnnualCmpYearBtns();
   renderAnnualCmpTable();
+  renderYearlySummaryTable();
+  renderEfficiencyChart();
   renderFitness(1);
   buildPlansByQuarter();
 }
