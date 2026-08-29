@@ -2610,7 +2610,7 @@ function renderFitness(athleteNum) {
   ctlLevelEl.textContent = ctlLevel[0];
   ctlLevelEl.style.cssText = `color:${ctlLevel[1]};background:${ctlLevel[2]}`;
   document.getElementById('fit-ctl-hint').innerHTML =
-    `ממוצע 42 יום<br>${ctl >= 65 ? '65-85 = טוב ✓' : ctl >= 40 ? '40-65 = ממוצע' : 'מתחת 40 = נמוך'}`;
+    `ממוצע 42 יום<br>${ctl >= 85 ? '85+ = מצויין ✓' : ctl >= 65 ? '65-85 = טוב ✓' : ctl >= 40 ? '40-65 = ממוצע' : 'מתחת 40 = נמוך'}<br><span style="font-size:10px;opacity:0.6">טוב=65-85 | מצויין=85+</span>`;
 
   // ATL
   const diff = atl - ctl;
