@@ -47,7 +47,12 @@
       "dps": 2.74,
       "z3": "28:37",
       "z4": "12:06",
-      "z5": "2:12"
+      "z5": "2:12",
+      "sprint_avg_speed": 9.21,
+      "sprint_avg_hr": 135.25,
+      "sprint_spm_max": 60.75,
+      "sprint_count": 20,
+      "peak_speed": 10.6
     },
     {
       "id": "24118470043",
@@ -116,7 +121,12 @@
       "dps": 2.9,
       "z3": "23:57",
       "z4": "27:57",
-      "z5": "0:30"
+      "z5": "0:30",
+      "sprint_avg_speed": 8.89,
+      "sprint_avg_hr": 143.1,
+      "sprint_spm_max": 58.35,
+      "sprint_count": 20,
+      "peak_speed": 9.5
     },
     {
       "id": "24031197575",
@@ -208,7 +218,12 @@
       "dps": 3.02,
       "z3": "41:17",
       "z4": "13:12",
-      "z5": "1:54"
+      "z5": "1:54",
+      "sprint_avg_speed": 9.25,
+      "sprint_avg_hr": 144.85,
+      "sprint_spm_max": 62.75,
+      "sprint_count": 20,
+      "peak_speed": 10.6
     },
     {
       "id": "23918229787",
@@ -691,7 +706,12 @@
       "dps": 2.59,
       "z3": "48:06",
       "z4": "14:01",
-      "z5": "0:00"
+      "z5": "0:00",
+      "sprint_avg_speed": 7.62,
+      "sprint_avg_hr": 139.75,
+      "sprint_spm_max": 57.0,
+      "sprint_count": 8,
+      "peak_speed": 8.4
     },
     {
       "id": "23413624993",
@@ -829,7 +849,12 @@
       "dps": 2.77,
       "z3": "52:54",
       "z4": "12:25",
-      "z5": "0:00"
+      "z5": "0:00",
+      "sprint_avg_speed": 7.4,
+      "sprint_avg_hr": 148.0,
+      "sprint_spm_max": 45.0,
+      "sprint_count": 1,
+      "peak_speed": 7.4
     },
     {
       "id": "23312511528",
@@ -3773,7 +3798,12 @@
       "dps": 2.88,
       "z3": "15:29",
       "z4": "21:17",
-      "z5": "20:24"
+      "z5": "20:24",
+      "sprint_avg_speed": 7.1,
+      "sprint_avg_hr": 170.0,
+      "sprint_spm_max": 43.0,
+      "sprint_count": 1,
+      "peak_speed": 7.1
     },
     {
       "id": "19676023282",
