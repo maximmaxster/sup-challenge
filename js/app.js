@@ -226,6 +226,7 @@ function renderAll() {
   buildAnnualCmpYearBtns();
   renderAnnualCmpTable();
   renderFitness(1);
+  buildPlansByQuarter();
 }
 
 // ===== ATHLETE CARDS =====
@@ -725,16 +726,47 @@ function showPlanModal(plan) {
     </div>`;
 }
 
+function buildPlansByQuarter() {
+  const allWorkouts = [
+    ...(athlete1Data?.workouts || []),
+    ...(athlete2Data?.workouts || []),
+  ].filter(w => ['טמפו','ספרינטים'].includes(w.type) && w.workout_name && w.distance > 0);
+
+  const tempoByQ   = { q1: new Set(), q2: new Set(), q3: new Set(), q4: new Set() };
+  const sprintsByQ = { q1: new Set(), q2: new Set(), q3: new Set(), q4: new Set() };
+
+  allWorkouts.forEach(w => {
+    const q = dateToQ(w.date);
+    if (w.type === 'טמפו')     tempoByQ[q].add(w.workout_name);
+    if (w.type === 'ספרינטים') sprintsByQ[q].add(w.workout_name);
+  });
+
+  const sortByNum = arr => arr.sort((a, b) => {
+    const na = parseInt((a.name.match(/\d+/) || [0])[0]);
+    const nb = parseInt((b.name.match(/\d+/) || [0])[0]);
+    return na - nb;
+  });
+
+  ['q1','q2','q3','q4'].forEach(q => {
+    const tempoEl = document.getElementById(`tp-cards-tempo-${q}`);
+    if (tempoEl) {
+      const cards = sortByNum([...tempoByQ[q]].map(n => findPlanWorkout('טמפו', n, null)).filter(Boolean));
+      tempoEl.innerHTML = cards.length
+        ? cards.map(renderWorkoutCard).join('')
+        : '<div class="tp-empty-quarter">אין אימוני טמפו ברבעון זה</div>';
+    }
+    const sprintsEl = document.getElementById(`tp-cards-sprints-${q}`);
+    if (sprintsEl) {
+      const cards = sortByNum([...sprintsByQ[q]].map(n => findPlanWorkout('ספרינטים', n, null)).filter(Boolean));
+      sprintsEl.innerHTML = cards.length
+        ? cards.map(renderWorkoutCard).join('')
+        : '<div class="tp-empty-quarter">אין אימוני ספרינטים ברבעון זה</div>';
+    }
+  });
+}
+
 function initTrainingPlans() {
-  // Render cards
-  ['q1','q2','q3'].forEach(q => {
-    const el = document.getElementById(`tp-cards-tempo-${q}`);
-    if (el) el.innerHTML = (TRAINING_PLANS.tempo[q] || []).map(renderWorkoutCard).join('');
-  });
-  ['q1','q2','q3'].forEach(q => {
-    const el = document.getElementById(`tp-cards-sprints-${q}`);
-    if (el) el.innerHTML = (TRAINING_PLANS.sprints[q] || []).map(renderWorkoutCard).join('');
-  });
+  // Cards are built dynamically in buildPlansByQuarter() after data loads
 
   // Type tab switching
   document.querySelectorAll('.tp-type-btn').forEach(btn => {
