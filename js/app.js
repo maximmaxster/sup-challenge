@@ -730,7 +730,7 @@ function buildPlansByQuarter() {
   const allWorkouts = [
     ...(athlete1Data?.workouts || []),
     ...(athlete2Data?.workouts || []),
-  ].filter(w => ['טמפו','ספרינטים'].includes(w.type) && w.workout_name && w.distance > 0);
+  ].filter(w => ['טמפו','ספרינטים'].includes(w.type) && w.workout_name && w.distance > 0 && w.date);
 
   const tempoByQ   = { q1: new Set(), q2: new Set(), q3: new Set(), q4: new Set() };
   const sprintsByQ = { q1: new Set(), q2: new Set(), q3: new Set(), q4: new Set() };
