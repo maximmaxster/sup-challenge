@@ -2033,13 +2033,14 @@ function renderEfficiencyChart() {
 
   const eff = (data) => QUARTERS.map(q => {
     const ws = data.workouts.filter(w => {
-      if (!w.distance||!w.avg_speed||!w.avg_hr||w.avg_hr===0) return false;
+      if (!w.distance||!w.avg_speed||!w.dps||w.dps===0) return false;
       const d = parseDMY(w.date); return d>=q.s && d<=q.e;
     });
     if (!ws.length) return null;
     const spd = ws.reduce((s,w)=>s+w.avg_speed,0)/ws.length;
-    const hr  = ws.reduce((s,w)=>s+w.avg_hr,0)/ws.length;
-    return hr>0 ? +(spd/hr*100).toFixed(2) : null;
+    const dps = ws.reduce((s,w)=>s+w.dps,0)/ws.length;
+    const si  = (spd / 3.6) * dps;   // Stroke Index
+    return +si.toFixed(2);
   });
 
   if (charts['efficiencyChart']) charts['efficiencyChart'].destroy();
