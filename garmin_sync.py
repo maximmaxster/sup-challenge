@@ -2,6 +2,7 @@
 garmin_sync.py — SUP Training Garmin Sync
 מתחבר לשני חשבונות Garmin Connect, מסנן SUP, שומר JSON + git push.
 פורמט זהה לקובץ האקסל ניתוח_אימוני_SUP.
+VERSION = 2026-08-29
 """
 
 import os
