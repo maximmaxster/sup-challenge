@@ -385,11 +385,26 @@ def compute_fitness_metrics(workouts: list) -> dict:
         return {}
 
     # TRIMP per date
+    def _dur_sec(val) -> float:
+        if not val:
+            return 0.0
+        if isinstance(val, (int, float)):
+            return float(val)
+        parts = str(val).split(':')
+        try:
+            if len(parts) == 3:
+                return int(parts[0]) * 3600 + int(parts[1]) * 60 + int(parts[2])
+            if len(parts) == 2:
+                return int(parts[0]) * 60 + int(parts[1])
+            return float(parts[0])
+        except Exception:
+            return 0.0
+
     trimp_map: dict[str, float] = {}
     for w in workouts:
         date_str = w.get('date', '')
         hr = float(w.get('avg_hr') or 0)
-        dur_sec = float(w.get('duration') or 0)
+        dur_sec = _dur_sec(w.get('duration'))
         if not date_str or hr <= 0 or dur_sec <= 0:
             continue
         trimp = hr * (dur_sec / 3600.0)
