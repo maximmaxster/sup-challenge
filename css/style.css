@@ -1812,7 +1812,7 @@ section {
 .fit-fresh   .fit-banner-title { color: #66bb6a; }
 .fit-neutral .fit-banner-title { color: #ffd54f; }
 .fit-loaded  .fit-banner-title { color: #ef5350; }
-.fit-banner-desc { font-size: 12px; color: var(--text-muted); line-height: 1.4; }
+.fit-banner-desc { font-size: 13px; color: #cfd8dc; line-height: 1.5; }
 
 .fitness-chart-wrap {
   background: var(--card-bg); border: 1px solid var(--border);
