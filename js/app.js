@@ -693,12 +693,10 @@ function dateToQ(dateStr) {
   return 'q4';
 }
 
-function findPlanWorkout(type, workoutName, dateStr) {
+function findPlanWorkout(type, workoutName) {
   const planType = type === 'טמפו' ? 'tempo' : type === 'ספרינטים' ? 'sprints' : null;
   if (!planType || !workoutName) return null;
-  const q = dateToQ(dateStr);
-  const allQuarters = ['q1','q2','q3','q4'];
-  for (const qs of allQuarters) {
+  for (const qs of ['q1','q2','q3','q4']) {
     const cards = TRAINING_PLANS[planType][qs] || [];
     const found = cards.find(c => c.name === workoutName);
     if (found) return found;
@@ -749,14 +747,14 @@ function buildPlansByQuarter() {
   ['q1','q2','q3','q4'].forEach(q => {
     const tempoEl = document.getElementById(`tp-cards-tempo-${q}`);
     if (tempoEl) {
-      const cards = sortByNum([...tempoByQ[q]].map(n => findPlanWorkout('טמפו', n, null)).filter(Boolean));
+      const cards = sortByNum([...tempoByQ[q]].map(n => findPlanWorkout('טמפו', n)).filter(Boolean));
       tempoEl.innerHTML = cards.length
         ? cards.map(renderWorkoutCard).join('')
         : '<div class="tp-empty-quarter">אין אימוני טמפו ברבעון זה</div>';
     }
     const sprintsEl = document.getElementById(`tp-cards-sprints-${q}`);
     if (sprintsEl) {
-      const cards = sortByNum([...sprintsByQ[q]].map(n => findPlanWorkout('ספרינטים', n, null)).filter(Boolean));
+      const cards = sortByNum([...sprintsByQ[q]].map(n => findPlanWorkout('ספרינטים', n)).filter(Boolean));
       sprintsEl.innerHTML = cards.length
         ? cards.map(renderWorkoutCard).join('')
         : '<div class="tp-empty-quarter">אין אימוני ספרינטים ברבעון זה</div>';
@@ -1016,7 +1014,7 @@ function renderWorkoutsTable(filterAthlete = 'all', filterType = 'all', filterLo
 
     const planTypes = ['טמפו','ספרינטים'];
     const workoutNum = planTypes.includes(w.type) && w.workout_name ? w.workout_name : '';
-    const planCard = findPlanWorkout(w.type, w.workout_name, w.date);
+    const planCard = findPlanWorkout(w.type, w.workout_name);
     const planBtn = planCard
       ? `<button class="plan-peek-btn" onclick='showPlanModal(${JSON.stringify(planCard)})' title="מבנה אימון">📋</button>`
       : '';
