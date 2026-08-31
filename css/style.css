@@ -1151,7 +1151,7 @@ section {
 .ys-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; direction: rtl; }
 .ys-table thead tr:first-child th,
 .ys-table thead tr:last-child th { border-bottom: 1px solid rgba(79,195,247,0.25); }
-.ys-table td, .ys-table th { border: 1px solid rgba(255,255,255,0.08); }
+.ys-table td, .ys-table th { border: 1px solid rgba(255,255,255,0.18); }
 .ys-year-hdr { text-align: center; padding: 0.5rem; color: var(--accent-cyan); font-weight: 700; font-size: 0.9rem; border-bottom: 2px solid rgba(79,195,247,0.35) !important; background: rgba(79,195,247,0.06); }
 .ys-name { text-align: center; padding: 0.3rem 0.5rem; font-size: 0.75rem; font-weight: 600; background: rgba(255,255,255,0.02); }
 .ys-name-1 { color: var(--accent-cyan); }
