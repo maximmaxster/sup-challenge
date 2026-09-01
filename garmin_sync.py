@@ -2148,11 +2148,11 @@ def main():
             print(f"  שגיאה: {e}")
             ok = False
 
+    git_push()
     if ok:
-        git_push()
         print("\n✓ סנכרון הושלם!")
     else:
-        print("\n⚠ סנכרון עם שגיאות")
+        print("\n⚠ סנכרון הושלם עם שגיאות")
         sys.exit(1)
 
 
