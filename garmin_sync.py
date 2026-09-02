@@ -502,7 +502,11 @@ def save_json(data: dict, path: Path, skip_merge: bool = False):
                     merged.append(w)
                     existing_ids.add(aid)
                     added += 1
-            merged.sort(key=lambda w: w.get("date", ""), reverse=True)
+            def _date_sort(w):
+                d = w.get("date", "")
+                p = d.split(".")
+                return f"{p[2]}-{p[1]}-{p[0]}" if len(p) == 3 else d
+            merged.sort(key=_date_sort, reverse=True)
             data["workouts"] = merged
             if added:
                 print(f"  מוזגו {added} אימונים חדשים (סה\"כ {len(merged)})")
