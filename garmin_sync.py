@@ -489,10 +489,23 @@ def save_json(data: dict, path: Path):
         if missing:
             raise RuntimeError(f"{path}: שדות קריטיים נעלמו {missing} — עוצר לפני דריסה")
 
-        # פחות אימונים מהריצה הקודמת (למשל תקלת Garmin/רשת) → כנראה נתונים חלקיים
-        old_count, new_count = len(existing.get("workouts", [])), len(data.get("workouts", []))
-        if old_count > 0 and new_count < old_count:
-            raise RuntimeError(f"{path}: {new_count} אימונים < {old_count} קיימים — עוצר לפני דריסה")
+        # מיזוג אימונים: שומר את כל הישנים + מוסיף חדשים (לפי activity_id)
+        existing_workouts = existing.get("workouts", [])
+        new_workouts = data.get("workouts", [])
+        if existing_workouts:
+            existing_ids = {w.get("activity_id") for w in existing_workouts if w.get("activity_id")}
+            merged = existing_workouts[:]
+            added = 0
+            for w in new_workouts:
+                if w.get("activity_id") not in existing_ids:
+                    merged.append(w)
+                    added += 1
+            merged.sort(key=lambda w: w.get("date", ""), reverse=True)
+            data["workouts"] = merged
+            if added:
+                print(f"  מוזגו {added} אימונים חדשים (סה\"כ {len(merged)})")
+            else:
+                print(f"  אין אימונים חדשים (סה\"כ {len(merged)})")
 
     with open(path, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
