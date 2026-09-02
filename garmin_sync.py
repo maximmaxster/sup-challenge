@@ -460,7 +460,7 @@ def compute_fitness_metrics(workouts: list) -> dict:
 # ===== SAVE =====
 REQUIRED_STATIC_FIELDS = ("races", "dob", "sup_start", "competitions", "birthdate", "age", "name", "profile_image")
 
-def save_json(data: dict, path: Path):
+def save_json(data: dict, path: Path, skip_merge: bool = False):
     path.parent.mkdir(parents=True, exist_ok=True)
     existing = None
     # Preserve fields that sync doesn't touch (e.g. races, dob, sup_start)
@@ -490,7 +490,7 @@ def save_json(data: dict, path: Path):
             raise RuntimeError(f"{path}: שדות קריטיים נעלמו {missing} — עוצר לפני דריסה")
 
         # מיזוג אימונים: שומר את כל הישנים + מוסיף חדשים (לפי activity_id)
-        existing_workouts = existing.get("workouts", [])
+        existing_workouts = existing.get("workouts", []) if not skip_merge else []
         new_workouts = data.get("workouts", [])
         if existing_workouts:
             existing_ids = {w.get("activity_id") for w in existing_workouts if w.get("activity_id")}
@@ -2154,7 +2154,7 @@ def main():
 
                 # שמור מחדש עם מדדי הניתוח שנוספו
                 if analysis_updated:
-                    save_json(data, cfg["output"])
+                    save_json(data, cfg["output"], skip_merge=True)
                     print("  [JSON] נשמר מחדש עם מדדי ניתוח")
 
         except Exception as e:
