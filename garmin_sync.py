@@ -489,16 +489,18 @@ def save_json(data: dict, path: Path, skip_merge: bool = False):
         if missing:
             raise RuntimeError(f"{path}: שדות קריטיים נעלמו {missing} — עוצר לפני דריסה")
 
-        # מיזוג אימונים: שומר את כל הישנים + מוסיף חדשים (לפי activity_id)
-        existing_workouts = existing.get("workouts", []) if not skip_merge else []
-        new_workouts = data.get("workouts", [])
-        if existing_workouts:
+        # מיזוג אימונים: שומר את כל הישנים + מוסיף רק חדשים עם activity_id שעדיין לא קיים
+        if not skip_merge:
+            existing_workouts = existing.get("workouts", [])
+            new_workouts = data.get("workouts", [])
             existing_ids = {w.get("activity_id") for w in existing_workouts if w.get("activity_id")}
             merged = existing_workouts[:]
             added = 0
             for w in new_workouts:
-                if w.get("activity_id") not in existing_ids:
+                aid = w.get("activity_id")
+                if aid and aid not in existing_ids:
                     merged.append(w)
+                    existing_ids.add(aid)
                     added += 1
             merged.sort(key=lambda w: w.get("date", ""), reverse=True)
             data["workouts"] = merged
