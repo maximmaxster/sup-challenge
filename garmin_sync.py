@@ -2078,6 +2078,15 @@ def git_push():
 
 # ===== MAIN =====
 def main():
+    import fcntl
+    lock_path = Path("/tmp/garmin_sync.lock")
+    lock_file = open(lock_path, "w")
+    try:
+        fcntl.flock(lock_file, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except OSError:
+        print("garmin_sync כבר רץ — יוצא")
+        sys.exit(0)
+
     print("=" * 50)
     print("SUP Training — Garmin Sync")
     print(f"זמן: {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}")
@@ -2155,7 +2164,7 @@ def main():
                                 w['sprint_avg_speed'] = smry.get('avg_speed', 0)
                                 w['sprint_spm_max']   = smry.get('avg_spm', 0)
                                 w['sprint_avg_hr']    = smry.get('avg_hr', 0)
-                            analysis_updated = True
+                        analysis_updated = True  # always save after email (weather/wellness/lap data)
                         send_workout_email(to_email, cfg["name"], w,
                                            all_workouts=data.get("workouts", []),
                                            wellness=wellness,
