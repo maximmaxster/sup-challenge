@@ -489,26 +489,29 @@ def save_json(data: dict, path: Path, skip_merge: bool = False):
         if missing:
             raise RuntimeError(f"{path}: שדות קריטיים נעלמו {missing} — עוצר לפני דריסה")
 
-        # מיזוג אימונים: שומר את כל הישנים + מוסיף רק חדשים עם activity_id שעדיין לא קיים
+        # מיזוג אימונים: חדשים מגרמין מחליפים/מוסיפים; ישנים שגרמין לא מחזיר נשמרים
         if not skip_merge:
-            existing_workouts = existing.get("workouts", [])
-            new_workouts = data.get("workouts", [])
-            existing_ids = {w.get("activity_id") for w in existing_workouts if w.get("activity_id")}
-            merged = existing_workouts[:]
-            added = 0
-            for w in new_workouts:
-                aid = w.get("activity_id")
-                if aid and aid not in existing_ids:
-                    merged.append(w)
-                    existing_ids.add(aid)
-                    added += 1
             def _date_sort(w):
                 d = w.get("date", "")
                 p = d.split(".")
                 return f"{p[2]}-{p[1]}-{p[0]}" if len(p) == 3 else d
+
+            existing_workouts = existing.get("workouts", [])
+            new_workouts = data.get("workouts", [])
+
+            # activity_id אם קיים — מפתח ראשי; אחרת תאריך+סוג
+            def _key(w):
+                aid = w.get("activity_id") or w.get("id")
+                return aid if aid else f"{w.get('date','')}_{w.get('type','')}"
+
+            new_keys = {_key(w) for w in new_workouts}
+            # שמור ישנים שגרמין לא החזיר (לא קיים ב-new_keys)
+            old_only = [w for w in existing_workouts if _key(w) not in new_keys]
+            merged = new_workouts + old_only
+            added = len(merged) - len(existing_workouts)
             merged.sort(key=_date_sort, reverse=True)
             data["workouts"] = merged
-            if added:
+            if added > 0:
                 print(f"  מוזגו {added} אימונים חדשים (סה\"כ {len(merged)})")
             else:
                 print(f"  אין אימונים חדשים (סה\"כ {len(merged)})")
