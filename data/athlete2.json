@@ -49,7 +49,15 @@
       "wave_height_m": 0.52,
       "wave_period_s": 5.2,
       "wave_dir_deg": 294,
-      "wave_dir_he": "צפון-מערב"
+      "wave_dir_he": "צפון-מערב",
+      "dur_sec": 4539,
+      "max_speed": 12.8,
+      "spm_max": 158,
+      "dps": 0,
+      "z3": 1200,
+      "z4": 1800,
+      "z5": 939,
+      "workout_name": ""
     },
     {
       "id": "24205086288",
