@@ -1053,7 +1053,7 @@ function renderWorkoutsTable(filterAthlete = 'all', filterType = 'all', filterLo
       <td>${isZero ? '—' : w.avg_speed.toFixed(1)}</td>
       <td>${isZero ? '—' : (w.avg_hr || '—')}</td>
       <td>${isZero ? '—' : (w.spm || '—')}</td>
-      <td>${isZero ? '—' : w.dps.toFixed(2)}</td>
+      <td>${isZero ? '—' : (w.dps != null ? w.dps.toFixed(2) : '—')}</td>
       <td>${isZero ? '—' : (w.z3 || '—')}</td>
       <td>${isZero ? '—' : (w.z4 || '—')}</td>
       <td>${isZero ? '—' : (w.z5 || '—')}</td>`;
