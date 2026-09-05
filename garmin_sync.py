@@ -507,6 +507,24 @@ def save_json(data: dict, path: Path, skip_merge: bool = False):
             new_keys = {_key(w) for w in new_workouts}
             # שמור ישנים שגרמין לא החזיר (לא קיים ב-new_keys)
             old_only = [w for w in existing_workouts if _key(w) not in new_keys]
+
+            # שמור שדות ניתוח מהגרסה הקיימת — לא לאפס pa_hr/weather/wellness בסנכרון חוזר
+            _ANALYSIS_FIELDS = (
+                'pa_hr', 'pace_cv', 'dps_cv',
+                'hr_z1', 'hr_z2', 'hr_z3', 'hr_z4', 'hr_z5',
+                'sprint_count', 'peak_speed', 'sprint_avg_speed', 'sprint_spm_max', 'sprint_avg_hr',
+                'wind_kmh', 'wind_dir_deg', 'wind_dir_he', 'wind_gusts_kmh',
+                'temp_c', 'wave_height_m', 'wave_period_s', 'wave_dir_deg', 'wave_dir_he',
+                'weather_desc', 'sleep_hours', 'deep_pct', 'body_battery',
+            )
+            existing_map = {_key(w): w for w in existing_workouts}
+            for w in new_workouts:
+                old = existing_map.get(_key(w))
+                if old:
+                    for f in _ANALYSIS_FIELDS:
+                        if f not in w and f in old:
+                            w[f] = old[f]
+
             merged = new_workouts + old_only
             added = len(merged) - len(existing_workouts)
             merged.sort(key=_date_sort, reverse=True)
