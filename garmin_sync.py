@@ -1140,7 +1140,7 @@ def fetch_lap_analysis(api, act_id: str, workout_type: str = '', total_dist_km: 
                 break
         main_laps.append(lap)
 
-    if len(main_laps) < 2:
+    if len(main_laps) < 1:
         return {}
 
     laps_data = [
