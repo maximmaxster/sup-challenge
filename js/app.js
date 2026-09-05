@@ -1604,15 +1604,15 @@ function renderProgCard(typeConf, base, curr, decBase, showVsDec, periodKey, yoy
     const dYoY     = (hasYoY && y && c) ? progDelta(yv, cv, m.lb) : null;
     const vsDecCol = showVsDec ? progDeltaHtml(dVsDec) : '';
     const yoyCol   = hasYoY
-      ? `<span class="pm-yoy-val">${progFmtVal(yv, m.key)}<small>${m.unit}</small></span>${progDeltaHtml(dYoY)}`
+      ? `<span class="pm-yoy-val">${progFmtVal(yv,m.key)==='—'?'—':`${progFmtVal(yv,m.key)}<small>${m.unit}</small>`}</span>${progDeltaHtml(dYoY)}`
       : '';
     const rowClass = hasYoY ? 'pm-row-7' : showVsDec ? 'pm-row-6' : '';
     return `
       <div class="pm-row ${rowClass}">
         <span class="pm-lbl">${m.label}</span>
-        <span class="pm-bv">${progFmtVal(bv, m.key)}<small>${m.unit}</small></span>
+        <span class="pm-bv">${progFmtVal(bv,m.key)==='—'?'—':`${progFmtVal(bv,m.key)}<small>${m.unit}</small>`}</span>
         <span class="pm-sep">→</span>
-        <span class="pm-cv">${progFmtVal(cv, m.key)}<small>${m.unit}</small></span>
+        <span class="pm-cv">${progFmtVal(cv,m.key)==='—'?'—':`${progFmtVal(cv,m.key)}<small>${m.unit}</small>`}</span>
         ${progDeltaHtml(dRolling)}
         ${vsDecCol}
         ${yoyCol}
