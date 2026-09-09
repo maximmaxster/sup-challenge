@@ -1,8 +1,48 @@
 {
   "name": "מקסים רפופורט",
   "profile_image": "images/athlete1_profile.jpg",
-  "last_sync": "2026-09-08T08:31:32Z",
+  "last_sync": "2026-09-09T07:01:47Z",
   "workouts": [
+    {
+      "id": "24292131759",
+      "date": "09.09.2026",
+      "start_hour": 6,
+      "type": "טמפו",
+      "workout_name": "אימון טמפו 7",
+      "location": "ים",
+      "lat": 32.15739053674042,
+      "lon": 34.79350813664496,
+      "distance": 9.18,
+      "duration": "1:13:10",
+      "dur_sec": 4390,
+      "avg_speed": 7.5,
+      "max_speed": 9.8,
+      "avg_hr": 143,
+      "max_hr": 163,
+      "spm": 40,
+      "spm_max": 62,
+      "dps": 3.15,
+      "z3": "30:59",
+      "z4": "33:11",
+      "z5": "0:00",
+      "wind_kmh": 5.4,
+      "wind_dir_deg": 140,
+      "wind_dir_he": "דרום-מזרח",
+      "wind_gusts_kmh": 10.1,
+      "temp_c": 21.7,
+      "wave_height_m": 0.72,
+      "wave_period_s": 6.0,
+      "wave_dir_deg": 310,
+      "wave_dir_he": "צפון-מערב",
+      "hr_z1": 0,
+      "hr_z2": 0,
+      "hr_z3": 24,
+      "hr_z4": 76,
+      "hr_z5": 0,
+      "pa_hr": null,
+      "pace_cv": 7.3,
+      "dps_cv": 7.5
+    },
     {
       "id": "24266405960",
       "date": "07.09.2026",
@@ -7992,16 +8032,16 @@
         "tsb": -43.8
       },
       {
-        "date": "08.09.2026",
-        "ctl": 114.2,
-        "atl": 137.8,
-        "tsb": -23.7
+        "date": "09.09.2026",
+        "ctl": 117.2,
+        "atl": 152.8,
+        "tsb": -35.6
       }
     ],
     "current": {
-      "ctl": 114.2,
-      "atl": 137.8,
-      "tsb": -23.7
+      "ctl": 117.2,
+      "atl": 152.8,
+      "tsb": -35.6
     }
   },
   "races": [
