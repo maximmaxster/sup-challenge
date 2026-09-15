@@ -1,7 +1,7 @@
 {
   "name": "מקסים רפופורט",
   "profile_image": "images/athlete1_profile.jpg",
-  "last_sync": "2026-09-14T11:48:19Z",
+  "last_sync": "2026-09-15T07:01:45Z",
   "workouts": [
     {
       "id": "24355065413",
@@ -25,6 +25,14 @@
       "z3": "15:17",
       "z4": "49:52",
       "z5": "0:00",
+      "pa_hr": null,
+      "pace_cv": 8.7,
+      "dps_cv": 4.6,
+      "hr_z1": 0,
+      "hr_z2": 0,
+      "hr_z3": 0,
+      "hr_z4": 100,
+      "hr_z5": 0,
       "wind_kmh": 5.5,
       "wind_dir_deg": 136,
       "wind_dir_he": "דרום-מזרח",
@@ -33,15 +41,7 @@
       "wave_height_m": 0.48,
       "wave_period_s": 5.4,
       "wave_dir_deg": 296,
-      "wave_dir_he": "צפון-מערב",
-      "hr_z1": 0,
-      "hr_z2": 0,
-      "hr_z3": 0,
-      "hr_z4": 100,
-      "hr_z5": 0,
-      "pa_hr": null,
-      "pace_cv": 8.7,
-      "dps_cv": 4.6
+      "wave_dir_he": "צפון-מערב"
     },
     {
       "id": "24317234717",
@@ -8134,12 +8134,18 @@
         "ctl": 116.5,
         "atl": 133.8,
         "tsb": -17.4
+      },
+      {
+        "date": "15.09.2026",
+        "ctl": 113.7,
+        "atl": 114.7,
+        "tsb": -1.0
       }
     ],
     "current": {
-      "ctl": 116.5,
-      "atl": 133.8,
-      "tsb": -17.4
+      "ctl": 113.7,
+      "atl": 114.7,
+      "tsb": -1.0
     }
   },
   "races": [
