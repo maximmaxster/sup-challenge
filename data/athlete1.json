@@ -1,7 +1,7 @@
 {
   "name": "מקסים רפופורט",
   "profile_image": "images/athlete1_profile.jpg",
-  "last_sync": "2026-09-16T07:01:51Z",
+  "last_sync": "2026-09-16T08:31:37Z",
   "workouts": [
     {
       "id": "24378807916",
@@ -25,6 +25,14 @@
       "z3": "29:40",
       "z4": "36:18",
       "z5": "4:30",
+      "pa_hr": null,
+      "pace_cv": 8.1,
+      "dps_cv": 5.1,
+      "hr_z1": 0,
+      "hr_z2": 0,
+      "hr_z3": 60,
+      "hr_z4": 40,
+      "hr_z5": 0,
       "wind_kmh": 6.2,
       "wind_dir_deg": 123,
       "wind_dir_he": "דרום-מזרח",
@@ -33,15 +41,7 @@
       "wave_height_m": 0.68,
       "wave_period_s": 5.8,
       "wave_dir_deg": 306,
-      "wave_dir_he": "צפון-מערב",
-      "hr_z1": 0,
-      "hr_z2": 0,
-      "hr_z3": 60,
-      "hr_z4": 40,
-      "hr_z5": 0,
-      "pa_hr": null,
-      "pace_cv": 8.1,
-      "dps_cv": 5.1
+      "wave_dir_he": "צפון-מערב"
     },
     {
       "id": "24355065413",
