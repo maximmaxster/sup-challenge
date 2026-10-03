@@ -1,7 +1,7 @@
 {
   "name": "ויקטור מורטוב",
   "profile_image": "images/athlete2_profile.jpg",
-  "last_sync": "2026-10-03T07:03:08Z",
+  "last_sync": "2026-10-03T08:32:56Z",
   "workouts": [
     {
       "id": "24585162683",
@@ -25,6 +25,14 @@
       "z3": "25:11",
       "z4": "11:04",
       "z5": "2:00",
+      "pa_hr": -23.2,
+      "pace_cv": 8.4,
+      "dps_cv": 8.1,
+      "hr_z1": 0,
+      "hr_z2": 0,
+      "hr_z3": 38,
+      "hr_z4": 62,
+      "hr_z5": 0,
       "wind_kmh": 9.0,
       "wind_dir_deg": 143,
       "wind_dir_he": "דרום-מזרח",
@@ -33,15 +41,7 @@
       "wave_height_m": 0.86,
       "wave_period_s": 5.7,
       "wave_dir_deg": 294,
-      "wave_dir_he": "צפון-מערב",
-      "hr_z1": 0,
-      "hr_z2": 0,
-      "hr_z3": 38,
-      "hr_z4": 62,
-      "hr_z5": 0,
-      "pa_hr": -23.2,
-      "pace_cv": 8.4,
-      "dps_cv": 8.1
+      "wave_dir_he": "צפון-מערב"
     },
     {
       "id": "24585162028",
@@ -65,6 +65,14 @@
       "z3": "0:27",
       "z4": "1:35",
       "z5": "20:54",
+      "pa_hr": null,
+      "pace_cv": null,
+      "dps_cv": null,
+      "hr_z1": 0,
+      "hr_z2": 0,
+      "hr_z3": 0,
+      "hr_z4": 100,
+      "hr_z5": 0,
       "wind_kmh": 9.0,
       "wind_dir_deg": 143,
       "wind_dir_he": "דרום-מזרח",
@@ -73,15 +81,7 @@
       "wave_height_m": 0.86,
       "wave_period_s": 5.7,
       "wave_dir_deg": 294,
-      "wave_dir_he": "צפון-מערב",
-      "hr_z1": 0,
-      "hr_z2": 0,
-      "hr_z3": 0,
-      "hr_z4": 100,
-      "hr_z5": 0,
-      "pa_hr": null,
-      "pace_cv": null,
-      "dps_cv": null
+      "wave_dir_he": "צפון-מערב"
     },
     {
       "id": "24574008201",
