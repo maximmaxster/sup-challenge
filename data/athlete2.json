@@ -1,8 +1,48 @@
 {
   "name": "ויקטור מורטוב",
   "profile_image": "images/athlete2_profile.jpg",
-  "last_sync": "2026-10-04T08:33:00Z",
+  "last_sync": "2026-10-05T07:03:01Z",
   "workouts": [
+    {
+      "id": "24609583197",
+      "date": "05.10.2026",
+      "start_hour": 5,
+      "type": "טמפו",
+      "workout_name": "טמפו 8",
+      "location": "ים",
+      "lat": 32.157543171197176,
+      "lon": 34.79386193677783,
+      "distance": 9.01,
+      "duration": "1:13:17",
+      "dur_sec": 4397,
+      "avg_speed": 7.4,
+      "max_speed": 9.8,
+      "avg_hr": 146,
+      "max_hr": 167,
+      "spm": 40,
+      "spm_max": 63,
+      "dps": 3.02,
+      "z3": "21:05",
+      "z4": "46:21",
+      "z5": "1:27",
+      "wind_kmh": 2.0,
+      "wind_dir_deg": 5,
+      "wind_dir_he": "צפון",
+      "wind_gusts_kmh": 4.3,
+      "temp_c": 20.7,
+      "wave_height_m": 0.48,
+      "wave_period_s": 5.4,
+      "wave_dir_deg": 290,
+      "wave_dir_he": "מערב",
+      "hr_z1": 0,
+      "hr_z2": 0,
+      "hr_z3": 0,
+      "hr_z4": 100,
+      "hr_z5": 0,
+      "pa_hr": null,
+      "pace_cv": 7.0,
+      "dps_cv": 5.1
+    },
     {
       "id": "24585162683",
       "date": "03.10.2026",
@@ -7600,16 +7640,16 @@
         "tsb": -16.8
       },
       {
-        "date": "04.10.2026",
-        "ctl": 94.2,
-        "atl": 97.1,
-        "tsb": -2.9
+        "date": "05.10.2026",
+        "ctl": 98.2,
+        "atl": 120.9,
+        "tsb": -22.7
       }
     ],
     "current": {
-      "ctl": 94.2,
-      "atl": 97.1,
-      "tsb": -2.9
+      "ctl": 98.2,
+      "atl": 120.9,
+      "tsb": -22.7
     }
   },
   "races": [
