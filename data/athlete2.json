@@ -1,7 +1,7 @@
 {
   "name": "ויקטור מורטוב",
   "profile_image": "images/athlete2_profile.jpg",
-  "last_sync": "2026-10-10T07:03:11Z",
+  "last_sync": "2026-10-10T08:33:17Z",
   "workouts": [
     {
       "id": "24669490287",
@@ -25,14 +25,14 @@
       "z3": "16:14",
       "z4": "6:25",
       "z5": "3:46",
+      "pa_hr": null,
+      "pace_cv": null,
+      "dps_cv": null,
       "hr_z1": 0,
       "hr_z2": 0,
       "hr_z3": 0,
       "hr_z4": 0,
-      "hr_z5": 0,
-      "pa_hr": null,
-      "pace_cv": null,
-      "dps_cv": null
+      "hr_z5": 0
     },
     {
       "id": "24634933522",
