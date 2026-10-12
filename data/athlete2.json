@@ -1,7 +1,7 @@
 {
   "name": "ויקטור מורטוב",
   "profile_image": "images/athlete2_profile.jpg",
-  "last_sync": "2026-10-11T08:33:12Z",
+  "last_sync": "2026-10-12T07:03:09Z",
   "workouts": [
     {
       "id": "24669490287",
@@ -7733,12 +7733,18 @@
         "ctl": 94.7,
         "atl": 89.9,
         "tsb": 4.8
+      },
+      {
+        "date": "12.10.2026",
+        "ctl": 92.5,
+        "atl": 77.1,
+        "tsb": 15.4
       }
     ],
     "current": {
-      "ctl": 94.7,
-      "atl": 89.9,
-      "tsb": 4.8
+      "ctl": 92.5,
+      "atl": 77.1,
+      "tsb": 15.4
     }
   },
   "races": [
