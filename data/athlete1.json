@@ -1,8 +1,48 @@
 {
   "name": "מקסים רפופורט",
   "profile_image": "images/athlete1_profile.jpg",
-  "last_sync": "2026-10-13T08:31:35Z",
+  "last_sync": "2026-10-14T07:01:37Z",
   "workouts": [
+    {
+      "id": "24706719294",
+      "date": "13.10.2026",
+      "start_hour": 10,
+      "type": "ספרינטים",
+      "workout_name": "",
+      "location": "ים",
+      "lat": 41.294782385230064,
+      "lon": 13.020064495503902,
+      "distance": 5.53,
+      "duration": "1:00:17",
+      "dur_sec": 3617,
+      "avg_speed": 5.5,
+      "max_speed": 13.2,
+      "avg_hr": 145,
+      "max_hr": 173,
+      "spm": 31,
+      "spm_max": 98,
+      "dps": 2.87,
+      "z3": "18:02",
+      "z4": "22:40",
+      "z5": "8:52",
+      "wind_kmh": 13.6,
+      "wind_dir_deg": 68,
+      "wind_dir_he": "מזרח",
+      "wind_gusts_kmh": 24.1,
+      "temp_c": 16.8,
+      "wave_height_m": 0.5,
+      "wave_period_s": 4.5,
+      "wave_dir_deg": 260,
+      "wave_dir_he": "מערב",
+      "hr_z1": 0,
+      "hr_z2": 0,
+      "hr_z3": 0,
+      "hr_z4": 0,
+      "hr_z5": 0,
+      "pa_hr": null,
+      "pace_cv": null,
+      "dps_cv": null
+    },
     {
       "id": "24670247499",
       "date": "10.10.2026",
@@ -8215,15 +8255,21 @@
       },
       {
         "date": "13.10.2026",
-        "ctl": 70.2,
-        "atl": 21.9,
-        "tsb": 48.2
+        "ctl": 75.2,
+        "atl": 51.9,
+        "tsb": 23.3
+      },
+      {
+        "date": "14.10.2026",
+        "ctl": 73.4,
+        "atl": 44.5,
+        "tsb": 28.9
       }
     ],
     "current": {
-      "ctl": 70.2,
-      "atl": 21.9,
-      "tsb": 48.2
+      "ctl": 73.4,
+      "atl": 44.5,
+      "tsb": 28.9
     }
   },
   "races": [
