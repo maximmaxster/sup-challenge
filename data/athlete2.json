@@ -1,8 +1,31 @@
 {
   "name": "ויקטור מורטוב",
   "profile_image": "images/athlete2_profile.jpg",
-  "last_sync": "2026-10-15T08:32:47Z",
+  "last_sync": "2026-10-16T07:03:32Z",
   "workouts": [
+    {
+      "id": "24734241474",
+      "date": "15.10.2026",
+      "start_hour": 15,
+      "type": "ספרינטים",
+      "workout_name": "",
+      "location": "ים",
+      "lat": 41.2960309535265,
+      "lon": 13.020220817998052,
+      "distance": 0.87,
+      "duration": "8:57",
+      "dur_sec": 537,
+      "avg_speed": 5.8,
+      "max_speed": 11.2,
+      "avg_hr": 172,
+      "max_hr": 194,
+      "spm": 42,
+      "spm_max": 98,
+      "dps": 2.56,
+      "z3": "1:41",
+      "z4": "1:10",
+      "z5": "6:04"
+    },
     {
       "id": "24730273626",
       "date": "15.10.2026",
@@ -25,6 +48,14 @@
       "z3": "3:03",
       "z4": "0:10",
       "z5": "5:06",
+      "pa_hr": null,
+      "pace_cv": null,
+      "dps_cv": null,
+      "hr_z1": 0,
+      "hr_z2": 0,
+      "hr_z3": 0,
+      "hr_z4": 0,
+      "hr_z5": 0,
       "wind_kmh": 5.3,
       "wind_dir_deg": 82,
       "wind_dir_he": "מזרח",
@@ -33,21 +64,13 @@
       "wave_height_m": 0.22,
       "wave_period_s": 3.0,
       "wave_dir_deg": 248,
-      "wave_dir_he": "מערב",
-      "hr_z1": 0,
-      "hr_z2": 0,
-      "hr_z3": 0,
-      "hr_z4": 0,
-      "hr_z5": 0,
-      "pa_hr": null,
-      "pace_cv": null,
-      "dps_cv": null
+      "wave_dir_he": "מערב"
     },
     {
       "id": "24729957276",
       "date": "15.10.2026",
       "start_hour": 8,
-      "type": "אירובי",
+      "type": "ספרינטים",
       "workout_name": "",
       "location": "ים",
       "lat": 41.29659245721996,
@@ -7898,15 +7921,21 @@
       },
       {
         "date": "15.10.2026",
-        "ctl": 91.7,
-        "atl": 76.9,
-        "tsb": 14.8
+        "ctl": 92.6,
+        "atl": 82.6,
+        "tsb": 10.0
+      },
+      {
+        "date": "16.10.2026",
+        "ctl": 90.4,
+        "atl": 70.8,
+        "tsb": 19.6
       }
     ],
     "current": {
-      "ctl": 91.7,
-      "atl": 76.9,
-      "tsb": 14.8
+      "ctl": 90.4,
+      "atl": 70.8,
+      "tsb": 19.6
     }
   },
   "races": [
