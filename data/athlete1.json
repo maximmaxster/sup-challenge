@@ -1,7 +1,7 @@
 {
   "name": "מקסים רפופורט",
   "profile_image": "images/athlete1_profile.jpg",
-  "last_sync": "2026-10-20T08:31:31Z",
+  "last_sync": "2026-10-21T07:01:44Z",
   "workouts": [
     {
       "id": "24766596711",
@@ -8444,16 +8444,16 @@
         "tsb": -27.6
       },
       {
-        "date": "20.10.2026",
-        "ctl": 77.9,
-        "atl": 80.4,
-        "tsb": -2.5
+        "date": "21.10.2026",
+        "ctl": 76.1,
+        "atl": 68.9,
+        "tsb": 7.2
       }
     ],
     "current": {
-      "ctl": 77.9,
-      "atl": 80.4,
-      "tsb": -2.5
+      "ctl": 76.1,
+      "atl": 68.9,
+      "tsb": 7.2
     }
   },
   "races": [
