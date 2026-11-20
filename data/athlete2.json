@@ -1,7 +1,7 @@
 {
   "name": "ויקטור מורטוב",
   "profile_image": "images/athlete2_profile.jpg",
-  "last_sync": "2026-11-20T08:02:53Z",
+  "last_sync": "2026-11-20T09:32:48Z",
   "workouts": [
     {
       "id": "25137685934",
@@ -25,6 +25,14 @@
       "z3": "57:08",
       "z4": "10:02",
       "z5": "0:00",
+      "pa_hr": null,
+      "pace_cv": 3.6,
+      "dps_cv": 1.7,
+      "hr_z1": 0,
+      "hr_z2": 0,
+      "hr_z3": 0,
+      "hr_z4": 100,
+      "hr_z5": 0,
       "wind_kmh": 6.6,
       "wind_dir_deg": 135,
       "wind_dir_he": "דרום-מזרח",
@@ -33,15 +41,7 @@
       "wave_height_m": 0.66,
       "wave_period_s": 5.8,
       "wave_dir_deg": 297,
-      "wave_dir_he": "צפון-מערב",
-      "hr_z1": 0,
-      "hr_z2": 0,
-      "hr_z3": 0,
-      "hr_z4": 100,
-      "hr_z5": 0,
-      "pa_hr": null,
-      "pace_cv": 3.6,
-      "dps_cv": 1.7
+      "wave_dir_he": "צפון-מערב"
     },
     {
       "id": "25115844682",
